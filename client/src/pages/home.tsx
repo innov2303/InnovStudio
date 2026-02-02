@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 
 import heroBg from "@/assets/images/hero-bg.jpg";
-import servicesBg from "@/assets/images/services-bg.jpg";
 import featuresBg from "@/assets/images/features-bg.jpg";
 import contactBg from "@/assets/images/contact-bg.jpg";
 
@@ -153,13 +152,8 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="services" className="relative py-20 overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${servicesBg})` }}
-          />
-          <div className="absolute inset-0 bg-background/90 dark:bg-background/95" />
-          <div className="container relative mx-auto px-6">
+        <section id="services" className="py-20 bg-muted/30">
+          <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Nos Services
