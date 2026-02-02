@@ -1,4 +1,4 @@
-# WebStudio - Site Vitrine Studio de Production Web
+# Innov Studio - Site Vitrine Studio de Production Web
 
 ## Overview
 Site vitrine pour un studio de production web spécialisé dans les applications entreprise et les sites vitrines avec intégration IA. Le site comprend un système d'authentification locale avec gestion des utilisateurs.

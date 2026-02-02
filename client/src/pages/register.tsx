@@ -51,7 +51,7 @@ export default function Register() {
       login(data.user);
       toast({
         title: "Inscription réussie",
-        description: "Bienvenue sur WebStudio !",
+        description: "Bienvenue sur Innov Studio !",
       });
       setLocation("/dashboard");
     },
@@ -74,7 +74,7 @@ export default function Register() {
               <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary">
                 <Code2 className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">WebStudio</span>
+              <span className="text-xl font-bold">Innov Studio</span>
             </div>
           </Link>
           <ThemeToggle />
@@ -94,7 +94,7 @@ export default function Register() {
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Créer un compte</CardTitle>
               <CardDescription>
-                Rejoignez WebStudio et accédez à votre espace client
+                Rejoignez Innov Studio et accédez à votre espace client
               </CardDescription>
             </CardHeader>
             <CardContent>

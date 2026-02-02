@@ -37,7 +37,7 @@ export default function Login() {
       login(data.user);
       toast({
         title: "Connexion réussie",
-        description: "Bienvenue sur WebStudio",
+        description: "Bienvenue sur Innov Studio",
       });
       if (data.user.mustChangePassword) {
         setLocation("/change-password");
@@ -64,7 +64,7 @@ export default function Login() {
               <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary">
                 <Code2 className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">WebStudio</span>
+              <span className="text-xl font-bold">Innov Studio</span>
             </div>
           </Link>
           <ThemeToggle />

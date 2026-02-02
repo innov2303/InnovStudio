@@ -69,7 +69,7 @@ export default function Home() {
               <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary">
                 <Code2 className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">WebStudio</span>
+              <span className="text-xl font-bold">Innov Studio</span>
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
@@ -177,7 +177,7 @@ export default function Home() {
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Pourquoi choisir{" "}
-                  <span className="text-primary">WebStudio</span> ?
+                  <span className="text-primary">Innov Studio</span> ?
                 </h2>
                 <p className="text-muted-foreground mb-8">
                   Notre expertise technique et notre passion pour l'innovation nous permettent 
@@ -253,10 +253,10 @@ export default function Home() {
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
                 <Code2 className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold">WebStudio</span>
+              <span className="font-semibold">Innov Studio</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 WebStudio. Tous droits réservés.
+              © 2024 Innov Studio. Tous droits réservés.
             </p>
           </div>
         </div>
