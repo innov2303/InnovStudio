@@ -16,6 +16,11 @@ import {
   ChevronRight
 } from "lucide-react";
 
+import heroBg from "@/assets/images/hero-bg.jpg";
+import servicesBg from "@/assets/images/services-bg.jpg";
+import featuresBg from "@/assets/images/features-bg.jpg";
+import contactBg from "@/assets/images/contact-bg.jpg";
+
 export default function Home() {
   const { user } = useAuth();
 
@@ -106,7 +111,11 @@ export default function Home() {
 
       <main>
         <section className="relative pt-32 pb-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroBg})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/80 to-background/70 dark:from-background/98 dark:via-background/90 dark:to-background/80" />
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           
@@ -144,8 +153,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="services" className="py-20 bg-muted/30">
-          <div className="container mx-auto px-6">
+        <section id="services" className="relative py-20 overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${servicesBg})` }}
+          />
+          <div className="absolute inset-0 bg-background/90 dark:bg-background/95" />
+          <div className="container relative mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Nos Services
@@ -171,8 +185,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="features" className="py-20">
-          <div className="container mx-auto px-6">
+        <section id="features" className="relative py-20 overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${featuresBg})` }}
+          />
+          <div className="absolute inset-0 bg-background/85 dark:bg-background/92" />
+          <div className="container relative mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -219,8 +238,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="contact" className="py-20 bg-muted/30">
-          <div className="container mx-auto px-6">
+        <section id="contact" className="relative py-20 overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${contactBg})` }}
+          />
+          <div className="absolute inset-0 bg-background/90 dark:bg-background/95" />
+          <div className="container relative mx-auto px-6">
             <div className="max-w-2xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 Prêt à lancer votre projet ?
