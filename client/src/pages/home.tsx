@@ -251,7 +251,7 @@ export default function Home() {
                 Prêt à lancer votre projet ?
               </h2>
               <p className="text-muted-foreground mb-8">
-                Connectez-vous à votre espace client pour déposer les premières bases de votre projet et concrétiser vos idées.
+                Connectez-vous à votre espace client pour déposer les premières bases de votre projet et concrétisons ensemble vos idées.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 {user ? (
