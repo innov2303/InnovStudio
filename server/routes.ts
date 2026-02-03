@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import { storage } from "./storage";
-import { loginSchema, registerSchema, changePasswordSchema } from "@shared/schema";
+import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import { pool } from "./db";
 import connectPgSimple from "connect-pg-simple";
@@ -171,6 +171,65 @@ export async function registerRoutes(
       res.json(usersWithoutPasswords);
     } catch (error) {
       console.error("Get users error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Projects routes
+  app.post("/api/projects", requireAuth, async (req, res) => {
+    try {
+      const result = createProjectSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: result.error.errors[0].message });
+      }
+
+      const project = await storage.createProject(req.session.userId!, result.data);
+      res.status(201).json(project);
+    } catch (error) {
+      console.error("Create project error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  app.get("/api/projects", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Admin sees all projects, users see only their own
+      const projectsList = currentUser.role === "admin" 
+        ? await storage.getAllProjects()
+        : await storage.getProjectsByUser(req.session.userId!);
+      
+      res.json(projectsList);
+    } catch (error) {
+      console.error("Get projects error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  app.get("/api/projects/:id", requireAuth, async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.id as string);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Check access rights
+      if (currentUser.role !== "admin" && project.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      res.json(project);
+    } catch (error) {
+      console.error("Get project error:", error);
       res.status(500).json({ message: "Erreur serveur" });
     }
   });

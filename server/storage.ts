@@ -1,6 +1,6 @@
-import { type User, type InsertUser, users } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -10,6 +10,11 @@ export interface IStorage {
   updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
   initializeAdmin(): Promise<void>;
+  // Projects
+  createProject(userId: string, project: InsertProject): Promise<Project>;
+  getProjectsByUser(userId: string): Promise<Project[]>;
+  getAllProjects(): Promise<Project[]>;
+  getProject(id: string): Promise<Project | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -69,6 +74,30 @@ export class DatabaseStorage implements IStorage {
       });
       console.log("Admin user created with default credentials");
     }
+  }
+
+  async createProject(userId: string, project: InsertProject): Promise<Project> {
+    const [newProject] = await db
+      .insert(projects)
+      .values({
+        ...project,
+        userId,
+      })
+      .returning();
+    return newProject;
+  }
+
+  async getProjectsByUser(userId: string): Promise<Project[]> {
+    return db.select().from(projects).where(eq(projects.userId, userId)).orderBy(desc(projects.createdAt));
+  }
+
+  async getAllProjects(): Promise<Project[]> {
+    return db.select().from(projects).orderBy(desc(projects.createdAt));
+  }
+
+  async getProject(id: string): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project;
   }
 }
 

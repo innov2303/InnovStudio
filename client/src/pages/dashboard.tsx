@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -25,9 +31,12 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
-  Home
+  Home,
+  Plus,
+  Clock
 } from "lucide-react";
-import type { User as UserType } from "@shared/schema";
+import type { User as UserType, Project, CreateProjectData } from "@shared/schema";
+import { createProjectSchema } from "@shared/schema";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
 
@@ -37,6 +46,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<MenuSection>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -54,6 +64,50 @@ export default function Dashboard() {
     queryKey: ["/api/users"],
     enabled: user?.role === "admin",
   });
+
+  const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
+    queryKey: ["/api/projects"],
+    enabled: !!user,
+  });
+
+  const projectForm = useForm<CreateProjectData>({
+    resolver: zodResolver(createProjectSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      businessSector: "",
+      features: "",
+      designStyle: "",
+    },
+  });
+
+  const createProjectMutation = useMutation({
+    mutationFn: async (data: CreateProjectData) => {
+      const response = await apiRequest("POST", "/api/projects", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Demande envoyée",
+        description: "Votre demande de projet a été soumise avec succès.",
+      });
+      projectForm.reset();
+      setShowProjectForm(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la soumission",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmitProject = (data: CreateProjectData) => {
+    if (createProjectMutation.isPending) return;
+    createProjectMutation.mutate(data);
+  };
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -334,17 +388,216 @@ export default function Dashboard() {
 
           {/* Projects Section */}
           {activeSection === "projects" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Mes Projets</CardTitle>
-                <CardDescription>Suivez l'avancement de vos projets en temps réel</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Aucun projet en cours</p>
-                <p className="text-sm text-muted-foreground mt-1">Vos projets apparaîtront ici une fois créés</p>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              {/* Header with new project button */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Mes Projets</h2>
+                  <p className="text-muted-foreground">Suivez l'avancement de vos projets en temps réel</p>
+                </div>
+                <Button onClick={() => setShowProjectForm(!showProjectForm)} data-testid="button-new-project">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouvelle demande
+                </Button>
+              </div>
+
+              {/* Project form */}
+              {showProjectForm && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Nouvelle demande de projet</CardTitle>
+                    <CardDescription>Décrivez votre projet pour que nous puissions vous accompagner</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Form {...projectForm}>
+                      <form onSubmit={projectForm.handleSubmit(onSubmitProject)} className="space-y-4">
+                        <FormField
+                          control={projectForm.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Titre / Nom du projet</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ex: Site vitrine pour mon entreprise" data-testid="input-project-title" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={projectForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description du besoin</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Décrivez votre projet et vos objectifs..." 
+                                  className="min-h-[100px]"
+                                  data-testid="input-project-description"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={projectForm.control}
+                          name="businessSector"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Secteur d'activité</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-business-sector">
+                                    <SelectValue placeholder="Sélectionnez votre secteur" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="commerce">Commerce / E-commerce</SelectItem>
+                                  <SelectItem value="services">Services aux entreprises</SelectItem>
+                                  <SelectItem value="industrie">Industrie</SelectItem>
+                                  <SelectItem value="sante">Santé / Médical</SelectItem>
+                                  <SelectItem value="education">Éducation / Formation</SelectItem>
+                                  <SelectItem value="immobilier">Immobilier</SelectItem>
+                                  <SelectItem value="restauration">Restauration / Hôtellerie</SelectItem>
+                                  <SelectItem value="tech">Technologie / IT</SelectItem>
+                                  <SelectItem value="autre">Autre</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={projectForm.control}
+                          name="features"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description des fonctionnalités souhaitées</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Listez les fonctionnalités que vous souhaitez (formulaire de contact, espace client, blog, etc.)" 
+                                  className="min-h-[100px]"
+                                  data-testid="input-project-features"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={projectForm.control}
+                          name="designStyle"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Style de design souhaité</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-design-style">
+                                    <SelectValue placeholder="Sélectionnez un style" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="moderne">Moderne & Minimaliste</SelectItem>
+                                  <SelectItem value="corporate">Corporate / Professionnel</SelectItem>
+                                  <SelectItem value="creatif">Créatif & Artistique</SelectItem>
+                                  <SelectItem value="luxe">Luxe & Premium</SelectItem>
+                                  <SelectItem value="tech">Tech & Futuriste</SelectItem>
+                                  <SelectItem value="nature">Nature & Écologique</SelectItem>
+                                  <SelectItem value="autre">Autre (à préciser)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex gap-3 pt-4">
+                          <Button 
+                            type="submit" 
+                            disabled={createProjectMutation.isPending}
+                            data-testid="button-submit-project"
+                          >
+                            {createProjectMutation.isPending ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Envoi en cours...
+                              </>
+                            ) : (
+                              "Soumettre la demande"
+                            )}
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setShowProjectForm(false)}
+                            data-testid="button-cancel-project"
+                          >
+                            Annuler
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Projects list */}
+              {projectsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : projects && projects.length > 0 ? (
+                <div className="grid gap-4">
+                  {projects.map((project) => (
+                    <Card key={project.id} data-testid={`card-project-${project.id}`}>
+                      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                        <div>
+                          <CardTitle className="text-lg">{project.title}</CardTitle>
+                          <CardDescription className="mt-1">
+                            {project.businessSector} • {project.designStyle}
+                          </CardDescription>
+                        </div>
+                        <Badge variant={
+                          project.status === "pending" ? "secondary" :
+                          project.status === "in_progress" ? "default" :
+                          project.status === "completed" ? "outline" : "secondary"
+                        }>
+                          {project.status === "pending" && "En attente"}
+                          {project.status === "in_review" && "En cours d'étude"}
+                          {project.status === "approved" && "Approuvé"}
+                          {project.status === "in_progress" && "En cours"}
+                          {project.status === "completed" && "Terminé"}
+                          {project.status === "cancelled" && "Annulé"}
+                        </Badge>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+                        <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>Créé le {new Date(project.createdAt!).toLocaleDateString('fr-FR')}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                    <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">Aucun projet en cours</p>
+                    <p className="text-sm text-muted-foreground mt-1">Cliquez sur "Nouvelle demande" pour démarrer</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
 
           {/* Documents Section */}

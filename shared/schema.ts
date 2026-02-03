@@ -3,6 +3,8 @@ import { pgTable, text, varchar, boolean, timestamp } from "drizzle-orm/pg-core"
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const projectStatusEnum = ["pending", "in_review", "approved", "in_progress", "completed", "cancelled"] as const;
+
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
@@ -59,3 +61,37 @@ export type User = typeof users.$inferSelect;
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;
 export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
+
+// Projects table
+export const projects = pgTable("projects", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  businessSector: text("business_sector").notNull(),
+  features: text("features").notNull(),
+  designStyle: text("design_style").notNull(),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertProjectSchema = createInsertSchema(projects).pick({
+  title: true,
+  description: true,
+  businessSector: true,
+  features: true,
+  designStyle: true,
+});
+
+export const createProjectSchema = insertProjectSchema.extend({
+  title: z.string().min(3, "Minimum 3 caractères"),
+  description: z.string().min(10, "Minimum 10 caractères"),
+  businessSector: z.string().min(1, "Secteur d'activité requis"),
+  features: z.string().min(10, "Minimum 10 caractères"),
+  designStyle: z.string().min(1, "Style de design requis"),
+});
+
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Project = typeof projects.$inferSelect;
+export type CreateProjectData = z.infer<typeof createProjectSchema>;
