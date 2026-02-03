@@ -36,10 +36,15 @@ import {
   Clock,
   CheckCircle2,
   Circle,
-  XCircle
+  XCircle,
+  ChevronDown,
+  ChevronUp,
+  Zap,
+  AlertCircle,
+  MessageSquare
 } from "lucide-react";
-import type { User as UserType, Project, CreateProjectData } from "@shared/schema";
-import { createProjectSchema } from "@shared/schema";
+import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData } from "@shared/schema";
+import { createProjectSchema, createFeatureSchema } from "@shared/schema";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
 
@@ -50,6 +55,10 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<MenuSection>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  const [expandedProject, setExpandedProject] = useState<string | null>(null);
+  const [showFeatureForm, setShowFeatureForm] = useState<string | null>(null);
+  const [newFeatureTitle, setNewFeatureTitle] = useState("");
+  const [newFeatureDescription, setNewFeatureDescription] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -132,6 +141,72 @@ export default function Dashboard() {
       });
     },
   });
+
+  // Features query - fetch when a project is expanded
+  const { data: features, isLoading: featuresLoading, refetch: refetchFeatures } = useQuery<ProjectFeature[]>({
+    queryKey: ["/api/projects", expandedProject, "features"],
+    queryFn: async () => {
+      if (!expandedProject) return [];
+      const response = await fetch(`/api/projects/${expandedProject}/features`, { credentials: "include" });
+      if (!response.ok) throw new Error("Erreur lors du chargement");
+      return response.json();
+    },
+    enabled: !!expandedProject,
+  });
+
+  const createFeatureMutation = useMutation({
+    mutationFn: async ({ projectId, title, description }: { projectId: string; title: string; description?: string }) => {
+      const response = await apiRequest("POST", `/api/projects/${projectId}/features`, { title, description });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Fonctionnalité ajoutée",
+        description: "Votre demande de fonctionnalité a été enregistrée.",
+      });
+      setNewFeatureTitle("");
+      setNewFeatureDescription("");
+      setShowFeatureForm(null);
+      refetchFeatures();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'ajout",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateFeatureStatusMutation = useMutation({
+    mutationFn: async ({ featureId, status, adminNotes }: { featureId: string; status: string; adminNotes?: string }) => {
+      const response = await apiRequest("PATCH", `/api/features/${featureId}/status`, { status, adminNotes });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Statut mis à jour",
+        description: "Le statut de la fonctionnalité a été modifié.",
+      });
+      refetchFeatures();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la mise à jour",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddFeature = (projectId: string) => {
+    if (!newFeatureTitle.trim()) return;
+    createFeatureMutation.mutate({ 
+      projectId, 
+      title: newFeatureTitle.trim(), 
+      description: newFeatureDescription.trim() || undefined 
+    });
+  };
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -739,6 +814,161 @@ export default function Dashboard() {
                             </p>
                           )}
                         </div>
+
+                        {/* Features toggle button */}
+                        <Button
+                          variant="ghost"
+                          className="w-full mt-3 justify-between"
+                          onClick={() => setExpandedProject(expandedProject === project.id ? null : project.id)}
+                          data-testid={`button-toggle-features-${project.id}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Zap className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">Suivi des fonctionnalités</span>
+                          </div>
+                          {expandedProject === project.id ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+
+                        {/* Features section - expanded */}
+                        {expandedProject === project.id && (
+                          <div className="mt-4 pt-4 border-t space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-semibold">Fonctionnalités demandées</h4>
+                              {user.role !== "admin" && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => setShowFeatureForm(showFeatureForm === project.id ? null : project.id)}
+                                  data-testid={`button-add-feature-${project.id}`}
+                                >
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  Ajouter
+                                </Button>
+                              )}
+                            </div>
+
+                            {/* Add feature form (client only) */}
+                            {showFeatureForm === project.id && user.role !== "admin" && (
+                              <div className="p-3 rounded-lg bg-muted/50 space-y-3">
+                                <Input
+                                  placeholder="Titre de la fonctionnalité"
+                                  value={newFeatureTitle}
+                                  onChange={(e) => setNewFeatureTitle(e.target.value)}
+                                  data-testid="input-feature-title"
+                                />
+                                <Textarea
+                                  placeholder="Description (optionnel)"
+                                  value={newFeatureDescription}
+                                  onChange={(e) => setNewFeatureDescription(e.target.value)}
+                                  className="resize-none"
+                                  rows={2}
+                                  data-testid="input-feature-description"
+                                />
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => handleAddFeature(project.id)}
+                                    disabled={!newFeatureTitle.trim() || createFeatureMutation.isPending}
+                                    data-testid="button-submit-feature"
+                                  >
+                                    {createFeatureMutation.isPending ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                      "Ajouter"
+                                    )}
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setShowFeatureForm(null);
+                                      setNewFeatureTitle("");
+                                      setNewFeatureDescription("");
+                                    }}
+                                    data-testid="button-cancel-feature"
+                                  >
+                                    Annuler
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Features list */}
+                            {featuresLoading ? (
+                              <div className="flex justify-center py-4">
+                                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                              </div>
+                            ) : features && features.length > 0 ? (
+                              <div className="space-y-3">
+                                {features.map((feature) => (
+                                  <div 
+                                    key={feature.id} 
+                                    className="p-3 rounded-lg border bg-background/50"
+                                    data-testid={`feature-item-${feature.id}`}
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-sm">{feature.title}</p>
+                                        {feature.description && (
+                                          <p className="text-xs text-muted-foreground mt-1">{feature.description}</p>
+                                        )}
+                                        {feature.adminNotes && (
+                                          <div className="flex items-start gap-2 mt-2 p-2 rounded bg-muted/50">
+                                            <MessageSquare className="h-3 w-3 mt-0.5 text-muted-foreground" />
+                                            <p className="text-xs text-muted-foreground">{feature.adminNotes}</p>
+                                          </div>
+                                        )}
+                                      </div>
+                                      {user.role === "admin" ? (
+                                        <Select 
+                                          value={feature.status} 
+                                          onValueChange={(status) => updateFeatureStatusMutation.mutate({ featureId: feature.id, status })}
+                                        >
+                                          <SelectTrigger className="w-[130px]" data-testid={`select-feature-status-${feature.id}`}>
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="pending">En attente</SelectItem>
+                                            <SelectItem value="in_progress">En cours</SelectItem>
+                                            <SelectItem value="completed">Terminé</SelectItem>
+                                            <SelectItem value="blocked">Bloqué</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      ) : (
+                                        <Badge variant={
+                                          feature.status === "pending" ? "secondary" :
+                                          feature.status === "in_progress" ? "default" :
+                                          feature.status === "completed" ? "outline" : "destructive"
+                                        }>
+                                          {feature.status === "pending" && (
+                                            <><Circle className="h-2 w-2 mr-1" /> En attente</>
+                                          )}
+                                          {feature.status === "in_progress" && (
+                                            <><Loader2 className="h-2 w-2 mr-1 animate-spin" /> En cours</>
+                                          )}
+                                          {feature.status === "completed" && (
+                                            <><CheckCircle2 className="h-2 w-2 mr-1" /> Terminé</>
+                                          )}
+                                          {feature.status === "blocked" && (
+                                            <><AlertCircle className="h-2 w-2 mr-1" /> Bloqué</>
+                                          )}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-4 text-muted-foreground text-sm">
+                                Aucune fonctionnalité demandée
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}

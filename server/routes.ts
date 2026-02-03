@@ -262,7 +262,8 @@ export async function registerRoutes(
   // Feature routes
   app.post("/api/projects/:projectId/features", requireAuth, async (req, res) => {
     try {
-      const project = await storage.getProject(req.params.projectId);
+      const projectId = req.params.projectId as string;
+      const project = await storage.getProject(projectId);
       if (!project) {
         return res.status(404).json({ message: "Projet non trouvé" });
       }
@@ -282,7 +283,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: result.error.errors[0].message });
       }
 
-      const feature = await storage.createFeature(req.params.projectId, result.data);
+      const feature = await storage.createFeature(projectId, result.data);
       res.status(201).json(feature);
     } catch (error) {
       console.error("Create feature error:", error);
@@ -292,7 +293,8 @@ export async function registerRoutes(
 
   app.get("/api/projects/:projectId/features", requireAuth, async (req, res) => {
     try {
-      const project = await storage.getProject(req.params.projectId);
+      const projectId = req.params.projectId as string;
+      const project = await storage.getProject(projectId);
       if (!project) {
         return res.status(404).json({ message: "Projet non trouvé" });
       }
@@ -307,7 +309,7 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
-      const features = await storage.getFeaturesByProject(req.params.projectId);
+      const features = await storage.getFeaturesByProject(projectId);
       res.json(features);
     } catch (error) {
       console.error("Get features error:", error);
@@ -328,7 +330,8 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Statut invalide" });
       }
 
-      const feature = await storage.updateFeatureStatus(req.params.id, status, adminNotes);
+      const featureId = req.params.id as string;
+      const feature = await storage.updateFeatureStatus(featureId, status, adminNotes);
       if (!feature) {
         return res.status(404).json({ message: "Fonctionnalité non trouvée" });
       }
