@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import { storage } from "./storage";
-import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema } from "@shared/schema";
+import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema, createFeatureSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import { pool } from "./db";
 import connectPgSimple from "connect-pg-simple";
@@ -255,6 +255,87 @@ export async function registerRoutes(
       res.json(project);
     } catch (error) {
       console.error("Update project status error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Feature routes
+  app.post("/api/projects/:projectId/features", requireAuth, async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Only project owner can add features
+      if (project.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const result = createFeatureSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: result.error.errors[0].message });
+      }
+
+      const feature = await storage.createFeature(req.params.projectId, result.data);
+      res.status(201).json(feature);
+    } catch (error) {
+      console.error("Create feature error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  app.get("/api/projects/:projectId/features", requireAuth, async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Check access rights
+      if (currentUser.role !== "admin" && project.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const features = await storage.getFeaturesByProject(req.params.projectId);
+      res.json(features);
+    } catch (error) {
+      console.error("Get features error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  app.patch("/api/features/:id/status", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const { status, adminNotes } = req.body;
+      const validStatuses = ["pending", "in_progress", "completed", "blocked"];
+      if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Statut invalide" });
+      }
+
+      const feature = await storage.updateFeatureStatus(req.params.id, status, adminNotes);
+      if (!feature) {
+        return res.status(404).json({ message: "Fonctionnalité non trouvée" });
+      }
+
+      res.json(feature);
+    } catch (error) {
+      console.error("Update feature status error:", error);
       res.status(500).json({ message: "Erreur serveur" });
     }
   });

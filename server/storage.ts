@@ -1,6 +1,6 @@
-import { type User, type InsertUser, users, type Project, type InsertProject, projects } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -16,6 +16,10 @@ export interface IStorage {
   getAllProjects(): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
   updateProjectStatus(id: string, status: string): Promise<Project | undefined>;
+  // Features
+  createFeature(projectId: string, feature: InsertFeature): Promise<ProjectFeature>;
+  getFeaturesByProject(projectId: string): Promise<ProjectFeature[]>;
+  updateFeatureStatus(id: string, status: string, adminNotes?: string): Promise<ProjectFeature | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -108,6 +112,30 @@ export class DatabaseStorage implements IStorage {
       .where(eq(projects.id, id))
       .returning();
     return project;
+  }
+
+  async createFeature(projectId: string, feature: InsertFeature): Promise<ProjectFeature> {
+    const [newFeature] = await db
+      .insert(projectFeatures)
+      .values({
+        ...feature,
+        projectId,
+      })
+      .returning();
+    return newFeature;
+  }
+
+  async getFeaturesByProject(projectId: string): Promise<ProjectFeature[]> {
+    return db.select().from(projectFeatures).where(eq(projectFeatures.projectId, projectId)).orderBy(desc(projectFeatures.createdAt));
+  }
+
+  async updateFeatureStatus(id: string, status: string, adminNotes?: string): Promise<ProjectFeature | undefined> {
+    const [feature] = await db
+      .update(projectFeatures)
+      .set({ status, adminNotes, updatedAt: new Date() })
+      .where(eq(projectFeatures.id, id))
+      .returning();
+    return feature;
   }
 }
 
