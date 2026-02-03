@@ -519,6 +519,27 @@ export default function Dashboard() {
                           )}
                         />
 
+                        {projectForm.watch("designStyle") === "autre" && (
+                          <FormField
+                            control={projectForm.control}
+                            name="designStyle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Précisez le style souhaité</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Décrivez le style que vous imaginez..." 
+                                    data-testid="input-design-style-other"
+                                    value={field.value.startsWith("autre:") ? field.value.replace("autre:", "") : ""}
+                                    onChange={(e) => field.onChange(`autre:${e.target.value}`)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+
                         <div className="flex gap-3 pt-4">
                           <Button 
                             type="submit" 
