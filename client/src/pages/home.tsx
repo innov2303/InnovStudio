@@ -123,17 +123,17 @@ export default function Home() {
                 <span className="text-sm font-medium">Innovation Web & Intelligence Artificielle</span>
               </div>
               
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-8">
-                Créons ensemble le{" "}
-                <span className="text-primary">digital</span> de demain
-              </h1>
-              
               <div className="flex items-center justify-center gap-4 mb-8">
                 <img src={logo} alt="Innov Studio" className="h-24 w-auto rounded-xl" />
                 <span className="text-3xl md:text-4xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">
                   Innov Studio
                 </span>
               </div>
+              
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+                Créons ensemble le{" "}
+                <span className="text-primary">digital</span> de demain
+              </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
                 Studio de production web spécialisé dans les applications entreprise modernes 
