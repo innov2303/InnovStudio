@@ -4,6 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const projectStatusEnum = ["pending", "in_review", "approved", "in_progress", "completed", "cancelled"] as const;
+export const featureStatusEnum = ["pending", "in_progress", "completed", "blocked"] as const;
 
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
@@ -95,3 +96,29 @@ export const createProjectSchema = insertProjectSchema.extend({
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type CreateProjectData = z.infer<typeof createProjectSchema>;
+
+// Project Features table
+export const projectFeatures = pgTable("project_features", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id", { length: 36 }).notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default("pending"),
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertFeatureSchema = createInsertSchema(projectFeatures).pick({
+  title: true,
+  description: true,
+});
+
+export const createFeatureSchema = insertFeatureSchema.extend({
+  title: z.string().min(3, "Minimum 3 caractères"),
+  description: z.string().optional(),
+});
+
+export type InsertFeature = z.infer<typeof insertFeatureSchema>;
+export type ProjectFeature = typeof projectFeatures.$inferSelect;
+export type CreateFeatureData = z.infer<typeof createFeatureSchema>;
