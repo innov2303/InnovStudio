@@ -234,5 +234,30 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/projects/:id/status", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const { status } = req.body;
+      const validStatuses = ["pending", "in_review", "approved", "in_progress", "completed", "cancelled"];
+      if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Statut invalide" });
+      }
+
+      const project = await storage.updateProjectStatus(req.params.id as string, status);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      res.json(project);
+    } catch (error) {
+      console.error("Update project status error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   return httpServer;
 }

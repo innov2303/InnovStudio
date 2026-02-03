@@ -109,6 +109,27 @@ export default function Dashboard() {
     createProjectMutation.mutate(data);
   };
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ projectId, status }: { projectId: string; status: string }) => {
+      const response = await apiRequest("PATCH", `/api/projects/${projectId}/status`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Statut mis à jour",
+        description: "Le statut du projet a été modifié.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la mise à jour",
+        variant: "destructive",
+      });
+    },
+  });
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", "/api/auth/logout", {});
@@ -141,7 +162,8 @@ export default function Dashboard() {
   const menuItems = [
     { id: "dashboard" as MenuSection, label: "Tableau de bord", icon: LayoutDashboard },
     { id: "profile" as MenuSection, label: "Mon Profil", icon: User },
-    { id: "projects" as MenuSection, label: "Mes Projets", icon: FolderKanban },
+    ...(user.role !== "admin" ? [{ id: "projects" as MenuSection, label: "Mes Projets", icon: FolderKanban }] : []),
+    ...(user.role === "admin" ? [{ id: "projects" as MenuSection, label: "Gestion des projets", icon: FolderKanban }] : []),
     { id: "documents" as MenuSection, label: "Documents", icon: FileText },
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
     { id: "settings" as MenuSection, label: "Paramètres", icon: Settings },
@@ -389,16 +411,24 @@ export default function Dashboard() {
           {/* Projects Section */}
           {activeSection === "projects" && (
             <div className="space-y-6">
-              {/* Header with new project button */}
+              {/* Header - different for admin vs user */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">Mes Projets</h2>
-                  <p className="text-muted-foreground">Suivez l'avancement de vos projets en temps réel</p>
+                  <h2 className="text-2xl font-bold">
+                    {user.role === "admin" ? "Gestion des projets" : "Mes Projets"}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    {user.role === "admin" 
+                      ? "Gérez les demandes de projets des clients" 
+                      : "Suivez l'avancement de vos projets en temps réel"}
+                  </p>
                 </div>
-                <Button onClick={() => setShowProjectForm(!showProjectForm)} data-testid="button-new-project">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouvelle demande
-                </Button>
+                {user.role !== "admin" && (
+                  <Button onClick={() => setShowProjectForm(!showProjectForm)} data-testid="button-new-project">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nouvelle demande
+                  </Button>
+                )}
               </div>
 
               {/* Project form */}
@@ -579,31 +609,57 @@ export default function Dashboard() {
                 <div className="grid gap-4">
                   {projects.map((project) => (
                     <Card key={project.id} data-testid={`card-project-${project.id}`}>
-                      <CardHeader className="flex flex-row items-start justify-between space-y-0">
-                        <div>
+                      <CardHeader className="flex flex-row items-start justify-between space-y-0 gap-4">
+                        <div className="flex-1">
                           <CardTitle className="text-lg">{project.title}</CardTitle>
                           <CardDescription className="mt-1">
                             {project.businessSector} • {project.designStyle}
                           </CardDescription>
                         </div>
-                        <Badge variant={
-                          project.status === "pending" ? "secondary" :
-                          project.status === "in_progress" ? "default" :
-                          project.status === "completed" ? "outline" : "secondary"
-                        }>
-                          {project.status === "pending" && "En attente"}
-                          {project.status === "in_review" && "En cours d'étude"}
-                          {project.status === "approved" && "Approuvé"}
-                          {project.status === "in_progress" && "En cours"}
-                          {project.status === "completed" && "Terminé"}
-                          {project.status === "cancelled" && "Annulé"}
-                        </Badge>
+                        {user.role === "admin" ? (
+                          <Select 
+                            value={project.status} 
+                            onValueChange={(status) => updateStatusMutation.mutate({ projectId: project.id, status })}
+                          >
+                            <SelectTrigger className="w-[160px]" data-testid={`select-status-${project.id}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">En attente</SelectItem>
+                              <SelectItem value="in_review">En cours d'étude</SelectItem>
+                              <SelectItem value="approved">Approuvé</SelectItem>
+                              <SelectItem value="in_progress">En cours</SelectItem>
+                              <SelectItem value="completed">Terminé</SelectItem>
+                              <SelectItem value="cancelled">Annulé</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Badge variant={
+                            project.status === "pending" ? "secondary" :
+                            project.status === "in_progress" ? "default" :
+                            project.status === "completed" ? "outline" : "secondary"
+                          }>
+                            {project.status === "pending" && "En attente"}
+                            {project.status === "in_review" && "En cours d'étude"}
+                            {project.status === "approved" && "Approuvé"}
+                            {project.status === "in_progress" && "En cours"}
+                            {project.status === "completed" && "Terminé"}
+                            {project.status === "cancelled" && "Annulé"}
+                          </Badge>
+                        )}
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
-                        <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>Créé le {new Date(project.createdAt!).toLocaleDateString('fr-FR')}</span>
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>Créé le {new Date(project.createdAt!).toLocaleDateString('fr-FR')}</span>
+                          </div>
+                          {user.role === "admin" && (
+                            <p className="text-xs text-muted-foreground">
+                              Client ID: {project.userId.slice(0, 8)}...
+                            </p>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

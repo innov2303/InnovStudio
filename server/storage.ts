@@ -15,6 +15,7 @@ export interface IStorage {
   getProjectsByUser(userId: string): Promise<Project[]>;
   getAllProjects(): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
+  updateProjectStatus(id: string, status: string): Promise<Project | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -97,6 +98,15 @@ export class DatabaseStorage implements IStorage {
 
   async getProject(id: string): Promise<Project | undefined> {
     const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project;
+  }
+
+  async updateProjectStatus(id: string, status: string): Promise<Project | undefined> {
+    const [project] = await db
+      .update(projects)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
     return project;
   }
 }
