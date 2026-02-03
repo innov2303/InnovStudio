@@ -19,7 +19,6 @@ import {
 import heroBg from "@/assets/images/hero-bg.jpg";
 import featuresBg from "@/assets/images/features-bg.jpg";
 import projectTracking from "@/assets/images/project-tracking.png";
-import logo from "@/assets/images/logo.png";
 
 export default function Home() {
   const { user } = useAuth();
@@ -123,12 +122,9 @@ export default function Home() {
                 <span className="text-sm font-medium">Innovation Web & Intelligence Artificielle</span>
               </div>
               
-              <div className="flex items-center justify-center gap-6 mb-8">
-                <img src={logo} alt="Innov Studio" className="h-48 w-auto rounded-2xl" />
-                <span className="text-3xl md:text-4xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">
-                  Innov Studio
-                </span>
-              </div>
+              <h2 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent mb-8">
+                Innov Studio
+              </h2>
               
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
                 Créons ensemble le{" "}
@@ -273,9 +269,9 @@ export default function Home() {
       <footer className="border-t py-4">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="Innov Studio" className="h-16 w-auto rounded-lg" />
-            </div>
+            <span className="text-xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">
+              Innov Studio
+            </span>
             <p className="text-sm text-muted-foreground">
               © 2026 Innov Studio By Cyril Allegret. Tous droits réservés.
             </p>
