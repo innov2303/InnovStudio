@@ -39,11 +39,14 @@ export default function Login() {
         title: "Connexion réussie",
         description: "Bienvenue sur Innov Studio",
       });
-      if (data.user.mustChangePassword) {
-        setLocation("/change-password");
-      } else {
-        setLocation("/dashboard");
-      }
+      // Délai pour s'assurer que l'état est mis à jour avant la navigation
+      setTimeout(() => {
+        if (data.user.mustChangePassword) {
+          setLocation("/change-password");
+        } else {
+          setLocation("/dashboard");
+        }
+      }, 100);
     },
     onError: (error: Error) => {
       setError(error.message || "Identifiants incorrects");
