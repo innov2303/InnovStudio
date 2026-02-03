@@ -161,6 +161,40 @@ export async function registerRoutes(
     }
   });
 
+  // Resend verification email endpoint
+  app.post("/api/auth/resend-verification", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ message: "Email requis" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        // Don't reveal if email exists or not for security
+        return res.json({ message: "Si cet email existe, un nouveau lien de vérification a été envoyé" });
+      }
+
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Cet email est déjà vérifié" });
+      }
+
+      // Generate new token
+      const verificationToken = crypto.randomUUID();
+      await storage.updateUserVerificationToken(user.id, verificationToken);
+
+      // Send new verification email (sendVerificationEmail builds the URL internally)
+      await sendVerificationEmail(email, user.firstName, verificationToken);
+
+      res.json({ message: "Un nouveau lien de vérification a été envoyé à votre adresse email" });
+    } catch (error) {
+      console.error("Resend verification error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   app.get("/api/auth/me", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);

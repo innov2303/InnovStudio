@@ -20,6 +20,7 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(false);
 
   const form = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
@@ -60,6 +61,28 @@ export default function Register() {
     },
   });
 
+  const resendMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/resend-verification", { email: registeredEmail });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Email envoyé",
+        description: data.message,
+      });
+      setResendCooldown(true);
+      setTimeout(() => setResendCooldown(false), 60000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de renvoyer l'email",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: RegisterData) => {
     setError(null);
     registerMutation.mutate(data);
@@ -95,11 +118,11 @@ export default function Register() {
                     <Mail className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <CardTitle className="text-2xl">Vérifiez votre email</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-2xl" data-testid="text-verify-email-title">Vérifiez votre email</CardTitle>
+                <CardDescription className="text-base" data-testid="text-verify-email-description">
                   Un email de vérification a été envoyé à
                 </CardDescription>
-                <p className="font-medium text-primary mt-2">{registeredEmail}</p>
+                <p className="font-medium text-primary mt-2" data-testid="text-registered-email">{registeredEmail}</p>
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <div className="bg-muted/50 rounded-lg p-4 space-y-2">
@@ -108,15 +131,27 @@ export default function Register() {
                     <span>Cliquez sur le lien dans l'email pour activer votre compte</span>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Vous n'avez pas reçu l'email ? Vérifiez vos spams ou{" "}
-                  <button 
-                    onClick={() => setRegistrationSuccess(false)} 
-                    className="text-primary hover:underline"
+                <div className="text-sm text-muted-foreground space-y-2">
+                  <p>Vous n'avez pas reçu l'email ? Vérifiez vos spams.</p>
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => resendMutation.mutate()}
+                    disabled={resendMutation.isPending || resendCooldown}
+                    data-testid="button-resend-verification"
                   >
-                    réessayez
-                  </button>
-                </p>
+                    {resendMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Envoi...
+                      </>
+                    ) : resendCooldown ? (
+                      "Email envoyé, réessayez dans 1 minute"
+                    ) : (
+                      "Renvoyer l'email de vérification"
+                    )}
+                  </Button>
+                </div>
                 <Link href="/login">
                   <Button variant="outline" className="mt-4" data-testid="button-go-login">
                     Retour à la connexion

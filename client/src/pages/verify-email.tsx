@@ -76,8 +76,8 @@ export default function VerifyEmail() {
                   <div className="flex justify-center mb-4">
                     <CheckCircle className="h-16 w-16 text-green-500" />
                   </div>
-                  <CardTitle className="text-2xl text-green-600">Email vérifié !</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-2xl text-green-600" data-testid="text-verify-success-title">Email vérifié !</CardTitle>
+                  <CardDescription data-testid="text-verify-success-message">
                     {message}
                   </CardDescription>
                 </>
@@ -88,8 +88,8 @@ export default function VerifyEmail() {
                   <div className="flex justify-center mb-4">
                     <XCircle className="h-16 w-16 text-destructive" />
                   </div>
-                  <CardTitle className="text-2xl text-destructive">Erreur de vérification</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-2xl text-destructive" data-testid="text-verify-error-title">Erreur de vérification</CardTitle>
+                  <CardDescription data-testid="text-verify-error-message">
                     {message}
                   </CardDescription>
                 </>

@@ -10,6 +10,7 @@ export interface IStorage {
   getUserByVerificationToken(token: string): Promise<User | undefined>;
   createUser(user: InsertUser & { role?: string; mustChangePassword?: boolean; verificationToken?: string }): Promise<User>;
   verifyUserEmail(userId: string): Promise<void>;
+  updateUserVerificationToken(userId: string, token: string): Promise<void>;
   updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
   initializeAdmin(): Promise<void>;
@@ -50,6 +51,13 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(users)
       .set({ emailVerified: true, verificationToken: null })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserVerificationToken(userId: string, token: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ verificationToken: token })
       .where(eq(users.id, userId));
   }
 
