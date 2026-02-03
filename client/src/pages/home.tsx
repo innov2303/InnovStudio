@@ -19,6 +19,7 @@ import {
 import heroBg from "@/assets/images/hero-bg.jpg";
 import featuresBg from "@/assets/images/features-bg.jpg";
 import projectTracking from "@/assets/images/project-tracking.png";
+import logo from "@/assets/images/logo.png";
 
 export default function Home() {
   const { user } = useAuth();
@@ -70,10 +71,7 @@ export default function Home() {
         <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary">
-                <Code2 className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">Innov Studio</span>
+              <img src={logo} alt="Innov Studio" className="h-10 w-auto" />
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
@@ -269,10 +267,7 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-                <Code2 className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="font-semibold">Innov Studio</span>
+              <img src={logo} alt="Innov Studio" className="h-8 w-auto" />
             </div>
             <p className="text-sm text-muted-foreground">
               © 2026 Innov Studio. Tous droits réservés.
