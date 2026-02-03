@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -18,14 +18,25 @@ import {
   Users,
   Settings,
   Shield,
-  Loader2
+  Loader2,
+  LayoutDashboard,
+  FolderKanban,
+  FileText,
+  HelpCircle,
+  ChevronLeft,
+  ChevronRight,
+  Home
 } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
+
+type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user, logout, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const [activeSection, setActiveSection] = useState<MenuSection>("dashboard");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -73,15 +84,87 @@ export default function Dashboard() {
 
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
 
+  const menuItems = [
+    { id: "dashboard" as MenuSection, label: "Tableau de bord", icon: LayoutDashboard },
+    { id: "profile" as MenuSection, label: "Mon Profil", icon: User },
+    { id: "projects" as MenuSection, label: "Mes Projets", icon: FolderKanban },
+    { id: "documents" as MenuSection, label: "Documents", icon: FileText },
+    ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
+    { id: "settings" as MenuSection, label: "Paramètres", icon: Settings },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b">
-        <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-2">
+    <div className="min-h-screen flex bg-background">
+      {/* Sidebar */}
+      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r bg-muted/30 flex flex-col transition-all duration-300`}>
+        {/* Sidebar Header */}
+        <div className="p-4 border-b flex items-center justify-between">
+          {!sidebarCollapsed && (
+            <Link href="/">
+              <span className="text-lg font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent cursor-pointer">
+                Innov Studio
+              </span>
+            </Link>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="ml-auto"
+            data-testid="button-toggle-sidebar"
+          >
+            {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+        </div>
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 p-2 space-y-1">
+          {menuItems.map((item) => (
+            <Button
+              key={item.id}
+              variant={activeSection === item.id ? "secondary" : "ghost"}
+              className={`w-full justify-start gap-3 ${sidebarCollapsed ? 'px-2' : ''}`}
+              onClick={() => setActiveSection(item.id)}
+              data-testid={`menu-${item.id}`}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span>{item.label}</span>}
+            </Button>
+          ))}
+        </nav>
+
+        {/* Sidebar Footer */}
+        <div className="p-2 border-t space-y-1">
           <Link href="/">
-            <span className="text-xl md:text-2xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent cursor-pointer">
-              Innov Studio
-            </span>
+            <Button variant="ghost" className={`w-full justify-start gap-3 ${sidebarCollapsed ? 'px-2' : ''}`}>
+              <Home className="h-5 w-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span>Retour au site</span>}
+            </Button>
           </Link>
+          <Button
+            variant="ghost"
+            className={`w-full justify-start gap-3 text-destructive hover:text-destructive ${sidebarCollapsed ? 'px-2' : ''}`}
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            data-testid="button-logout"
+          >
+            {logoutMutation.isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin flex-shrink-0" />
+            ) : (
+              <LogOut className="h-5 w-5 flex-shrink-0" />
+            )}
+            {!sidebarCollapsed && <span>Déconnexion</span>}
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="border-b px-6 py-3 flex items-center justify-between">
+          <h1 className="text-xl font-semibold">
+            {menuItems.find(m => m.id === activeSection)?.label || "Tableau de bord"}
+          </h1>
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <div className="flex items-center gap-3">
@@ -92,223 +175,300 @@ export default function Dashboard() {
               </Avatar>
               <div className="hidden sm:block">
                 <p className="text-sm font-medium">{user.firstName} {user.lastName}</p>
-                <p className="text-xs text-muted-foreground">{user.username}</p>
+                <p className="text-xs text-muted-foreground">{user.role === "admin" ? "Administrateur" : "Client"}</p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
-              data-testid="button-logout"
-            >
-              {logoutMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <LogOut className="h-4 w-4" />
-              )}
-            </Button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="flex-1 p-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">
-              Bienvenue, {user.firstName} !
-            </h1>
-            <p className="text-muted-foreground">
-              Gérez votre compte et accédez à vos informations
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <User className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Profil</CardTitle>
-                  <CardDescription>Vos informations personnelles</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Prénom</span>
-                  <span className="text-sm font-medium" data-testid="text-firstname">{user.firstName}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Nom</span>
-                  <span className="text-sm font-medium" data-testid="text-lastname">{user.lastName}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Identifiant</span>
-                  <span className="text-sm font-medium" data-testid="text-username">{user.username}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Building2 className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Entreprise</CardTitle>
-                  <CardDescription>Informations de votre société</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-lg font-semibold" data-testid="text-company">{user.company}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Shield className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Statut</CardTitle>
-                  <CardDescription>Type de compte</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Badge 
-                  variant={user.role === "admin" ? "default" : "secondary"}
-                  data-testid="badge-role"
-                >
-                  {user.role === "admin" ? "Administrateur" : "Client"}
-                </Badge>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Adresse</CardTitle>
-                  <CardDescription>Adresse principale</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm" data-testid="text-address">{user.address}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Receipt className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Facturation</CardTitle>
-                  <CardDescription>Adresse de facturation</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm" data-testid="text-billing-address">
-                  {user.sameAsBilling ? user.address : user.billingAddress}
-                </p>
-                {user.sameAsBilling && (
-                  <Badge variant="secondary" className="mt-2">
-                    Identique à l'adresse principale
-                  </Badge>
+        {/* Content */}
+        <main className="flex-1 p-6 overflow-auto">
+          {/* Dashboard Section */}
+          {activeSection === "dashboard" && (
+            <div className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Projets actifs</CardTitle>
+                    <FolderKanban className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">0</div>
+                    <p className="text-xs text-muted-foreground">Aucun projet en cours</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Documents</CardTitle>
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">0</div>
+                    <p className="text-xs text-muted-foreground">Aucun document</p>
+                  </CardContent>
+                </Card>
+                {user.role === "admin" && (
+                  <>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{allUsers?.length || 0}</div>
+                        <p className="text-xs text-muted-foreground">Comptes enregistrés</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Statut</CardTitle>
+                        <Shield className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <Badge>Administrateur</Badge>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Settings className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Paramètres</CardTitle>
-                  <CardDescription>Gérer votre compte</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Link href="/change-password">
-                  <Button variant="outline" className="w-full" data-testid="button-change-password">
-                    Changer le mot de passe
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-
-          {user.role === "admin" && (
-            <div className="mt-8">
+              </div>
+              
               <Card>
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                <CardHeader>
+                  <CardTitle>Bienvenue, {user.firstName} !</CardTitle>
+                  <CardDescription>
+                    Utilisez le menu à gauche pour naviguer dans votre espace client.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          )}
+
+          {/* Profile Section */}
+          {activeSection === "profile" && (
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Users className="h-5 w-5 text-primary" />
+                    <User className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle>Gestion des utilisateurs</CardTitle>
-                    <CardDescription>Liste de tous les utilisateurs enregistrés</CardDescription>
+                    <CardTitle className="text-base">Informations personnelles</CardTitle>
+                    <CardDescription>Vos informations de profil</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Prénom</span>
+                    <span className="text-sm font-medium" data-testid="text-firstname">{user.firstName}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Nom</span>
+                    <span className="text-sm font-medium" data-testid="text-lastname">{user.lastName}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Identifiant</span>
+                    <span className="text-sm font-medium" data-testid="text-username">{user.username}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Rôle</span>
+                    <Badge variant={user.role === "admin" ? "default" : "secondary"} data-testid="badge-role">
+                      {user.role === "admin" ? "Administrateur" : "Client"}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Building2 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Entreprise</CardTitle>
+                    <CardDescription>Informations de votre société</CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {usersLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  ) : allUsers && allUsers.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Utilisateur</th>
-                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Entreprise</th>
-                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Rôle</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {allUsers.map((u) => (
-                            <tr key={u.id} className="border-b last:border-0" data-testid={`row-user-${u.id}`}>
-                              <td className="py-3 px-4">
-                                <div className="flex items-center gap-3">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarFallback className="bg-muted text-xs">
-                                      {`${u.firstName[0]}${u.lastName[0]}`.toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <p className="text-sm font-medium">{u.firstName} {u.lastName}</p>
-                                    <p className="text-xs text-muted-foreground">{u.username}</p>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="py-3 px-4">
-                                <span className="text-sm">{u.company}</span>
-                              </td>
-                              <td className="py-3 px-4">
-                                <Badge variant={u.role === "admin" ? "default" : "secondary"}>
-                                  {u.role === "admin" ? "Admin" : "Client"}
-                                </Badge>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <p className="text-center text-muted-foreground py-8">
-                      Aucun utilisateur enregistré
-                    </p>
+                  <p className="text-lg font-semibold" data-testid="text-company">{user.company}</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Adresse</CardTitle>
+                    <CardDescription>Adresse principale</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm" data-testid="text-address">{user.address}</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Receipt className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Facturation</CardTitle>
+                    <CardDescription>Adresse de facturation</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm" data-testid="text-billing-address">
+                    {user.sameAsBilling ? user.address : user.billingAddress}
+                  </p>
+                  {user.sameAsBilling && (
+                    <Badge variant="secondary" className="mt-2">
+                      Identique à l'adresse principale
+                    </Badge>
                   )}
                 </CardContent>
               </Card>
             </div>
           )}
-        </div>
-      </main>
+
+          {/* Projects Section */}
+          {activeSection === "projects" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Mes Projets</CardTitle>
+                <CardDescription>Suivez l'avancement de vos projets en temps réel</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Aucun projet en cours</p>
+                <p className="text-sm text-muted-foreground mt-1">Vos projets apparaîtront ici une fois créés</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Documents Section */}
+          {activeSection === "documents" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Documents</CardTitle>
+                <CardDescription>Vos devis, factures et contrats</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Aucun document disponible</p>
+                <p className="text-sm text-muted-foreground mt-1">Vos documents seront accessibles ici</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Users Section (Admin only) */}
+          {activeSection === "users" && user.role === "admin" && (
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>Gestion des utilisateurs</CardTitle>
+                  <CardDescription>Liste de tous les utilisateurs enregistrés</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {usersLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : allUsers && allUsers.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Utilisateur</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Entreprise</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Rôle</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allUsers.map((u) => (
+                          <tr key={u.id} className="border-b last:border-0" data-testid={`row-user-${u.id}`}>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback className="bg-muted text-xs">
+                                    {`${u.firstName[0]}${u.lastName[0]}`.toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium">{u.firstName} {u.lastName}</p>
+                                  <p className="text-xs text-muted-foreground">{u.username}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="text-sm">{u.company}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge variant={u.role === "admin" ? "default" : "secondary"}>
+                                {u.role === "admin" ? "Admin" : "Client"}
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Aucun utilisateur enregistré
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Settings Section */}
+          {activeSection === "settings" && (
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Settings className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Sécurité</CardTitle>
+                    <CardDescription>Gérer votre mot de passe</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Link href="/change-password">
+                    <Button variant="outline" className="w-full" data-testid="button-change-password">
+                      Changer le mot de passe
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <HelpCircle className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Aide</CardTitle>
+                    <CardDescription>Besoin d'assistance ?</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Contactez-nous pour toute question concernant votre compte ou vos projets.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
