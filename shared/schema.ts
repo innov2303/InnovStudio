@@ -19,6 +19,8 @@ export const users = pgTable("users", {
   sameAsBilling: boolean("same_as_billing").default(false),
   role: text("role").notNull().default("user"),
   mustChangePassword: boolean("must_change_password").default(false),
+  emailVerified: boolean("email_verified").default(false),
+  verificationToken: text("verification_token"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
