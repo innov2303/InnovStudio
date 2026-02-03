@@ -24,7 +24,7 @@ export default function Register() {
   const form = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
       firstName: "",
       lastName: "",
@@ -162,14 +162,15 @@ export default function Register() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="username"
+                      name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nom d'utilisateur</FormLabel>
+                          <FormLabel>Email</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="jean.dupont"
-                              data-testid="input-username"
+                              type="email"
+                              placeholder="jean.dupont@example.com"
+                              data-testid="input-email"
                               {...field}
                             />
                           </FormControl>

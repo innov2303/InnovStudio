@@ -55,8 +55,14 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Données invalides" });
       }
 
-      const { username, password } = result.data;
-      const user = await storage.getUserByUsername(username);
+      const { email, password } = result.data;
+      
+      // Try to find user by email first, then by username (for admin account)
+      let user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Fallback to username for admin account
+        user = await storage.getUserByUsername(email);
+      }
       
       if (!user) {
         return res.status(401).json({ message: "Identifiants incorrects" });
@@ -84,13 +90,17 @@ export async function registerRoutes(
         return res.status(400).json({ message: result.error.errors[0].message });
       }
 
-      const existingUser = await storage.getUserByUsername(result.data.username);
+      const existingUser = await storage.getUserByEmail(result.data.email);
       if (existingUser) {
-        return res.status(400).json({ message: "Ce nom d'utilisateur est déjà pris" });
+        return res.status(400).json({ message: "Cet email est déjà utilisé" });
       }
+
+      // Generate username from email (part before @)
+      const username = result.data.email.split('@')[0] + '_' + Date.now().toString(36);
 
       const user = await storage.createUser({
         ...result.data,
+        username,
         billingAddress: result.data.sameAsBilling ? result.data.address : (result.data.billingAddress || result.data.address),
       });
 

@@ -9,6 +9,7 @@ export const featureStatusEnum = ["pending", "in_progress", "completed", "blocke
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
+  email: text("email").unique(),
   password: text("password").notNull(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
@@ -23,6 +24,7 @@ export const users = pgTable("users", {
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
+  email: true,
   password: true,
   firstName: true,
   lastName: true,
@@ -33,12 +35,12 @@ export const insertUserSchema = createInsertSchema(users).pick({
 });
 
 export const loginSchema = z.object({
-  username: z.string().min(1, "Nom d'utilisateur requis"),
+  email: z.string().min(1, "Email requis"),
   password: z.string().min(1, "Mot de passe requis"),
 });
 
 export const registerSchema = insertUserSchema.extend({
-  username: z.string().min(3, "Minimum 3 caractères"),
+  email: z.string().email("Email invalide"),
   password: z.string().min(6, "Minimum 6 caractères"),
   firstName: z.string().min(1, "Prénom requis"),
   lastName: z.string().min(1, "Nom requis"),
@@ -46,7 +48,7 @@ export const registerSchema = insertUserSchema.extend({
   address: z.string().min(1, "Adresse requise"),
   billingAddress: z.string().optional(),
   sameAsBilling: z.boolean().optional(),
-});
+}).omit({ username: true });
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Mot de passe actuel requis"),
