@@ -57,7 +57,7 @@ export class DatabaseStorage implements IStorage {
     if (!existingAdmin) {
       await this.createUser({
         username: "admin",
-        password: "mot de passe",
+        password: "admin",
         firstName: "Admin",
         lastName: "Studio",
         company: "Innov Studio",

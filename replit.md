@@ -6,7 +6,7 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 ## Features
 - **Page d'accueil moderne** : Hero section, services (Sites Vitrines, Applications Web, Intégration IA, Design UI/UX), avantages
 - **Authentification locale** : Login/Register avec sessions PostgreSQL
-- **Compte admin par défaut** : username "admin", password "mot de passe" (changement obligatoire à la première connexion)
+- **Compte admin par défaut** : username "admin", password "admin" (changement obligatoire à la première connexion)
 - **Inscription utilisateurs** : Prénom, Nom, Entreprise, Adresse, Adresse de facturation (checkbox "identique")
 - **Dashboard** : Profil utilisateur, panneau admin pour voir tous les utilisateurs
 - **Mode sombre/clair** : Toggle disponible sur toutes les pages
