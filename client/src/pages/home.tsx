@@ -251,19 +251,30 @@ export default function Home() {
                 Prêt à lancer votre projet ?
               </h2>
               <p className="text-muted-foreground mb-8">
-                Contactez-moi dès maintenant pour déposer les premières bases de votre projet et concrétiser vos idées.
+                Connectez-vous à votre espace client pour déposer les premières bases de votre projet et concrétiser vos idées.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button size="lg" className="gap-2" data-testid="button-contact">
-                  Me contacter
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-                {!user && (
-                  <Link href="/register">
-                    <Button size="lg" variant="outline" data-testid="button-register-cta">
-                      Créer un compte
+                {user ? (
+                  <Link href="/dashboard">
+                    <Button size="lg" className="gap-2" data-testid="button-go-dashboard">
+                      Accéder à mon espace
+                      <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <Button size="lg" className="gap-2" data-testid="button-login-cta">
+                        Se connecter
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button size="lg" variant="outline" data-testid="button-register-cta">
+                        Créer un compte
+                      </Button>
+                    </Link>
+                  </>
                 )}
               </div>
             </div>
