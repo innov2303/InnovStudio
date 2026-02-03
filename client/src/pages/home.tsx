@@ -143,7 +143,7 @@ export default function Home() {
                 </a>
                 <a href="#services">
                   <Button size="lg" variant="outline" data-testid="button-discover-services">
-                    Découvrir nos services
+                    Découvrir mes services
                   </Button>
                 </a>
               </div>
@@ -155,7 +155,7 @@ export default function Home() {
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Nos Services
+                Mes Services
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Des solutions digitales complètes pour accompagner votre croissance
@@ -192,7 +192,7 @@ export default function Home() {
                   <span className="text-primary">Innov Studio</span> ?
                 </h2>
                 <p className="text-muted-foreground mb-8">
-                  Notre expertise technique et notre passion pour l'innovation nous permettent 
+                  Mon expertise technique et ma passion pour l'innovation me permettent 
                   de créer des solutions web qui dépassent vos attentes.
                 </p>
                 
@@ -238,11 +238,11 @@ export default function Home() {
                 Prêt à lancer votre projet ?
               </h2>
               <p className="text-muted-foreground mb-8">
-                Contactez-nous pour discuter de vos besoins et obtenir un devis personnalisé.
+                Contactez-moi pour discuter de vos besoins et obtenir un devis personnalisé.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button size="lg" className="gap-2" data-testid="button-contact">
-                  Nous contacter
+                  Me contacter
                   <ArrowRight className="h-4 w-4" />
                 </Button>
                 {!user && (
