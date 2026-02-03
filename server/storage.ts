@@ -7,7 +7,9 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser & { role?: string; mustChangePassword?: boolean }): Promise<User>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
+  createUser(user: InsertUser & { role?: string; mustChangePassword?: boolean; verificationToken?: string }): Promise<User>;
+  verifyUserEmail(userId: string): Promise<void>;
   updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
   initializeAdmin(): Promise<void>;
@@ -39,7 +41,19 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(insertUser: InsertUser & { role?: string; mustChangePassword?: boolean }): Promise<User> {
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.verificationToken, token));
+    return user;
+  }
+
+  async verifyUserEmail(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ emailVerified: true, verificationToken: null })
+      .where(eq(users.id, userId));
+  }
+
+  async createUser(insertUser: InsertUser & { role?: string; mustChangePassword?: boolean; verificationToken?: string }): Promise<User> {
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
     const [user] = await db
       .insert(users)

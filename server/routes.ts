@@ -1,11 +1,13 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
+import crypto from "crypto";
 import { storage } from "./storage";
 import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema, createFeatureSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import { pool } from "./db";
 import connectPgSimple from "connect-pg-simple";
+import { sendVerificationEmail } from "./email";
 
 declare module "express-session" {
   interface SessionData {
@@ -73,6 +75,14 @@ export async function registerRoutes(
         return res.status(401).json({ message: "Identifiants incorrects" });
       }
 
+      // Check if email is verified (skip for admin account)
+      if (user.role !== "admin" && !user.emailVerified) {
+        return res.status(403).json({ 
+          message: "Veuillez vérifier votre adresse email avant de vous connecter. Consultez votre boîte de réception.",
+          requiresVerification: true
+        });
+      }
+
       req.session.userId = user.id;
       
       const { password: _, ...userWithoutPassword } = user;
@@ -97,19 +107,56 @@ export async function registerRoutes(
 
       // Generate username from email (part before @)
       const username = result.data.email.split('@')[0] + '_' + Date.now().toString(36);
+      
+      // Generate verification token
+      const verificationToken = crypto.randomBytes(32).toString('hex');
 
       const user = await storage.createUser({
         ...result.data,
         username,
+        verificationToken,
         billingAddress: result.data.sameAsBilling ? result.data.address : (result.data.billingAddress || result.data.address),
       });
 
-      req.session.userId = user.id;
+      // Send verification email
+      const emailSent = await sendVerificationEmail(result.data.email, result.data.firstName, verificationToken);
+      
+      if (!emailSent) {
+        console.error("Failed to send verification email to:", result.data.email);
+      }
 
       const { password: _, ...userWithoutPassword } = user;
-      res.status(201).json({ user: userWithoutPassword });
+      res.status(201).json({ 
+        user: userWithoutPassword,
+        message: "Un email de vérification a été envoyé à votre adresse email. Veuillez vérifier votre boîte de réception.",
+        requiresVerification: true
+      });
     } catch (error) {
       console.error("Register error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Email verification endpoint
+  app.get("/api/auth/verify-email", async (req, res) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ message: "Token de vérification invalide" });
+      }
+
+      const user = await storage.getUserByVerificationToken(token);
+      
+      if (!user) {
+        return res.status(400).json({ message: "Token de vérification invalide ou expiré" });
+      }
+
+      await storage.verifyUserEmail(user.id);
+
+      res.json({ message: "Email vérifié avec succès", verified: true });
+    } catch (error) {
+      console.error("Verify email error:", error);
       res.status(500).json({ message: "Erreur serveur" });
     }
   });

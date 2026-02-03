@@ -9,17 +9,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { registerSchema, type RegisterData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, CheckCircle } from "lucide-react";
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   const form = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
@@ -45,15 +45,15 @@ export default function Register() {
         billingAddress: data.sameAsBilling ? data.address : data.billingAddress,
       };
       const response = await apiRequest("POST", "/api/auth/register", submitData);
-      return response.json();
+      return { ...await response.json(), email: data.email };
     },
     onSuccess: (data) => {
-      login(data.user);
+      setRegisteredEmail(data.email);
+      setRegistrationSuccess(true);
       toast({
         title: "Inscription réussie",
-        description: "Bienvenue sur Innov Studio !",
+        description: "Vérifiez votre boîte mail pour activer votre compte.",
       });
-      setLocation("/dashboard");
     },
     onError: (error: Error) => {
       setError(error.message || "Une erreur est survenue lors de l'inscription");
@@ -87,6 +87,44 @@ export default function Register() {
             </Button>
           </Link>
 
+          {registrationSuccess ? (
+            <Card>
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Mail className="h-8 w-8 text-primary" />
+                  </div>
+                </div>
+                <CardTitle className="text-2xl">Vérifiez votre email</CardTitle>
+                <CardDescription className="text-base">
+                  Un email de vérification a été envoyé à
+                </CardDescription>
+                <p className="font-medium text-primary mt-2">{registeredEmail}</p>
+              </CardHeader>
+              <CardContent className="text-center space-y-4">
+                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                  <div className="flex items-center gap-2 justify-center text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Cliquez sur le lien dans l'email pour activer votre compte</span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Vous n'avez pas reçu l'email ? Vérifiez vos spams ou{" "}
+                  <button 
+                    onClick={() => setRegistrationSuccess(false)} 
+                    className="text-primary hover:underline"
+                  >
+                    réessayez
+                  </button>
+                </p>
+                <Link href="/login">
+                  <Button variant="outline" className="mt-4" data-testid="button-go-login">
+                    Retour à la connexion
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
           <Card>
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Créer un compte</CardTitle>
@@ -286,6 +324,7 @@ export default function Register() {
               </div>
             </CardContent>
           </Card>
+          )}
         </div>
       </main>
     </div>
