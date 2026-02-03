@@ -216,12 +216,12 @@ export default function Home() {
                   <div className="h-full w-full rounded-xl bg-card border flex items-center justify-center">
                     <div className="text-center p-8">
                       <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                        <Sparkles className="h-8 w-8 text-primary" />
+                        <Rocket className="h-8 w-8 text-primary" />
                       </div>
-                      <h3 className="text-xl font-semibold mb-2">Intelligence Artificielle</h3>
+                      <h3 className="text-xl font-semibold mb-2">Suivi de Projet en Temps Réel</h3>
                       <p className="text-muted-foreground text-sm">
-                        Intégrez des chatbots, de l'analyse prédictive et de l'automatisation 
-                        intelligente dans vos projets web.
+                        Accédez à votre espace client pour suivre l'avancement de votre projet, 
+                        échanger directement avec moi et valider chaque étape de développement.
                       </p>
                     </div>
                   </div>
