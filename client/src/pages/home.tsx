@@ -18,6 +18,7 @@ import {
 
 import heroBg from "@/assets/images/hero-bg.jpg";
 import featuresBg from "@/assets/images/features-bg.jpg";
+import projectTracking from "@/assets/images/project-tracking.png";
 
 export default function Home() {
   const { user } = useAuth();
@@ -212,19 +213,17 @@ export default function Home() {
               </div>
               
               <div className="relative">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-8">
-                  <div className="h-full w-full rounded-xl bg-card border flex items-center justify-center">
-                    <div className="text-center p-8">
-                      <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                        <Rocket className="h-8 w-8 text-primary" />
-                      </div>
-                      <h3 className="text-xl font-semibold mb-2">Suivi de Projet en Temps Réel</h3>
-                      <p className="text-muted-foreground text-sm">
-                        Accédez à votre espace client pour suivre l'avancement de votre projet, 
-                        échanger directement avec moi et valider chaque étape de développement.
-                      </p>
-                    </div>
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-4">
+                  <div className="h-full w-full rounded-xl overflow-hidden border bg-card">
+                    <img 
+                      src={projectTracking} 
+                      alt="Suivi de projet en temps réel" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
+                </div>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-card border rounded-lg px-4 py-2 shadow-lg">
+                  <p className="text-sm font-medium text-center">Suivi de Projet en Temps Réel</p>
                 </div>
               </div>
             </div>
