@@ -123,8 +123,8 @@ export default function Home() {
                 <span className="text-sm font-medium">Innovation Web & Intelligence Artificielle</span>
               </div>
               
-              <div className="flex items-center justify-center gap-4 mb-8">
-                <img src={logo} alt="Innov Studio" className="h-24 w-auto rounded-xl" />
+              <div className="flex items-center justify-center gap-6 mb-8">
+                <img src={logo} alt="Innov Studio" className="h-48 w-auto rounded-2xl" />
                 <span className="text-3xl md:text-4xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">
                   Innov Studio
                 </span>
