@@ -12,8 +12,7 @@ import { useAuth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { loginSchema, type LoginData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import logo from "@/assets/images/logo.png";
+import { Code2, ArrowLeft, Loader2 } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -62,7 +61,10 @@ export default function Login() {
         <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logo} alt="Innov Studio" className="h-14 w-auto" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary">
+                <Code2 className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold">Innov Studio</span>
             </div>
           </Link>
           <ThemeToggle />

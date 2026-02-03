@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
+  Code2, 
   LogOut, 
   User, 
   Building2, 
@@ -20,7 +21,6 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import logo from "@/assets/images/logo.png";
 import type { User as UserType } from "@shared/schema";
 
 export default function Dashboard() {
@@ -80,7 +80,10 @@ export default function Dashboard() {
         <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logo} alt="Innov Studio" className="h-14 w-auto" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary">
+                <Code2 className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold">Innov Studio</span>
             </div>
           </Link>
           <div className="flex items-center gap-4">
