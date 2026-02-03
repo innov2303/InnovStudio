@@ -251,7 +251,7 @@ export default function Home() {
                 Prêt à lancer votre projet ?
               </h2>
               <p className="text-muted-foreground mb-8">
-                Contactez-moi pour discuter de vos besoins et obtenir un devis personnalisé.
+                Contactez-moi dès maintenant pour déposer les premières bases de votre projet et concrétiser vos idées.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button size="lg" className="gap-2" data-testid="button-contact">
