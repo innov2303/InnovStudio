@@ -275,7 +275,7 @@ export default function Home() {
               <span className="font-semibold">Innov Studio</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 Innov Studio. Tous droits réservés.
+              © 2026 Innov Studio. Tous droits réservés.
             </p>
           </div>
         </div>
