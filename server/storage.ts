@@ -22,8 +22,11 @@ export interface IStorage {
   updateProjectStatus(id: string, status: string): Promise<Project | undefined>;
   // Features
   createFeature(projectId: string, feature: InsertFeature): Promise<ProjectFeature>;
+  getFeature(id: string): Promise<ProjectFeature | undefined>;
   getFeaturesByProject(projectId: string): Promise<ProjectFeature[]>;
+  updateFeature(id: string, updates: { name?: string; description?: string }): Promise<ProjectFeature | undefined>;
   updateFeatureStatus(id: string, status: string, adminNotes?: string): Promise<ProjectFeature | undefined>;
+  deleteFeature(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -153,8 +156,22 @@ export class DatabaseStorage implements IStorage {
     return newFeature;
   }
 
+  async getFeature(id: string): Promise<ProjectFeature | undefined> {
+    const [feature] = await db.select().from(projectFeatures).where(eq(projectFeatures.id, id));
+    return feature;
+  }
+
   async getFeaturesByProject(projectId: string): Promise<ProjectFeature[]> {
     return db.select().from(projectFeatures).where(eq(projectFeatures.projectId, projectId)).orderBy(desc(projectFeatures.createdAt));
+  }
+
+  async updateFeature(id: string, updates: { name?: string; description?: string }): Promise<ProjectFeature | undefined> {
+    const [feature] = await db
+      .update(projectFeatures)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(projectFeatures.id, id))
+      .returning();
+    return feature;
   }
 
   async updateFeatureStatus(id: string, status: string, adminNotes?: string): Promise<ProjectFeature | undefined> {
@@ -164,6 +181,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(projectFeatures.id, id))
       .returning();
     return feature;
+  }
+
+  async deleteFeature(id: string): Promise<boolean> {
+    const result = await db.delete(projectFeatures).where(eq(projectFeatures.id, id));
+    return true;
   }
 }
 

@@ -41,7 +41,11 @@ import {
   ChevronUp,
   Zap,
   AlertCircle,
-  MessageSquare
+  MessageSquare,
+  Pencil,
+  Trash2,
+  X,
+  Check
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
@@ -58,6 +62,7 @@ export default function Dashboard() {
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
   const [showFeatureForm, setShowFeatureForm] = useState<string | null>(null);
+  const [editingFeature, setEditingFeature] = useState<{ id: string; name: string; description: string } | null>(null);
 
   const toggleProjectCollapse = (projectId: string) => {
     setCollapsedProjects(prev => {
@@ -211,6 +216,49 @@ export default function Dashboard() {
       toast({
         title: "Erreur",
         description: error.message || "Erreur lors de la mise à jour",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateFeatureMutation = useMutation({
+    mutationFn: async ({ featureId, name, description }: { featureId: string; name: string; description?: string }) => {
+      const response = await apiRequest("PATCH", `/api/features/${featureId}`, { name, description });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Fonctionnalité modifiée",
+        description: "Les modifications ont été enregistrées.",
+      });
+      setEditingFeature(null);
+      refetchFeatures();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la modification",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteFeatureMutation = useMutation({
+    mutationFn: async (featureId: string) => {
+      const response = await apiRequest("DELETE", `/api/features/${featureId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Fonctionnalité supprimée",
+        description: "La fonctionnalité a été supprimée.",
+      });
+      refetchFeatures();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la suppression",
         variant: "destructive",
       });
     },
@@ -966,9 +1014,54 @@ export default function Dashboard() {
                                   >
                                     <div className="flex items-start justify-between gap-3">
                                       <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm">{feature.title}</p>
-                                        {feature.description && (
-                                          <p className="text-xs text-muted-foreground mt-1">{feature.description}</p>
+                                        {editingFeature?.id === feature.id ? (
+                                          <div className="space-y-2">
+                                            <Input
+                                              value={editingFeature.name}
+                                              onChange={(e) => setEditingFeature({ ...editingFeature, name: e.target.value })}
+                                              placeholder="Nom de la fonctionnalité"
+                                              data-testid={`input-edit-feature-name-${feature.id}`}
+                                            />
+                                            <Input
+                                              value={editingFeature.description}
+                                              onChange={(e) => setEditingFeature({ ...editingFeature, description: e.target.value })}
+                                              placeholder="Description (optionnel)"
+                                              data-testid={`input-edit-feature-desc-${feature.id}`}
+                                            />
+                                            <div className="flex gap-2">
+                                              <Button
+                                                size="sm"
+                                                onClick={() => updateFeatureMutation.mutate({
+                                                  featureId: feature.id,
+                                                  name: editingFeature.name,
+                                                  description: editingFeature.description || undefined
+                                                })}
+                                                disabled={!editingFeature.name.trim() || updateFeatureMutation.isPending}
+                                                data-testid={`button-save-feature-${feature.id}`}
+                                              >
+                                                {updateFeatureMutation.isPending ? (
+                                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                  <Check className="h-4 w-4" />
+                                                )}
+                                              </Button>
+                                              <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setEditingFeature(null)}
+                                                data-testid={`button-cancel-edit-feature-${feature.id}`}
+                                              >
+                                                <X className="h-4 w-4" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <p className="font-medium text-sm">{feature.title}</p>
+                                            {feature.description && (
+                                              <p className="text-xs text-muted-foreground mt-1">{feature.description}</p>
+                                            )}
+                                          </>
                                         )}
                                         {feature.adminNotes && (
                                           <div className="flex items-start gap-2 mt-2 p-2 rounded bg-muted/50">
@@ -977,41 +1070,74 @@ export default function Dashboard() {
                                           </div>
                                         )}
                                       </div>
-                                      {user.role === "admin" ? (
-                                        <Select 
-                                          value={feature.status} 
-                                          onValueChange={(status) => updateFeatureStatusMutation.mutate({ featureId: feature.id, status })}
-                                        >
-                                          <SelectTrigger className="w-[130px]" data-testid={`select-feature-status-${feature.id}`}>
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value="pending">En attente</SelectItem>
-                                            <SelectItem value="in_progress">En cours</SelectItem>
-                                            <SelectItem value="completed">Terminé</SelectItem>
-                                            <SelectItem value="blocked">Bloqué</SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                      ) : (
-                                        <Badge variant={
-                                          feature.status === "pending" ? "secondary" :
-                                          feature.status === "in_progress" ? "default" :
-                                          feature.status === "completed" ? "outline" : "destructive"
-                                        }>
-                                          {feature.status === "pending" && (
-                                            <><Circle className="h-2 w-2 mr-1" /> En attente</>
-                                          )}
-                                          {feature.status === "in_progress" && (
-                                            <><Loader2 className="h-2 w-2 mr-1 animate-spin" /> En cours</>
-                                          )}
-                                          {feature.status === "completed" && (
-                                            <><CheckCircle2 className="h-2 w-2 mr-1" /> Terminé</>
-                                          )}
-                                          {feature.status === "blocked" && (
-                                            <><AlertCircle className="h-2 w-2 mr-1" /> Bloqué</>
-                                          )}
-                                        </Badge>
-                                      )}
+                                      <div className="flex items-center gap-2">
+                                        {feature.status === "pending" && user.role !== "admin" && !editingFeature && (
+                                          <>
+                                            <Button
+                                              size="icon"
+                                              variant="ghost"
+                                              className="h-8 w-8"
+                                              onClick={() => setEditingFeature({
+                                                id: feature.id,
+                                                name: feature.title,
+                                                description: feature.description || ""
+                                              })}
+                                              data-testid={`button-edit-feature-${feature.id}`}
+                                            >
+                                              <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                              size="icon"
+                                              variant="ghost"
+                                              className="h-8 w-8 text-destructive hover:text-destructive"
+                                              onClick={() => deleteFeatureMutation.mutate(feature.id)}
+                                              disabled={deleteFeatureMutation.isPending}
+                                              data-testid={`button-delete-feature-${feature.id}`}
+                                            >
+                                              {deleteFeatureMutation.isPending ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                              ) : (
+                                                <Trash2 className="h-4 w-4" />
+                                              )}
+                                            </Button>
+                                          </>
+                                        )}
+                                        {user.role === "admin" ? (
+                                          <Select 
+                                            value={feature.status} 
+                                            onValueChange={(status) => updateFeatureStatusMutation.mutate({ featureId: feature.id, status })}
+                                          >
+                                            <SelectTrigger className="w-[130px]" data-testid={`select-feature-status-${feature.id}`}>
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="pending">En attente</SelectItem>
+                                              <SelectItem value="in_progress">En cours</SelectItem>
+                                              <SelectItem value="completed">Terminé</SelectItem>
+                                              <SelectItem value="blocked">Bloqué</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        ) : (
+                                          <Badge variant={
+                                            feature.status === "pending" ? "secondary" :
+                                            feature.status === "in_progress" ? "default" :
+                                            feature.status === "completed" ? "outline" : "destructive"
+                                          }>
+                                            {feature.status === "pending" && (
+                                              <><Circle className="h-2 w-2 mr-1" /> En attente</>
+                                            )}
+                                            {feature.status === "in_progress" && (
+                                              <><Loader2 className="h-2 w-2 mr-1 animate-spin" /> En cours</>
+                                            )}
+                                            {feature.status === "completed" && (
+                                              <><CheckCircle2 className="h-2 w-2 mr-1" /> Terminé</>
+                                            )}
+                                            {feature.status === "blocked" && (
+                                              <><AlertCircle className="h-2 w-2 mr-1" /> Bloqué</>
+                                            )}
+                                          </Badge>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 ))}

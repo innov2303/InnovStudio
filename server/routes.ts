@@ -434,5 +434,72 @@ export async function registerRoutes(
     }
   });
 
+  // Update feature (only if pending and user is project owner)
+  app.patch("/api/features/:id", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const featureId = req.params.id as string;
+      const feature = await storage.getFeature(featureId);
+      if (!feature) {
+        return res.status(404).json({ message: "Fonctionnalité non trouvée" });
+      }
+
+      // Check if feature is still pending
+      if (feature.status !== "pending") {
+        return res.status(400).json({ message: "Cette fonctionnalité est déjà en cours de traitement" });
+      }
+
+      // Check if user owns the project
+      const project = await storage.getProject(feature.projectId);
+      if (!project || project.userId !== currentUser.id) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const { name, description } = req.body;
+      const updatedFeature = await storage.updateFeature(featureId, { name, description });
+      res.json(updatedFeature);
+    } catch (error) {
+      console.error("Update feature error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Delete feature (only if pending and user is project owner)
+  app.delete("/api/features/:id", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const featureId = req.params.id as string;
+      const feature = await storage.getFeature(featureId);
+      if (!feature) {
+        return res.status(404).json({ message: "Fonctionnalité non trouvée" });
+      }
+
+      // Check if feature is still pending
+      if (feature.status !== "pending") {
+        return res.status(400).json({ message: "Cette fonctionnalité est déjà en cours de traitement" });
+      }
+
+      // Check if user owns the project
+      const project = await storage.getProject(feature.projectId);
+      if (!project || project.userId !== currentUser.id) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      await storage.deleteFeature(featureId);
+      res.json({ message: "Fonctionnalité supprimée" });
+    } catch (error) {
+      console.error("Delete feature error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   return httpServer;
 }

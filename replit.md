@@ -12,6 +12,9 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - **Mode sombre/clair** : Toggle disponible sur toutes les pages
 - **Système de projets** : Demandes de projet avec suivi d'état visuel (graphique de progression avec 5 étapes)
 - **Suivi des fonctionnalités** : Les clients déposent des fonctionnalités, l'admin gère les statuts (pending, in_progress, completed, blocked)
+- **Gestion des fonctionnalités** : Les clients peuvent modifier ou supprimer leurs fonctionnalités tant qu'elles sont en attente
+- **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
+- **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
 
 ## Tech Stack
 - **Frontend** : React + Vite + TypeScript + Tailwind CSS + shadcn/ui
@@ -64,6 +67,10 @@ shared/
 - `POST /api/projects/:projectId/features` - Ajouter une fonctionnalité (owner only)
 - `GET /api/projects/:projectId/features` - Liste fonctionnalités d'un projet
 - `PATCH /api/features/:id/status` - Mettre à jour statut fonctionnalité (admin only)
+- `PATCH /api/features/:id` - Modifier fonctionnalité (owner only, si pending)
+- `DELETE /api/features/:id` - Supprimer fonctionnalité (owner only, si pending)
+- `GET /api/auth/verify-email` - Vérifier email avec token
+- `POST /api/auth/resend-verification` - Renvoyer email de vérification
 
 ## Environment Variables
 - `DATABASE_URL` - URL PostgreSQL
