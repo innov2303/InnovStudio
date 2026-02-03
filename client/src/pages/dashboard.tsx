@@ -33,7 +33,10 @@ import {
   ChevronRight,
   Home,
   Plus,
-  Clock
+  Clock,
+  CheckCircle2,
+  Circle,
+  XCircle
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData } from "@shared/schema";
 import { createProjectSchema } from "@shared/schema";
@@ -648,9 +651,84 @@ export default function Dashboard() {
                           </Badge>
                         )}
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="space-y-4">
                         <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
-                        <div className="flex items-center justify-between mt-3">
+                        
+                        {/* Progress tracker */}
+                        {project.status !== "cancelled" && (
+                          <div className="pt-2">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-medium">Progression</span>
+                              <span className="text-xs text-muted-foreground">
+                                {project.status === "pending" && "0%"}
+                                {project.status === "in_review" && "25%"}
+                                {project.status === "approved" && "50%"}
+                                {project.status === "in_progress" && "75%"}
+                                {project.status === "completed" && "100%"}
+                              </span>
+                            </div>
+                            <div className="relative">
+                              {/* Progress bar background */}
+                              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
+                                  style={{ 
+                                    width: project.status === "pending" ? "0%" :
+                                           project.status === "in_review" ? "25%" :
+                                           project.status === "approved" ? "50%" :
+                                           project.status === "in_progress" ? "75%" : "100%"
+                                  }}
+                                />
+                              </div>
+                              {/* Step indicators */}
+                              <div className="flex justify-between mt-3">
+                                {[
+                                  { key: "pending", label: "Déposé" },
+                                  { key: "in_review", label: "Étude" },
+                                  { key: "approved", label: "Approuvé" },
+                                  { key: "in_progress", label: "En cours" },
+                                  { key: "completed", label: "Terminé" }
+                                ].map((step, index) => {
+                                  const statusOrder = ["pending", "in_review", "approved", "in_progress", "completed"];
+                                  const currentIndex = statusOrder.indexOf(project.status);
+                                  const isCompleted = index < currentIndex;
+                                  const isCurrent = index === currentIndex;
+                                  
+                                  return (
+                                    <div key={step.key} className="flex flex-col items-center gap-1">
+                                      <div className={`flex items-center justify-center w-6 h-6 rounded-full transition-all ${
+                                        isCompleted 
+                                          ? "bg-primary text-primary-foreground" 
+                                          : isCurrent 
+                                            ? "bg-primary/20 text-primary border-2 border-primary" 
+                                            : "bg-muted text-muted-foreground"
+                                      }`}>
+                                        {isCompleted ? (
+                                          <CheckCircle2 className="h-4 w-4" />
+                                        ) : (
+                                          <span className="text-xs font-medium">{index + 1}</span>
+                                        )}
+                                      </div>
+                                      <span className={`text-[10px] ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
+                                        {step.label}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Cancelled status */}
+                        {project.status === "cancelled" && (
+                          <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive">
+                            <XCircle className="h-4 w-4" />
+                            <span className="text-sm font-medium">Projet annulé</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2 border-t">
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Clock className="h-3 w-3" />
                             <span>Créé le {new Date(project.createdAt!).toLocaleDateString('fr-FR')}</span>
