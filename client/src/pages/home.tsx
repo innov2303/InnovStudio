@@ -71,7 +71,7 @@ export default function Home() {
         <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logo} alt="Innov Studio" className="h-10 w-auto mix-blend-multiply dark:mix-blend-screen" />
+              <img src={logo} alt="Innov Studio" className="h-10 w-auto dark:mix-blend-lighten" style={{ mixBlendMode: 'lighten' }} />
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
@@ -267,7 +267,7 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="Innov Studio" className="h-8 w-auto mix-blend-multiply dark:mix-blend-screen" />
+              <img src={logo} alt="Innov Studio" className="h-8 w-auto dark:mix-blend-lighten" style={{ mixBlendMode: 'lighten' }} />
             </div>
             <p className="text-sm text-muted-foreground">
               © 2026 Innov Studio. Tous droits réservés.
