@@ -62,6 +62,11 @@ export default function Home() {
       title: "Déploiement Rapide",
       description: "De l'idée à la mise en ligne en un temps record"
     },
+    {
+      icon: Code2,
+      title: "Technologies Modernes",
+      description: "React, TypeScript, Node.js, Python, PostgreSQL et les frameworks les plus récents"
+    },
   ];
 
   return (
