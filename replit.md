@@ -4,12 +4,14 @@
 Site vitrine pour un studio de production web spécialisé dans les applications entreprise et les sites vitrines avec intégration IA. Le site comprend un système d'authentification locale avec gestion des utilisateurs.
 
 ## Features
-- **Page d'accueil moderne** : Hero section, services (Sites Vitrines, Applications Web, Intégration IA, Design UI/UX), avantages
+- **Page d'accueil moderne** : Hero section, services (Sites Vitrines, Applications Web, Intégration IA, Design UI/UX), avantages, Technologies Modernes
 - **Authentification locale** : Login/Register avec sessions PostgreSQL
 - **Compte admin par défaut** : username "admin", password "admin" (changement obligatoire à la première connexion)
 - **Inscription utilisateurs** : Prénom, Nom, Entreprise, Adresse, Adresse de facturation (checkbox "identique")
 - **Dashboard** : Profil utilisateur, panneau admin pour voir tous les utilisateurs
 - **Mode sombre/clair** : Toggle disponible sur toutes les pages
+- **Système de projets** : Demandes de projet avec suivi d'état visuel (graphique de progression avec 5 étapes)
+- **Suivi des fonctionnalités** : Les clients déposent des fonctionnalités, l'admin gère les statuts (pending, in_progress, completed, blocked)
 
 ## Tech Stack
 - **Frontend** : React + Vite + TypeScript + Tailwind CSS + shadcn/ui
@@ -56,6 +58,12 @@ shared/
 - `POST /api/auth/logout` - Déconnexion
 - `POST /api/auth/change-password` - Changer mot de passe
 - `GET /api/users` - Liste utilisateurs (admin only)
+- `POST /api/projects` - Créer un projet
+- `GET /api/projects` - Liste des projets (user: ses projets, admin: tous)
+- `PATCH /api/projects/:id/status` - Mettre à jour statut projet (admin only)
+- `POST /api/projects/:projectId/features` - Ajouter une fonctionnalité (owner only)
+- `GET /api/projects/:projectId/features` - Liste fonctionnalités d'un projet
+- `PATCH /api/features/:id/status` - Mettre à jour statut fonctionnalité (admin only)
 
 ## Environment Variables
 - `DATABASE_URL` - URL PostgreSQL
