@@ -727,7 +727,27 @@ export default function Dashboard() {
                         )}
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+                        {/* Project details */}
+                        <div className="space-y-3">
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Description du besoin</h4>
+                            <p className="text-sm">{project.description}</p>
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Grandes fonctionnalités</h4>
+                            <p className="text-sm whitespace-pre-line">{project.features}</p>
+                          </div>
+                          <div className="flex flex-wrap gap-4 text-sm">
+                            <div>
+                              <span className="text-muted-foreground">Secteur : </span>
+                              <span className="font-medium">{project.businessSector}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Style : </span>
+                              <span className="font-medium">{project.designStyle}</span>
+                            </div>
+                          </div>
+                        </div>
                         
                         {/* Progress tracker */}
                         {project.status !== "cancelled" && (
