@@ -51,6 +51,7 @@ export default function Login() {
   });
 
   const onSubmit = (data: LoginData) => {
+    if (loginMutation.isPending) return;
     setError(null);
     loginMutation.mutate(data);
   };
