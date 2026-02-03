@@ -277,7 +277,7 @@ export default function Home() {
               <img src={logo} alt="Innov Studio" className="h-16 w-auto rounded-lg" />
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2026 Innov Studio. Tous droits réservés.
+              © 2026 Innov Studio By Cyril Allegret. Tous droits réservés.
             </p>
           </div>
         </div>
