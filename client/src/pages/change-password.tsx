@@ -14,7 +14,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { changePasswordSchema, type ChangePasswordData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
-import logo from "@/assets/images/logo.png";
 
 export default function ChangePassword() {
   const [, setLocation] = useLocation();
@@ -79,9 +78,9 @@ export default function ChangePassword() {
       <header className="border-b">
         <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-2">
           <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logo} alt="Innov Studio" className="h-20 w-auto rounded-lg" />
-            </div>
+            <span className="text-xl md:text-2xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent cursor-pointer">
+              Innov Studio
+            </span>
           </Link>
           <ThemeToggle />
         </div>

@@ -70,9 +70,9 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-2">
           <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logo} alt="Innov Studio" className="h-20 w-auto rounded-lg" />
-            </div>
+            <span className="text-xl md:text-2xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent cursor-pointer">
+              Innov Studio
+            </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">

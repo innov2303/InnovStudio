@@ -20,7 +20,6 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import logo from "@/assets/images/logo.png";
 import type { User as UserType } from "@shared/schema";
 
 export default function Dashboard() {
@@ -79,9 +78,9 @@ export default function Dashboard() {
       <header className="border-b">
         <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-2">
           <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logo} alt="Innov Studio" className="h-20 w-auto rounded-lg" />
-            </div>
+            <span className="text-xl md:text-2xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent cursor-pointer">
+              Innov Studio
+            </span>
           </Link>
           <div className="flex items-center gap-4">
             <ThemeToggle />
