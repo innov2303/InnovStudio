@@ -771,6 +771,37 @@ export default function Dashboard() {
                                 {project.businessSector} • {project.designStyle}
                               </CardDescription>
                             )}
+                            {/* Mini progress bar when collapsed */}
+                            {collapsedProjects.has(project.id) && project.status !== "cancelled" && (
+                              <div className="mt-2 flex items-center gap-3">
+                                <div className="flex-1 max-w-[200px]">
+                                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                    <div 
+                                      className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
+                                      style={{ 
+                                        width: project.status === "pending" ? "0%" :
+                                               project.status === "in_review" ? "25%" :
+                                               project.status === "approved" ? "50%" :
+                                               project.status === "in_progress" ? "75%" : "100%"
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {project.status === "pending" && "Déposé"}
+                                  {project.status === "in_review" && "Étude"}
+                                  {project.status === "approved" && "Approuvé"}
+                                  {project.status === "in_progress" && "En cours"}
+                                  {project.status === "completed" && "Terminé"}
+                                </span>
+                              </div>
+                            )}
+                            {collapsedProjects.has(project.id) && project.status === "cancelled" && (
+                              <div className="mt-2 flex items-center gap-2 text-destructive">
+                                <XCircle className="h-3 w-3" />
+                                <span className="text-xs font-medium">Annulé</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div onClick={(e) => e.stopPropagation()}>
