@@ -212,18 +212,27 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="relative">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-4">
-                  <div className="h-full w-full rounded-xl overflow-hidden border bg-card">
-                    <img 
-                      src={projectTracking} 
-                      alt="Suivi de projet en temps réel" 
-                      className="w-full h-full object-cover"
-                    />
+              <div className="relative space-y-6">
+                <div className="rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-8">
+                  <div className="rounded-xl bg-card border p-8">
+                    <div className="text-center">
+                      <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                        <Rocket className="h-8 w-8 text-primary" />
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">Suivi de Projet en Temps Réel</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Accédez à votre espace client pour suivre l'avancement de votre projet, 
+                        échanger directement avec moi et valider chaque étape de développement.
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-card border rounded-lg px-4 py-2 shadow-lg">
-                  <p className="text-sm font-medium text-center">Suivi de Projet en Temps Réel</p>
+                <div className="rounded-xl overflow-hidden border bg-card shadow-lg">
+                  <img 
+                    src={projectTracking} 
+                    alt="Exemple de suivi de projet" 
+                    className="w-full h-auto object-cover"
+                  />
                 </div>
               </div>
             </div>
