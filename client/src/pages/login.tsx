@@ -62,7 +62,7 @@ export default function Login() {
         <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logo} alt="Innov Studio" className="h-10 w-auto" />
+              <img src={logo} alt="Innov Studio" className="h-14 w-auto" />
             </div>
           </Link>
           <ThemeToggle />
