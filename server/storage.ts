@@ -98,6 +98,7 @@ export class DatabaseStorage implements IStorage {
     if (!existingAdmin) {
       await this.createUser({
         username: "admin",
+        email: "admin@innov-studio.fr",
         password: "admin",
         firstName: "Admin",
         lastName: "Studio",
@@ -109,6 +110,10 @@ export class DatabaseStorage implements IStorage {
         mustChangePassword: true,
       });
       console.log("Admin user created with default credentials");
+    } else if (!existingAdmin.email) {
+      // Update existing admin with email if not set
+      await db.update(users).set({ email: "admin@innov-studio.fr" }).where(eq(users.username, "admin"));
+      console.log("Admin email updated");
     }
   }
 
