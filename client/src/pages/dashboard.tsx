@@ -56,7 +56,24 @@ export default function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
+  const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
   const [showFeatureForm, setShowFeatureForm] = useState<string | null>(null);
+
+  const toggleProjectCollapse = (projectId: string) => {
+    setCollapsedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId)) {
+        newSet.delete(projectId);
+      } else {
+        newSet.add(projectId);
+        // Also collapse the features section if open
+        if (expandedProject === projectId) {
+          setExpandedProject(null);
+        }
+      }
+      return newSet;
+    });
+  };
   const [newFeatureTitle, setNewFeatureTitle] = useState("");
   const [newFeatureDescription, setNewFeatureDescription] = useState("");
 
@@ -687,45 +704,62 @@ export default function Dashboard() {
                 <div className="grid gap-4">
                   {projects.map((project) => (
                     <Card key={project.id} data-testid={`card-project-${project.id}`}>
-                      <CardHeader className="flex flex-row items-start justify-between space-y-0 gap-4">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{project.title}</CardTitle>
-                          <CardDescription className="mt-1">
-                            {project.businessSector} • {project.designStyle}
-                          </CardDescription>
+                      <CardHeader 
+                        className="flex flex-row items-start justify-between space-y-0 gap-4 cursor-pointer hover-elevate"
+                        onClick={() => toggleProjectCollapse(project.id)}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="flex-shrink-0">
+                            {collapsedProjects.has(project.id) ? (
+                              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-lg">{project.title}</CardTitle>
+                            {!collapsedProjects.has(project.id) && (
+                              <CardDescription className="mt-1">
+                                {project.businessSector} • {project.designStyle}
+                              </CardDescription>
+                            )}
+                          </div>
                         </div>
-                        {user.role === "admin" ? (
-                          <Select 
-                            value={project.status} 
-                            onValueChange={(status) => updateStatusMutation.mutate({ projectId: project.id, status })}
-                          >
-                            <SelectTrigger className="w-[160px]" data-testid={`select-status-${project.id}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">En attente</SelectItem>
-                              <SelectItem value="in_review">En cours d'étude</SelectItem>
-                              <SelectItem value="approved">Approuvé</SelectItem>
-                              <SelectItem value="in_progress">En cours</SelectItem>
-                              <SelectItem value="completed">Terminé</SelectItem>
-                              <SelectItem value="cancelled">Annulé</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Badge variant={
-                            project.status === "pending" ? "secondary" :
-                            project.status === "in_progress" ? "default" :
-                            project.status === "completed" ? "outline" : "secondary"
-                          }>
-                            {project.status === "pending" && "En attente"}
-                            {project.status === "in_review" && "En cours d'étude"}
-                            {project.status === "approved" && "Approuvé"}
-                            {project.status === "in_progress" && "En cours"}
-                            {project.status === "completed" && "Terminé"}
-                            {project.status === "cancelled" && "Annulé"}
-                          </Badge>
-                        )}
+                        <div onClick={(e) => e.stopPropagation()}>
+                          {user.role === "admin" ? (
+                            <Select 
+                              value={project.status} 
+                              onValueChange={(status) => updateStatusMutation.mutate({ projectId: project.id, status })}
+                            >
+                              <SelectTrigger className="w-[160px]" data-testid={`select-status-${project.id}`}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">En attente</SelectItem>
+                                <SelectItem value="in_review">En cours d'étude</SelectItem>
+                                <SelectItem value="approved">Approuvé</SelectItem>
+                                <SelectItem value="in_progress">En cours</SelectItem>
+                                <SelectItem value="completed">Terminé</SelectItem>
+                                <SelectItem value="cancelled">Annulé</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge variant={
+                              project.status === "pending" ? "secondary" :
+                              project.status === "in_progress" ? "default" :
+                              project.status === "completed" ? "outline" : "secondary"
+                            }>
+                              {project.status === "pending" && "En attente"}
+                              {project.status === "in_review" && "En cours d'étude"}
+                              {project.status === "approved" && "Approuvé"}
+                              {project.status === "in_progress" && "En cours"}
+                              {project.status === "completed" && "Terminé"}
+                              {project.status === "cancelled" && "Annulé"}
+                            </Badge>
+                          )}
+                        </div>
                       </CardHeader>
+                      {!collapsedProjects.has(project.id) && (
                       <CardContent className="space-y-4">
                         {/* Project details */}
                         <div className="space-y-3">
@@ -990,6 +1024,7 @@ export default function Dashboard() {
                           </div>
                         )}
                       </CardContent>
+                      )}
                     </Card>
                   ))}
                 </div>
