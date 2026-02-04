@@ -1583,48 +1583,6 @@ export default function Dashboard() {
                                               data-testid={`input-quote-title-${doc.id}`}
                                             />
                                           </div>
-                                          <div className="space-y-1">
-                                            <Label className="text-xs">Total calculé</Label>
-                                            <div className="h-9 px-3 py-2 bg-muted rounded-md text-sm font-semibold text-primary">
-                                              {(() => {
-                                                const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
-                                                const total = items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0);
-                                                return `${total.toFixed(2)} €`;
-                                              })()}
-                                            </div>
-                                            <input 
-                                              type="hidden" 
-                                              name="quoteAmount" 
-                                              value={(() => {
-                                                const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
-                                                return items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0).toFixed(2);
-                                              })()}
-                                            />
-                                          </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                          <div className="space-y-1">
-                                            <Label htmlFor={`quoteDepositPercent-${doc.id}`} className="text-xs">Acompte (%)</Label>
-                                            <Input
-                                              id={`quoteDepositPercent-${doc.id}`}
-                                              name="quoteDepositPercent"
-                                              type="number"
-                                              min="0"
-                                              max="100"
-                                              defaultValue={doc.quoteDepositPercent || ""}
-                                              placeholder="Ex: 30"
-                                              data-testid={`input-quote-deposit-percent-${doc.id}`}
-                                            />
-                                          </div>
-                                          <div className="flex items-end text-xs text-muted-foreground pb-2">
-                                            {doc.quoteDepositPercent && (
-                                              <span>Acompte: {(() => {
-                                                const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
-                                                const total = items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0);
-                                                return (total * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2);
-                                              })()} €</span>
-                                            )}
-                                          </div>
                                         </div>
                                         <div className="space-y-2">
                                           <div className="flex items-center justify-between">
@@ -1693,10 +1651,57 @@ export default function Dashboard() {
                                               <p className="text-xs text-muted-foreground italic">Aucune prestation ajoutée</p>
                                             )}
                                           </div>
+                                          {/* Total and deposit summary */}
+                                          {(lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : [])).length > 0 && (
+                                            <div className="border rounded-md overflow-hidden mt-2">
+                                              <div className="flex justify-between items-center p-2 bg-muted/50">
+                                                <span className="font-semibold text-sm">Total HT</span>
+                                                <span className="font-bold text-primary">
+                                                  {(() => {
+                                                    const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                    return items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0).toFixed(2);
+                                                  })()} €
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between items-center p-2 gap-2">
+                                                <div className="flex items-center gap-2">
+                                                  <span className="text-sm">Acompte</span>
+                                                  <Input
+                                                    id={`quoteDepositPercent-${doc.id}`}
+                                                    name="quoteDepositPercent"
+                                                    type="number"
+                                                    min="0"
+                                                    max="100"
+                                                    defaultValue={doc.quoteDepositPercent || ""}
+                                                    placeholder="%"
+                                                    className="w-16 h-7 text-center"
+                                                    data-testid={`input-quote-deposit-percent-${doc.id}`}
+                                                  />
+                                                  <span className="text-sm">%</span>
+                                                </div>
+                                                <span className="text-sm font-medium">
+                                                  {(() => {
+                                                    const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                    const total = items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0);
+                                                    const percent = parseFloat(doc.quoteDepositPercent || "0") || 0;
+                                                    return (total * percent / 100).toFixed(2);
+                                                  })()} €
+                                                </span>
+                                              </div>
+                                            </div>
+                                          )}
                                           <input 
                                             type="hidden" 
                                             name="quoteLineItems" 
                                             value={JSON.stringify(lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []))}
+                                          />
+                                          <input 
+                                            type="hidden" 
+                                            name="quoteAmount" 
+                                            value={(() => {
+                                              const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                              return items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0).toFixed(2);
+                                            })()}
                                           />
                                         </div>
                                         <div className="space-y-1">
