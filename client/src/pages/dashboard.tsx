@@ -1653,7 +1653,9 @@ export default function Dashboard() {
                                     )}
 
                                     {/* Quote preview for admin */}
-                                    {user.role === "admin" && previewQuote === doc.id && doc.quoteTitle && (
+                                    {user.role === "admin" && previewQuote === doc.id && doc.quoteTitle && (() => {
+                                      const projectOwner = allUsers?.find(u => u.id === project.userId);
+                                      return (
                                       <div className="mt-4 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-background">
                                         <div className="flex items-center justify-between mb-4">
                                           <h5 className="text-sm font-semibold text-primary">Prévisualisation du devis</h5>
@@ -1667,10 +1669,32 @@ export default function Dashboard() {
                                           </Button>
                                         </div>
                                         <div className="space-y-4">
+                                          {/* Addresses section */}
+                                          <div className="grid grid-cols-2 gap-4 pb-3 border-b">
+                                            <div>
+                                              <p className="text-xs text-muted-foreground mb-1">ÉMETTEUR</p>
+                                              <p className="text-sm font-semibold">{user.company}</p>
+                                              <p className="text-xs text-muted-foreground whitespace-pre-wrap">{user.address}</p>
+                                            </div>
+                                            <div>
+                                              <p className="text-xs text-muted-foreground mb-1">CLIENT</p>
+                                              {projectOwner ? (
+                                                <>
+                                                  <p className="text-sm font-semibold">{projectOwner.company}</p>
+                                                  <p className="text-xs text-muted-foreground">{projectOwner.firstName} {projectOwner.lastName}</p>
+                                                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{projectOwner.billingAddress || projectOwner.address}</p>
+                                                </>
+                                              ) : (
+                                                <p className="text-xs text-muted-foreground">Information non disponible</p>
+                                              )}
+                                            </div>
+                                          </div>
+
                                           <div className="flex items-center justify-between border-b pb-3">
                                             <div>
                                               <p className="text-xs text-muted-foreground">DEVIS</p>
                                               <p className="text-lg font-bold">{doc.quoteTitle}</p>
+                                              <p className="text-xs text-muted-foreground">Projet: {project.title}</p>
                                             </div>
                                             <div className="text-right">
                                               <p className="text-xs text-muted-foreground">MONTANT</p>
@@ -1694,7 +1718,8 @@ export default function Dashboard() {
                                           )}
                                         </div>
                                       </div>
-                                    )}
+                                      );
+                                    })()}
 
                                     {/* Show quote details for client when not draft */}
                                     {user.role !== "admin" && doc.status !== "draft" && doc.quoteDescription && (
