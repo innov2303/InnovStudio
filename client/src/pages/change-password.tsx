@@ -143,20 +143,18 @@ export default function ChangePassword() {
                               data-testid="input-current-password"
                               {...field}
                             />
-                            <Button
+                            <button
                               type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                               data-testid="button-toggle-current-password"
                             >
                               {showCurrentPassword ? (
-                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                <EyeOff className="h-4 w-4" />
                               ) : (
-                                <Eye className="h-4 w-4 text-muted-foreground" />
+                                <Eye className="h-4 w-4" />
                               )}
-                            </Button>
+                            </button>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -179,20 +177,18 @@ export default function ChangePassword() {
                               data-testid="input-new-password"
                               {...field}
                             />
-                            <Button
+                            <button
                               type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                               onClick={() => setShowNewPassword(!showNewPassword)}
                               data-testid="button-toggle-new-password"
                             >
                               {showNewPassword ? (
-                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                <EyeOff className="h-4 w-4" />
                               ) : (
-                                <Eye className="h-4 w-4 text-muted-foreground" />
+                                <Eye className="h-4 w-4" />
                               )}
-                            </Button>
+                            </button>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -215,20 +211,18 @@ export default function ChangePassword() {
                               data-testid="input-confirm-password"
                               {...field}
                             />
-                            <Button
+                            <button
                               type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                               data-testid="button-toggle-confirm-password"
                             >
                               {showConfirmPassword ? (
-                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                <EyeOff className="h-4 w-4" />
                               ) : (
-                                <Eye className="h-4 w-4 text-muted-foreground" />
+                                <Eye className="h-4 w-4" />
                               )}
-                            </Button>
+                            </button>
                           </div>
                         </FormControl>
                         <FormMessage />

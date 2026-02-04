@@ -184,20 +184,18 @@ export default function ResetPassword() {
                                 data-testid="input-new-password"
                                 {...field}
                               />
-                              <Button
+                              <button
                                 type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                 onClick={() => setShowPassword(!showPassword)}
                                 data-testid="button-toggle-password"
                               >
                                 {showPassword ? (
-                                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                  <EyeOff className="h-4 w-4" />
                                 ) : (
-                                  <Eye className="h-4 w-4 text-muted-foreground" />
+                                  <Eye className="h-4 w-4" />
                                 )}
-                              </Button>
+                              </button>
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -220,20 +218,18 @@ export default function ResetPassword() {
                                 data-testid="input-confirm-password"
                                 {...field}
                               />
-                              <Button
+                              <button
                                 type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                 data-testid="button-toggle-confirm-password"
                               >
                                 {showConfirmPassword ? (
-                                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                  <EyeOff className="h-4 w-4" />
                                 ) : (
-                                  <Eye className="h-4 w-4 text-muted-foreground" />
+                                  <Eye className="h-4 w-4" />
                                 )}
-                              </Button>
+                              </button>
                             </div>
                           </FormControl>
                           <FormMessage />
