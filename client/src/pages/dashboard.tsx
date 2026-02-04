@@ -23,6 +23,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -1722,12 +1728,12 @@ export default function Dashboard() {
                                             type="button"
                                             size="sm"
                                             variant="outline"
-                                            onClick={() => setPreviewQuote(previewQuote === doc.id ? null : doc.id)}
+                                            onClick={() => setPreviewQuote(doc.id)}
                                             disabled={!doc.quoteTitle || !doc.quoteAmount}
                                             data-testid={`button-preview-quote-${doc.id}`}
                                           >
                                             <Eye className="h-4 w-4 mr-2" />
-                                            {previewQuote === doc.id ? "Fermer" : "Prévisualiser"}
+                                            Prévisualiser
                                           </Button>
                                           <Button
                                             type="submit"
@@ -1759,111 +1765,105 @@ export default function Dashboard() {
                                       </form>
                                     )}
 
-                                    {/* Quote preview for admin */}
-                                    {user.role === "admin" && previewQuote === doc.id && doc.quoteTitle && (() => {
-                                      const projectOwner = allUsers?.find(u => u.id === project.userId);
-                                      return (
-                                      <div className="mt-4 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-background">
-                                        <div className="flex items-center justify-between mb-4">
-                                          <h5 className="text-sm font-semibold text-primary">Prévisualisation du devis</h5>
-                                          <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            onClick={() => setPreviewQuote(null)}
-                                            data-testid={`button-close-preview-${doc.id}`}
-                                          >
-                                            <XIcon className="h-4 w-4" />
-                                          </Button>
-                                        </div>
-                                        <div className="space-y-4">
-                                          {/* Addresses section */}
-                                          <div className="grid grid-cols-2 gap-4 pb-3 border-b">
-                                            <div>
-                                              <p className="text-xs text-muted-foreground mb-1">ÉMETTEUR</p>
-                                              <p className="text-sm font-semibold">{user.company}</p>
-                                              <p className="text-xs text-muted-foreground whitespace-pre-wrap">{user.address}</p>
-                                            </div>
-                                            <div>
-                                              <p className="text-xs text-muted-foreground mb-1">CLIENT</p>
-                                              {projectOwner ? (
-                                                <>
-                                                  <p className="text-sm font-semibold">{projectOwner.company}</p>
-                                                  <p className="text-xs text-muted-foreground">{projectOwner.firstName} {projectOwner.lastName}</p>
-                                                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{projectOwner.billingAddress || projectOwner.address}</p>
-                                                </>
-                                              ) : (
-                                                <p className="text-xs text-muted-foreground">Information non disponible</p>
-                                              )}
-                                            </div>
-                                          </div>
+                                    {/* Quote preview dialog for admin */}
+                                    <Dialog open={previewQuote === doc.id} onOpenChange={(open) => !open && setPreviewQuote(null)}>
+                                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid={`dialog-preview-${doc.id}`}>
+                                        <DialogHeader>
+                                          <DialogTitle className="text-primary">Prévisualisation du devis</DialogTitle>
+                                        </DialogHeader>
+                                        {(() => {
+                                          const projectOwner = allUsers?.find(u => u.id === project.userId);
+                                          return (
+                                            <div className="space-y-4">
+                                              {/* Addresses section */}
+                                              <div className="grid grid-cols-2 gap-4 pb-3 border-b">
+                                                <div>
+                                                  <p className="text-xs text-muted-foreground mb-1">ÉMETTEUR</p>
+                                                  <p className="text-sm font-semibold">{user.company}</p>
+                                                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{user.address}</p>
+                                                </div>
+                                                <div>
+                                                  <p className="text-xs text-muted-foreground mb-1">CLIENT</p>
+                                                  {projectOwner ? (
+                                                    <>
+                                                      <p className="text-sm font-semibold">{projectOwner.company}</p>
+                                                      <p className="text-xs text-muted-foreground">{projectOwner.firstName} {projectOwner.lastName}</p>
+                                                      <p className="text-xs text-muted-foreground whitespace-pre-wrap">{projectOwner.billingAddress || projectOwner.address}</p>
+                                                    </>
+                                                  ) : (
+                                                    <p className="text-xs text-muted-foreground">Information non disponible</p>
+                                                  )}
+                                                </div>
+                                              </div>
 
-                                          <div className="flex items-center justify-between border-b pb-3">
-                                            <div>
-                                              <p className="text-xs text-muted-foreground">DEVIS</p>
-                                              <p className="text-lg font-bold">{doc.quoteTitle}</p>
-                                              <p className="text-xs text-muted-foreground">Projet: {project.title}</p>
-                                            </div>
-                                            <div className="text-right">
-                                              <p className="text-xs text-muted-foreground">MONTANT</p>
-                                              <p className="text-2xl font-bold text-primary">{doc.quoteAmount} €</p>
-                                              {doc.quoteDepositPercent && (
-                                                <p className="text-sm text-muted-foreground">
-                                                  Acompte ({doc.quoteDepositPercent}%): {(parseFloat(doc.quoteAmount || "0") * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2)} €
-                                                </p>
+                                              <div className="flex items-center justify-between border-b pb-3">
+                                                <div>
+                                                  <p className="text-xs text-muted-foreground">DEVIS</p>
+                                                  <p className="text-lg font-bold">{doc.quoteTitle}</p>
+                                                  <p className="text-xs text-muted-foreground">Projet: {project.title}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                  <p className="text-xs text-muted-foreground">MONTANT</p>
+                                                  <p className="text-2xl font-bold text-primary">{doc.quoteAmount} €</p>
+                                                  {doc.quoteDepositPercent && (
+                                                    <p className="text-sm text-muted-foreground">
+                                                      Acompte ({doc.quoteDepositPercent}%): {(parseFloat(doc.quoteAmount || "0") * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2)} €
+                                                    </p>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              {/* Line items */}
+                                              {doc.quoteLineItems && (() => {
+                                                try {
+                                                  const items = JSON.parse(doc.quoteLineItems) as Array<{ description: string; amount: string }>;
+                                                  if (items.length > 0) {
+                                                    return (
+                                                      <div>
+                                                        <p className="text-xs text-muted-foreground mb-2">PRESTATIONS</p>
+                                                        <div className="border rounded-md overflow-hidden">
+                                                          <div className="flex bg-muted/50 p-2 text-xs font-medium">
+                                                            <span className="flex-1">Description</span>
+                                                            <span className="w-24 text-right">Montant</span>
+                                                          </div>
+                                                          {items.map((item, idx) => (
+                                                            <div key={idx} className={`flex p-2 text-sm ${idx % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
+                                                              <span className="flex-1">{item.description}</span>
+                                                              <span className="w-24 text-right">{item.amount} €</span>
+                                                            </div>
+                                                          ))}
+                                                          <div className="flex p-2 bg-muted/50 font-semibold">
+                                                            <span className="flex-1">Total HT</span>
+                                                            <span className="w-24 text-right text-primary">{doc.quoteAmount} €</span>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  }
+                                                } catch (e) {
+                                                  return null;
+                                                }
+                                                return null;
+                                              })()}
+                                              {doc.quoteDescription && (
+                                                <div>
+                                                  <p className="text-xs text-muted-foreground mb-1">NOTES</p>
+                                                  <p className="text-sm whitespace-pre-wrap">{doc.quoteDescription}</p>
+                                                </div>
+                                              )}
+                                              <div className="flex justify-between text-xs text-muted-foreground pt-3 border-t">
+                                                <span>Validité: {doc.quoteValidityDays || "30"} jours</span>
+                                                <span>Date: {new Date().toLocaleDateString("fr-FR")}</span>
+                                              </div>
+                                              {doc.quoteNotes && (
+                                                <div className="mt-2 p-2 bg-yellow-500/10 rounded text-xs">
+                                                  <span className="font-semibold">Notes internes (non visible client):</span> {doc.quoteNotes}
+                                                </div>
                                               )}
                                             </div>
-                                          </div>
-                                          {/* Line items */}
-                                          {doc.quoteLineItems && (() => {
-                                            try {
-                                              const items = JSON.parse(doc.quoteLineItems) as Array<{ description: string; amount: string }>;
-                                              if (items.length > 0) {
-                                                return (
-                                                  <div>
-                                                    <p className="text-xs text-muted-foreground mb-2">PRESTATIONS</p>
-                                                    <div className="border rounded-md overflow-hidden">
-                                                      <div className="flex bg-muted/50 p-2 text-xs font-medium">
-                                                        <span className="flex-1">Description</span>
-                                                        <span className="w-24 text-right">Montant</span>
-                                                      </div>
-                                                      {items.map((item, idx) => (
-                                                        <div key={idx} className={`flex p-2 text-sm ${idx % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
-                                                          <span className="flex-1">{item.description}</span>
-                                                          <span className="w-24 text-right">{item.amount} €</span>
-                                                        </div>
-                                                      ))}
-                                                      <div className="flex p-2 bg-muted/50 font-semibold">
-                                                        <span className="flex-1">Total HT</span>
-                                                        <span className="w-24 text-right text-primary">{doc.quoteAmount} €</span>
-                                                      </div>
-                                                    </div>
-                                                  </div>
-                                                );
-                                              }
-                                            } catch (e) {
-                                              return null;
-                                            }
-                                            return null;
-                                          })()}
-                                          {doc.quoteDescription && (
-                                            <div>
-                                              <p className="text-xs text-muted-foreground mb-1">NOTES</p>
-                                              <p className="text-sm whitespace-pre-wrap">{doc.quoteDescription}</p>
-                                            </div>
-                                          )}
-                                          <div className="flex justify-between text-xs text-muted-foreground pt-3 border-t">
-                                            <span>Validité: {doc.quoteValidityDays || "30"} jours</span>
-                                            <span>Date: {new Date().toLocaleDateString("fr-FR")}</span>
-                                          </div>
-                                          {doc.quoteNotes && (
-                                            <div className="mt-2 p-2 bg-yellow-500/10 rounded text-xs">
-                                              <span className="font-semibold">Notes internes (non visible client):</span> {doc.quoteNotes}
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                      );
-                                    })()}
+                                          );
+                                        })()}
+                                      </DialogContent>
+                                    </Dialog>
 
                                     {/* Show quote details for client when not draft */}
                                     {user.role !== "admin" && doc.status !== "draft" && doc.quoteDescription && (
