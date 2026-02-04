@@ -1,4 +1,4 @@
-import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -30,6 +30,13 @@ export interface IStorage {
   updateFeature(id: string, updates: { name?: string; description?: string }): Promise<ProjectFeature | undefined>;
   updateFeatureStatus(id: string, status: string, adminNotes?: string): Promise<ProjectFeature | undefined>;
   deleteFeature(id: string): Promise<boolean>;
+  // Documents
+  createDocument(projectId: string, type: string): Promise<ProjectDocument>;
+  getDocument(id: string): Promise<ProjectDocument | undefined>;
+  getDocumentsByProject(projectId: string): Promise<ProjectDocument[]>;
+  updateDocumentStatus(id: string, status: string): Promise<ProjectDocument | undefined>;
+  updateDocumentFile(id: string, fileName: string): Promise<ProjectDocument | undefined>;
+  updateDocumentSignedFile(id: string, signedFileName: string): Promise<ProjectDocument | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -213,6 +220,54 @@ export class DatabaseStorage implements IStorage {
   async deleteFeature(id: string): Promise<boolean> {
     const result = await db.delete(projectFeatures).where(eq(projectFeatures.id, id));
     return true;
+  }
+
+  // Document operations
+  async createDocument(projectId: string, type: string): Promise<ProjectDocument> {
+    const [doc] = await db
+      .insert(projectDocuments)
+      .values({
+        projectId,
+        type,
+      })
+      .returning();
+    return doc;
+  }
+
+  async getDocument(id: string): Promise<ProjectDocument | undefined> {
+    const [doc] = await db.select().from(projectDocuments).where(eq(projectDocuments.id, id));
+    return doc;
+  }
+
+  async getDocumentsByProject(projectId: string): Promise<ProjectDocument[]> {
+    return db.select().from(projectDocuments).where(eq(projectDocuments.projectId, projectId)).orderBy(desc(projectDocuments.createdAt));
+  }
+
+  async updateDocumentStatus(id: string, status: string): Promise<ProjectDocument | undefined> {
+    const [doc] = await db
+      .update(projectDocuments)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(projectDocuments.id, id))
+      .returning();
+    return doc;
+  }
+
+  async updateDocumentFile(id: string, fileName: string): Promise<ProjectDocument | undefined> {
+    const [doc] = await db
+      .update(projectDocuments)
+      .set({ fileName, updatedAt: new Date() })
+      .where(eq(projectDocuments.id, id))
+      .returning();
+    return doc;
+  }
+
+  async updateDocumentSignedFile(id: string, signedFileName: string): Promise<ProjectDocument | undefined> {
+    const [doc] = await db
+      .update(projectDocuments)
+      .set({ signedFileName, status: "signed", updatedAt: new Date() })
+      .where(eq(projectDocuments.id, id))
+      .returning();
+    return doc;
   }
 }
 
