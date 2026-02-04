@@ -66,7 +66,7 @@ import {
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send } from "lucide-react";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
 
@@ -120,7 +120,7 @@ export default function Dashboard() {
     enabled: user?.role === "admin",
   });
 
-  const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
+  const { data: projects, isLoading: projectsLoading, refetch: refetchProjects } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
     enabled: !!user,
   });
@@ -373,18 +373,15 @@ export default function Dashboard() {
     },
   });
 
-  const uploadQuoteMutation = useMutation({
-    mutationFn: async ({ documentId, file }: { documentId: string; file: File }) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch(`/api/documents/${documentId}/upload-quote`, {
+  const sendQuoteMutation = useMutation({
+    mutationFn: async (documentId: string) => {
+      const response = await fetch(`/api/documents/${documentId}/send`, {
         method: "POST",
-        body: formData,
         credentials: "include",
       });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Erreur lors de l'upload");
+        throw new Error(error.message || "Erreur lors de l'envoi");
       }
       return response.json();
     },
@@ -394,6 +391,7 @@ export default function Dashboard() {
         description: "Le devis a été envoyé au client pour signature.",
       });
       refetchDocuments();
+      refetchProjects();
     },
     onError: (error: Error) => {
       toast({
@@ -970,9 +968,10 @@ export default function Dashboard() {
                                       className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
                                       style={{ 
                                         width: project.status === "pending" ? "0%" :
-                                               project.status === "in_review" ? "25%" :
-                                               project.status === "approved" ? "50%" :
-                                               project.status === "in_progress" ? "75%" : "100%"
+                                               project.status === "in_review" ? "20%" :
+                                               project.status === "awaiting_signature" ? "40%" :
+                                               project.status === "approved" ? "60%" :
+                                               project.status === "in_progress" ? "80%" : "100%"
                                       }}
                                     />
                                   </div>
@@ -980,6 +979,7 @@ export default function Dashboard() {
                                 <span className="text-xs text-muted-foreground">
                                   {project.status === "pending" && "Déposé"}
                                   {project.status === "in_review" && "Étude"}
+                                  {project.status === "awaiting_signature" && "Signature"}
                                   {project.status === "approved" && "Approuvé"}
                                   {project.status === "in_progress" && "En cours"}
                                   {project.status === "completed" && "Terminé"}
@@ -1006,6 +1006,7 @@ export default function Dashboard() {
                               <SelectContent>
                                 <SelectItem value="pending">En attente</SelectItem>
                                 <SelectItem value="in_review">En cours d'étude</SelectItem>
+                                <SelectItem value="awaiting_signature">En attente de signature</SelectItem>
                                 <SelectItem value="approved">Approuvé</SelectItem>
                                 <SelectItem value="in_progress">En cours</SelectItem>
                                 <SelectItem value="completed">Terminé</SelectItem>
@@ -1015,11 +1016,13 @@ export default function Dashboard() {
                           ) : (
                             <Badge variant={
                               project.status === "pending" ? "secondary" :
+                              project.status === "awaiting_signature" ? "default" :
                               project.status === "in_progress" ? "default" :
                               project.status === "completed" ? "outline" : "secondary"
                             }>
                               {project.status === "pending" && "En attente"}
                               {project.status === "in_review" && "En cours d'étude"}
+                              {project.status === "awaiting_signature" && "En attente de signature"}
                               {project.status === "approved" && "Approuvé"}
                               {project.status === "in_progress" && "En cours"}
                               {project.status === "completed" && "Terminé"}
@@ -1059,9 +1062,10 @@ export default function Dashboard() {
                               <span className="text-xs font-medium">Progression</span>
                               <span className="text-xs text-muted-foreground">
                                 {project.status === "pending" && "0%"}
-                                {project.status === "in_review" && "25%"}
-                                {project.status === "approved" && "50%"}
-                                {project.status === "in_progress" && "75%"}
+                                {project.status === "in_review" && "20%"}
+                                {project.status === "awaiting_signature" && "40%"}
+                                {project.status === "approved" && "60%"}
+                                {project.status === "in_progress" && "80%"}
                                 {project.status === "completed" && "100%"}
                               </span>
                             </div>
@@ -1072,9 +1076,10 @@ export default function Dashboard() {
                                   className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
                                   style={{ 
                                     width: project.status === "pending" ? "0%" :
-                                           project.status === "in_review" ? "25%" :
-                                           project.status === "approved" ? "50%" :
-                                           project.status === "in_progress" ? "75%" : "100%"
+                                           project.status === "in_review" ? "20%" :
+                                           project.status === "awaiting_signature" ? "40%" :
+                                           project.status === "approved" ? "60%" :
+                                           project.status === "in_progress" ? "80%" : "100%"
                                   }}
                                 />
                               </div>
@@ -1083,11 +1088,12 @@ export default function Dashboard() {
                                 {[
                                   { key: "pending", label: "Déposé" },
                                   { key: "in_review", label: "Étude" },
+                                  { key: "awaiting_signature", label: "Signature" },
                                   { key: "approved", label: "Approuvé" },
                                   { key: "in_progress", label: "En cours" },
                                   { key: "completed", label: "Terminé" }
                                 ].map((step, index) => {
-                                  const statusOrder = ["pending", "in_review", "approved", "in_progress", "completed"];
+                                  const statusOrder = ["pending", "in_review", "awaiting_signature", "approved", "in_progress", "completed"];
                                   const currentIndex = statusOrder.indexOf(project.status);
                                   const isCompleted = index < currentIndex;
                                   const isCurrent = index === currentIndex;
@@ -1450,29 +1456,17 @@ export default function Dashboard() {
                                         {/* Admin actions */}
                                         {user.role === "admin" && doc.status === "draft" && (
                                           <div className="flex items-center gap-2">
-                                            <input
-                                              type="file"
-                                              id={`upload-quote-${doc.id}`}
-                                              className="hidden"
-                                              accept=".pdf,.doc,.docx"
-                                              onChange={(e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) {
-                                                  uploadQuoteMutation.mutate({ documentId: doc.id, file });
-                                                }
-                                              }}
-                                            />
                                             <Button
                                               size="sm"
                                               variant="default"
-                                              onClick={() => document.getElementById(`upload-quote-${doc.id}`)?.click()}
-                                              disabled={uploadQuoteMutation.isPending || !doc.quoteTitle || !doc.quoteAmount}
-                                              data-testid={`button-upload-quote-${doc.id}`}
+                                              onClick={() => sendQuoteMutation.mutate(doc.id)}
+                                              disabled={sendQuoteMutation.isPending || !doc.quoteTitle || !doc.quoteAmount}
+                                              data-testid={`button-send-quote-${doc.id}`}
                                             >
-                                              {uploadQuoteMutation.isPending ? (
+                                              {sendQuoteMutation.isPending ? (
                                                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                               ) : (
-                                                <Upload className="h-4 w-4 mr-2" />
+                                                <Send className="h-4 w-4 mr-2" />
                                               )}
                                               Envoyer le devis
                                             </Button>

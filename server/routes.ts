@@ -691,8 +691,8 @@ export async function registerRoutes(
     }
   });
 
-  // Admin uploads/generates the quote file
-  app.post("/api/documents/:id/upload-quote", requireAuth, upload.single("file"), async (req, res) => {
+  // Admin sends the quote (changes document and project status)
+  app.post("/api/documents/:id/send", requireAuth, async (req, res) => {
     try {
       const currentUser = await storage.getUser(req.session.userId!);
       if (!currentUser || currentUser.role !== "admin") {
@@ -705,18 +705,20 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Document non trouvé" });
       }
 
-      if (!req.file) {
-        return res.status(400).json({ message: "Fichier requis" });
+      if (!document.quoteTitle || !document.quoteAmount) {
+        return res.status(400).json({ message: "Le devis doit avoir un titre et un montant" });
       }
 
-      // Update document with file and change status to awaiting_signature
-      const updatedDoc = await storage.updateDocumentFile(documentId, req.file.filename);
+      // Update document status to awaiting_signature
       await storage.updateDocumentStatus(documentId, "awaiting_signature");
+      
+      // Update project status to awaiting_signature
+      await storage.updateProjectStatus(document.projectId, "awaiting_signature");
       
       const finalDoc = await storage.getDocument(documentId);
       res.json(finalDoc);
     } catch (error) {
-      console.error("Upload quote error:", error);
+      console.error("Send quote error:", error);
       res.status(500).json({ message: "Erreur serveur" });
     }
   });
