@@ -50,7 +50,7 @@ import {
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon } from "lucide-react";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
 
@@ -288,6 +288,7 @@ export default function Dashboard() {
 
   // Documents state and queries
   const [expandedDocuments, setExpandedDocuments] = useState<string | null>(null);
+  const [previewQuote, setPreviewQuote] = useState<string | null>(null);
 
   const { data: documents, refetch: refetchDocuments } = useQuery<ProjectDocument[]>({
     queryKey: ["/api/projects", expandedDocuments, "documents"],
@@ -1568,7 +1569,18 @@ export default function Dashboard() {
                                             />
                                           </div>
                                         </div>
-                                        <div className="flex justify-end">
+                                        <div className="flex justify-end gap-2">
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setPreviewQuote(previewQuote === doc.id ? null : doc.id)}
+                                            disabled={!doc.quoteTitle || !doc.quoteAmount}
+                                            data-testid={`button-preview-quote-${doc.id}`}
+                                          >
+                                            <Eye className="h-4 w-4 mr-2" />
+                                            {previewQuote === doc.id ? "Fermer" : "Prévisualiser"}
+                                          </Button>
                                           <Button
                                             type="submit"
                                             size="sm"
@@ -1584,6 +1596,50 @@ export default function Dashboard() {
                                           </Button>
                                         </div>
                                       </form>
+                                    )}
+
+                                    {/* Quote preview for admin */}
+                                    {user.role === "admin" && previewQuote === doc.id && doc.quoteTitle && (
+                                      <div className="mt-4 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-background">
+                                        <div className="flex items-center justify-between mb-4">
+                                          <h5 className="text-sm font-semibold text-primary">Prévisualisation du devis</h5>
+                                          <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            onClick={() => setPreviewQuote(null)}
+                                            data-testid={`button-close-preview-${doc.id}`}
+                                          >
+                                            <XIcon className="h-4 w-4" />
+                                          </Button>
+                                        </div>
+                                        <div className="space-y-4">
+                                          <div className="flex items-center justify-between border-b pb-3">
+                                            <div>
+                                              <p className="text-xs text-muted-foreground">DEVIS</p>
+                                              <p className="text-lg font-bold">{doc.quoteTitle}</p>
+                                            </div>
+                                            <div className="text-right">
+                                              <p className="text-xs text-muted-foreground">MONTANT</p>
+                                              <p className="text-2xl font-bold text-primary">{doc.quoteAmount} €</p>
+                                            </div>
+                                          </div>
+                                          {doc.quoteDescription && (
+                                            <div>
+                                              <p className="text-xs text-muted-foreground mb-1">DESCRIPTION</p>
+                                              <p className="text-sm whitespace-pre-wrap">{doc.quoteDescription}</p>
+                                            </div>
+                                          )}
+                                          <div className="flex justify-between text-xs text-muted-foreground pt-3 border-t">
+                                            <span>Validité: {doc.quoteValidityDays || "30"} jours</span>
+                                            <span>Date: {new Date().toLocaleDateString("fr-FR")}</span>
+                                          </div>
+                                          {doc.quoteNotes && (
+                                            <div className="mt-2 p-2 bg-yellow-500/10 rounded text-xs">
+                                              <span className="font-semibold">Notes internes (non visible client):</span> {doc.quoteNotes}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
                                     )}
 
                                     {/* Show quote details for client when not draft */}
