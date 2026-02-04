@@ -315,19 +315,14 @@ export default function Dashboard() {
   });
 
   const createDocumentMutation = useMutation({
-    mutationFn: async ({ projectId, type, defaultDescription }: { projectId: string; type: string; defaultDescription?: string }) => {
-      const response = await apiRequest("POST", `/api/projects/${projectId}/documents`, { 
-        type,
-        quoteDescription: defaultDescription 
-      });
+    mutationFn: async ({ projectId, type }: { projectId: string; type: string }) => {
+      const response = await apiRequest("POST", `/api/projects/${projectId}/documents`, { type });
       return response.json();
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       toast({
-        title: variables.type === "deposit" ? "Acompte créé" : "Devis créé",
-        description: variables.type === "deposit" 
-          ? "L'acompte a été créé et est en attente d'édition."
-          : "Le devis a été créé et est en attente d'édition.",
+        title: "Devis créé",
+        description: "Le devis a été créé et est en attente d'édition.",
       });
       refetchDocuments();
     },
@@ -1392,40 +1387,20 @@ export default function Dashboard() {
                             <div className="flex items-center justify-between">
                               <h4 className="text-sm font-semibold">Documents du projet</h4>
                               {user.role === "admin" && project.status === "in_review" && (
-                                <div className="flex gap-2">
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => createDocumentMutation.mutate({ projectId: project.id, type: "quote" })}
-                                    disabled={createDocumentMutation.isPending}
-                                    data-testid={`button-create-quote-${project.id}`}
-                                  >
-                                    {createDocumentMutation.isPending ? (
-                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    ) : (
-                                      <Plus className="h-4 w-4 mr-2" />
-                                    )}
-                                    Devis
-                                  </Button>
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => createDocumentMutation.mutate({ 
-                                      projectId: project.id, 
-                                      type: "deposit",
-                                      defaultDescription: "Frais initiaux de développement du projet"
-                                    })}
-                                    disabled={createDocumentMutation.isPending}
-                                    data-testid={`button-create-deposit-${project.id}`}
-                                  >
-                                    {createDocumentMutation.isPending ? (
-                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    ) : (
-                                      <Plus className="h-4 w-4 mr-2" />
-                                    )}
-                                    Acompte
-                                  </Button>
-                                </div>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => createDocumentMutation.mutate({ projectId: project.id, type: "quote" })}
+                                  disabled={createDocumentMutation.isPending}
+                                  data-testid={`button-create-quote-${project.id}`}
+                                >
+                                  {createDocumentMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  ) : (
+                                    <Plus className="h-4 w-4 mr-2" />
+                                  )}
+                                  Créer un devis
+                                </Button>
                               )}
                             </div>
 
@@ -1450,7 +1425,7 @@ export default function Dashboard() {
                                         </div>
                                         <div>
                                           <p className="text-sm font-medium">
-                                            {doc.type === "quote" ? "Devis" : doc.type === "deposit" ? "Acompte" : "Document"}
+                                            Devis
                                             {doc.quoteTitle && ` - ${doc.quoteTitle}`}
                                           </p>
                                           <p className="text-xs text-muted-foreground">
@@ -1591,7 +1566,7 @@ export default function Dashboard() {
                                       >
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                           <div className="space-y-1">
-                                            <Label htmlFor={`quoteTitle-${doc.id}`} className="text-xs">Titre {doc.type === "deposit" ? "de l'acompte" : "du devis"} *</Label>
+                                            <Label htmlFor={`quoteTitle-${doc.id}`} className="text-xs">Titre du devis *</Label>
                                             <Input
                                               id={`quoteTitle-${doc.id}`}
                                               name="quoteTitle"
@@ -1614,28 +1589,26 @@ export default function Dashboard() {
                                             />
                                           </div>
                                         </div>
-                                        {doc.type === "quote" && (
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <div className="space-y-1">
-                                              <Label htmlFor={`quoteDepositPercent-${doc.id}`} className="text-xs">Acompte (%)</Label>
-                                              <Input
-                                                id={`quoteDepositPercent-${doc.id}`}
-                                                name="quoteDepositPercent"
-                                                type="number"
-                                                min="0"
-                                                max="100"
-                                                defaultValue={doc.quoteDepositPercent || ""}
-                                                placeholder="Ex: 30"
-                                                data-testid={`input-quote-deposit-percent-${doc.id}`}
-                                              />
-                                            </div>
-                                            <div className="flex items-end text-xs text-muted-foreground pb-2">
-                                              {doc.quoteAmount && doc.quoteDepositPercent && (
-                                                <span>Acompte: {(parseFloat(doc.quoteAmount) * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2)} €</span>
-                                              )}
-                                            </div>
+                                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          <div className="space-y-1">
+                                            <Label htmlFor={`quoteDepositPercent-${doc.id}`} className="text-xs">Acompte (%)</Label>
+                                            <Input
+                                              id={`quoteDepositPercent-${doc.id}`}
+                                              name="quoteDepositPercent"
+                                              type="number"
+                                              min="0"
+                                              max="100"
+                                              defaultValue={doc.quoteDepositPercent || ""}
+                                              placeholder="Ex: 30"
+                                              data-testid={`input-quote-deposit-percent-${doc.id}`}
+                                            />
                                           </div>
-                                        )}
+                                          <div className="flex items-end text-xs text-muted-foreground pb-2">
+                                            {doc.quoteAmount && doc.quoteDepositPercent && (
+                                              <span>Acompte: {(parseFloat(doc.quoteAmount) * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2)} €</span>
+                                            )}
+                                          </div>
+                                        </div>
                                         <div className="space-y-1">
                                           <Label htmlFor={`quoteDescription-${doc.id}`} className="text-xs">Description</Label>
                                           <Textarea
@@ -1705,7 +1678,7 @@ export default function Dashboard() {
                                       return (
                                       <div className="mt-4 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-background">
                                         <div className="flex items-center justify-between mb-4">
-                                          <h5 className="text-sm font-semibold text-primary">Prévisualisation {doc.type === "deposit" ? "de l'acompte" : "du devis"}</h5>
+                                          <h5 className="text-sm font-semibold text-primary">Prévisualisation du devis</h5>
                                           <Button
                                             size="icon"
                                             variant="ghost"
@@ -1739,14 +1712,14 @@ export default function Dashboard() {
 
                                           <div className="flex items-center justify-between border-b pb-3">
                                             <div>
-                                              <p className="text-xs text-muted-foreground">{doc.type === "deposit" ? "ACOMPTE" : "DEVIS"}</p>
+                                              <p className="text-xs text-muted-foreground">DEVIS</p>
                                               <p className="text-lg font-bold">{doc.quoteTitle}</p>
                                               <p className="text-xs text-muted-foreground">Projet: {project.title}</p>
                                             </div>
                                             <div className="text-right">
                                               <p className="text-xs text-muted-foreground">MONTANT</p>
                                               <p className="text-2xl font-bold text-primary">{doc.quoteAmount} €</p>
-                                              {doc.type === "quote" && doc.quoteDepositPercent && (
+                                              {doc.quoteDepositPercent && (
                                                 <p className="text-sm text-muted-foreground">
                                                   Acompte ({doc.quoteDepositPercent}%): {(parseFloat(doc.quoteAmount || "0") * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2)} €
                                                 </p>
