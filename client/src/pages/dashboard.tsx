@@ -309,6 +309,7 @@ export default function Dashboard() {
   const [expandedDocuments, setExpandedDocuments] = useState<string | null>(null);
   const [previewQuote, setPreviewQuote] = useState<string | null>(null);
   const [lineItems, setLineItems] = useState<Record<string, Array<{ description: string; amount: string }>>>({});
+  const [depositPercents, setDepositPercents] = useState<Record<string, string>>({});
 
   const { data: documents, refetch: refetchDocuments } = useQuery<ProjectDocument[]>({
     queryKey: ["/api/projects", expandedDocuments, "documents"],
@@ -1560,6 +1561,7 @@ export default function Dashboard() {
                                           const formData = new FormData(e.currentTarget);
                                           const currentLineItems = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
                                           const totalAmount = currentLineItems.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0).toFixed(2);
+                                          const currentDepositPercent = depositPercents[doc.id] ?? doc.quoteDepositPercent ?? "";
                                           updateQuoteMutation.mutate({
                                             documentId: doc.id,
                                             data: {
@@ -1567,7 +1569,7 @@ export default function Dashboard() {
                                               quoteDescription: formData.get("quoteDescription") as string || undefined,
                                               quoteLineItems: JSON.stringify(currentLineItems),
                                               quoteAmount: totalAmount,
-                                              quoteDepositPercent: formData.get("quoteDepositPercent") as string || undefined,
+                                              quoteDepositPercent: currentDepositPercent || undefined,
                                               quoteValidityDays: formData.get("quoteValidityDays") as string || undefined,
                                               quoteNotes: formData.get("quoteNotes") as string || undefined,
                                             },
@@ -1676,7 +1678,8 @@ export default function Dashboard() {
                                                     type="number"
                                                     min="0"
                                                     max="100"
-                                                    defaultValue={doc.quoteDepositPercent || ""}
+                                                    value={depositPercents[doc.id] ?? doc.quoteDepositPercent ?? ""}
+                                                    onChange={(e) => setDepositPercents({ ...depositPercents, [doc.id]: e.target.value })}
                                                     placeholder="%"
                                                     className="w-16 h-7 text-center"
                                                     data-testid={`input-quote-deposit-percent-${doc.id}`}
@@ -1687,7 +1690,7 @@ export default function Dashboard() {
                                                   {(() => {
                                                     const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
                                                     const total = items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0);
-                                                    const percent = parseFloat(doc.quoteDepositPercent || "0") || 0;
+                                                    const percent = parseFloat(depositPercents[doc.id] ?? doc.quoteDepositPercent ?? "0") || 0;
                                                     return (total * percent / 100).toFixed(2);
                                                   })()} €
                                                 </span>
