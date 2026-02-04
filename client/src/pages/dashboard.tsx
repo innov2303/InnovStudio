@@ -13,6 +13,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -285,6 +295,9 @@ export default function Dashboard() {
       description: newFeatureDescription.trim() || undefined 
     });
   };
+
+  // Delete confirmation state
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "feature" | "document"; id: string; title: string } | null>(null);
 
   // Documents state and queries
   const [expandedDocuments, setExpandedDocuments] = useState<string | null>(null);
@@ -1290,11 +1303,7 @@ export default function Dashboard() {
                                               size="icon"
                                               variant="ghost"
                                               className="h-8 w-8 text-destructive hover:text-destructive"
-                                              onClick={() => {
-                                                if (confirm("Êtes-vous sûr de vouloir supprimer cette fonctionnalité ?")) {
-                                                  deleteFeatureMutation.mutate(feature.id);
-                                                }
-                                              }}
+                                              onClick={() => setDeleteConfirm({ type: "feature", id: feature.id, title: feature.title })}
                                               disabled={deleteFeatureMutation.isPending}
                                               data-testid={`button-delete-feature-${feature.id}`}
                                             >
@@ -1462,11 +1471,7 @@ export default function Dashboard() {
                                             <Button
                                               size="sm"
                                               variant="destructive"
-                                              onClick={() => {
-                                                if (confirm("Êtes-vous sûr de vouloir supprimer ce devis ?")) {
-                                                  deleteDocumentMutation.mutate(doc.id);
-                                                }
-                                              }}
+                                              onClick={() => setDeleteConfirm({ type: "document", id: doc.id, title: doc.quoteTitle || "ce devis" })}
                                               disabled={deleteDocumentMutation.isPending}
                                               data-testid={`button-delete-quote-${doc.id}`}
                                             >
@@ -1851,6 +1856,40 @@ export default function Dashboard() {
           )}
         </main>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteConfirm?.type === "feature" 
+                ? `Êtes-vous sûr de vouloir supprimer la fonctionnalité "${deleteConfirm?.title}" ? Cette action est irréversible.`
+                : `Êtes-vous sûr de vouloir supprimer le devis "${deleteConfirm?.title}" ? Cette action est irréversible.`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete">Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteConfirm) {
+                  if (deleteConfirm.type === "feature") {
+                    deleteFeatureMutation.mutate(deleteConfirm.id);
+                  } else {
+                    deleteDocumentMutation.mutate(deleteConfirm.id);
+                  }
+                  setDeleteConfirm(null);
+                }
+              }}
+              data-testid="button-confirm-delete"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
