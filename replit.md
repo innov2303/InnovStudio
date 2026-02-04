@@ -9,11 +9,12 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - **Compte admin par défaut** : username "admin", password "admin" (changement obligatoire à la première connexion)
 - **Inscription utilisateurs** : Prénom, Nom, Entreprise, Adresse, Adresse de facturation (checkbox "identique")
 - **Dashboard** : Profil utilisateur, panneau admin pour voir tous les utilisateurs
-- **Mode sombre/clair** : Toggle disponible sur toutes les pages
+- **Mode sombre/clair** : Toggle disponible uniquement après connexion (dashboard), pages publiques toujours en mode sombre
 - **Système de projets** : Demandes de projet avec suivi d'état visuel (graphique de progression avec 5 étapes)
 - **Suivi des fonctionnalités** : Les clients déposent des fonctionnalités, l'admin gère les statuts (pending, in_progress, completed, blocked)
 - **Gestion des fonctionnalités** : Les clients peuvent modifier ou supprimer leurs fonctionnalités tant qu'elles sont en attente
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
+- **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
 
 ## Tech Stack
@@ -31,7 +32,9 @@ client/
 │   │   ├── login.tsx         # Login form
 │   │   ├── register.tsx      # Registration form
 │   │   ├── dashboard.tsx     # User dashboard + admin panel
-│   │   └── change-password.tsx
+│   │   ├── change-password.tsx
+│   │   ├── forgot-password.tsx
+│   │   └── reset-password.tsx
 │   ├── components/
 │   │   └── theme-toggle.tsx  # Dark/light mode toggle
 │   ├── lib/
@@ -53,6 +56,8 @@ shared/
 - `/register` - Inscription
 - `/dashboard` - Dashboard utilisateur
 - `/change-password` - Changement de mot de passe
+- `/forgot-password` - Demande de réinitialisation mot de passe
+- `/reset-password` - Nouveau mot de passe (avec token)
 
 ## API Endpoints
 - `POST /api/auth/login` - Connexion
@@ -71,6 +76,8 @@ shared/
 - `DELETE /api/features/:id` - Supprimer fonctionnalité (owner only, si pending)
 - `GET /api/auth/verify-email` - Vérifier email avec token
 - `POST /api/auth/resend-verification` - Renvoyer email de vérification
+- `POST /api/auth/forgot-password` - Demander réinitialisation mot de passe
+- `POST /api/auth/reset-password` - Réinitialiser mot de passe avec token
 
 ## Environment Variables
 - `DATABASE_URL` - URL PostgreSQL

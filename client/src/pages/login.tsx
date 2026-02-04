@@ -170,7 +170,15 @@ export default function Login() {
                 </form>
               </Form>
 
-              <div className="mt-6 text-center text-sm">
+              <div className="mt-4 text-center">
+                <Link href="/forgot-password">
+                  <span className="text-sm text-muted-foreground hover:text-primary hover:underline cursor-pointer" data-testid="link-forgot-password">
+                    Mot de passe oublié ?
+                  </span>
+                </Link>
+              </div>
+
+              <div className="mt-4 text-center text-sm">
                 <span className="text-muted-foreground">Pas encore de compte ? </span>
                 <Link href="/register">
                   <span className="text-primary hover:underline cursor-pointer" data-testid="link-register">
