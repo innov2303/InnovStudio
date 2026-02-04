@@ -37,7 +37,7 @@ export interface IStorage {
   updateDocumentStatus(id: string, status: string): Promise<ProjectDocument | undefined>;
   updateDocumentFile(id: string, fileName: string): Promise<ProjectDocument | undefined>;
   updateDocumentSignedFile(id: string, signedFileName: string): Promise<ProjectDocument | undefined>;
-  updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteAmount?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined>;
+  updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteAmount?: string; quoteDepositPercent?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined>;
   deleteDocument(id: string): Promise<boolean>;
 }
 
@@ -273,7 +273,7 @@ export class DatabaseStorage implements IStorage {
     return doc;
   }
 
-  async updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteAmount?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined> {
+  async updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteAmount?: string; quoteDepositPercent?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined> {
     const [doc] = await db
       .update(projectDocuments)
       .set({ ...details, updatedAt: new Date() })

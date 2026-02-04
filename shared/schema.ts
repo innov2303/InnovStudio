@@ -158,6 +158,7 @@ export const projectDocuments = pgTable("project_documents", {
   quoteTitle: text("quote_title"),
   quoteDescription: text("quote_description"),
   quoteAmount: text("quote_amount"),
+  quoteDepositPercent: text("quote_deposit_percent"),
   quoteValidityDays: text("quote_validity_days"),
   quoteNotes: text("quote_notes"),
   // Files
@@ -176,6 +177,7 @@ export const updateQuoteSchema = z.object({
   quoteTitle: z.string().min(1, "Titre requis"),
   quoteDescription: z.string().optional(),
   quoteAmount: z.string().min(1, "Montant requis"),
+  quoteDepositPercent: z.string().optional(),
   quoteValidityDays: z.string().optional(),
   quoteNotes: z.string().optional(),
 });

@@ -1614,6 +1614,28 @@ export default function Dashboard() {
                                             />
                                           </div>
                                         </div>
+                                        {doc.type === "quote" && (
+                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div className="space-y-1">
+                                              <Label htmlFor={`quoteDepositPercent-${doc.id}`} className="text-xs">Acompte (%)</Label>
+                                              <Input
+                                                id={`quoteDepositPercent-${doc.id}`}
+                                                name="quoteDepositPercent"
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                defaultValue={doc.quoteDepositPercent || ""}
+                                                placeholder="Ex: 30"
+                                                data-testid={`input-quote-deposit-percent-${doc.id}`}
+                                              />
+                                            </div>
+                                            <div className="flex items-end text-xs text-muted-foreground pb-2">
+                                              {doc.quoteAmount && doc.quoteDepositPercent && (
+                                                <span>Acompte: {(parseFloat(doc.quoteAmount) * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2)} €</span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
                                         <div className="space-y-1">
                                           <Label htmlFor={`quoteDescription-${doc.id}`} className="text-xs">Description</Label>
                                           <Textarea
@@ -1724,6 +1746,11 @@ export default function Dashboard() {
                                             <div className="text-right">
                                               <p className="text-xs text-muted-foreground">MONTANT</p>
                                               <p className="text-2xl font-bold text-primary">{doc.quoteAmount} €</p>
+                                              {doc.type === "quote" && doc.quoteDepositPercent && (
+                                                <p className="text-sm text-muted-foreground">
+                                                  Acompte ({doc.quoteDepositPercent}%): {(parseFloat(doc.quoteAmount || "0") * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2)} €
+                                                </p>
+                                              )}
                                             </div>
                                           </div>
                                           {doc.quoteDescription && (

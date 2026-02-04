@@ -672,11 +672,12 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Le devis ne peut plus être modifié une fois envoyé" });
       }
 
-      const { quoteTitle, quoteDescription, quoteAmount, quoteValidityDays, quoteNotes } = req.body;
+      const { quoteTitle, quoteDescription, quoteAmount, quoteDepositPercent, quoteValidityDays, quoteNotes } = req.body;
       const updatedDoc = await storage.updateQuoteDetails(documentId, {
         quoteTitle,
         quoteDescription,
         quoteAmount,
+        quoteDepositPercent,
         quoteValidityDays,
         quoteNotes,
       });
