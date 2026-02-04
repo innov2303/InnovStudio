@@ -14,7 +14,8 @@ import {
   Shield,
   Bot,
   ChevronRight,
-  Briefcase
+  Briefcase,
+  LogOut
 } from "lucide-react";
 
 import heroBg from "@/assets/images/hero-bg.jpg";
@@ -23,7 +24,7 @@ import projectTracking from "@/assets/images/project-tracking.png";
 
 export default function Home() {
   useForceDark();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const services = [
     {
@@ -93,12 +94,26 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-2">
             {user ? (
-              <Link href="/dashboard">
-                <Button data-testid="button-dashboard">
-                  Dashboard
-                  <ChevronRight className="ml-1 h-4 w-4" />
+              <>
+                <Link href="/dashboard">
+                  <Button data-testid="button-dashboard">
+                    Dashboard
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  onClick={async () => {
+                    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+                    logout();
+                    window.location.href = "/";
+                  }}
+                  data-testid="button-logout-home"
+                >
+                  <LogOut className="h-4 w-4 mr-1" />
+                  Déconnexion
                 </Button>
-              </Link>
+              </>
             ) : (
               <Link href="/login">
                 <Button data-testid="button-login">
