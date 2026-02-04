@@ -231,6 +231,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         projectId,
         type,
+        status: "draft",
         quoteDescription,
       })
       .returning();
