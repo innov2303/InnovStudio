@@ -654,6 +654,40 @@ export async function registerRoutes(
     }
   });
 
+  // Update quote details (admin only, only when draft)
+  app.patch("/api/documents/:id/quote", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.getDocument(documentId);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      if (document.status !== "draft") {
+        return res.status(400).json({ message: "Le devis ne peut plus être modifié une fois envoyé" });
+      }
+
+      const { quoteTitle, quoteDescription, quoteAmount, quoteValidityDays, quoteNotes } = req.body;
+      const updatedDoc = await storage.updateQuoteDetails(documentId, {
+        quoteTitle,
+        quoteDescription,
+        quoteAmount,
+        quoteValidityDays,
+        quoteNotes,
+      });
+
+      res.json(updatedDoc);
+    } catch (error) {
+      console.error("Update quote details error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Admin uploads/generates the quote file
   app.post("/api/documents/:id/upload-quote", requireAuth, upload.single("file"), async (req, res) => {
     try {
@@ -770,7 +804,7 @@ export async function registerRoutes(
       }
 
       const { status } = req.body;
-      const validStatuses = ["pending_creation", "awaiting_signature", "signed"];
+      const validStatuses = ["draft", "awaiting_signature", "signed"];
       if (!status || !validStatuses.includes(status)) {
         return res.status(400).json({ message: "Statut invalide" });
       }

@@ -37,6 +37,7 @@ export interface IStorage {
   updateDocumentStatus(id: string, status: string): Promise<ProjectDocument | undefined>;
   updateDocumentFile(id: string, fileName: string): Promise<ProjectDocument | undefined>;
   updateDocumentSignedFile(id: string, signedFileName: string): Promise<ProjectDocument | undefined>;
+  updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteAmount?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -265,6 +266,15 @@ export class DatabaseStorage implements IStorage {
     const [doc] = await db
       .update(projectDocuments)
       .set({ signedFileName, status: "signed", updatedAt: new Date() })
+      .where(eq(projectDocuments.id, id))
+      .returning();
+    return doc;
+  }
+
+  async updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteAmount?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined> {
+    const [doc] = await db
+      .update(projectDocuments)
+      .set({ ...details, updatedAt: new Date() })
       .where(eq(projectDocuments.id, id))
       .returning();
     return doc;

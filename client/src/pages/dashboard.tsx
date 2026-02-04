@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth";
@@ -49,7 +50,7 @@ import {
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save } from "lucide-react";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
 
@@ -315,6 +316,36 @@ export default function Dashboard() {
       toast({
         title: "Erreur",
         description: error.message || "Erreur lors de la création",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateQuoteMutation = useMutation({
+    mutationFn: async ({ documentId, data }: { documentId: string; data: { quoteTitle: string; quoteDescription?: string; quoteAmount: string; quoteValidityDays?: string; quoteNotes?: string } }) => {
+      const response = await fetch(`/api/documents/${documentId}/quote`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur lors de la mise à jour");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Devis mis à jour",
+        description: "Les informations du devis ont été enregistrées.",
+      });
+      refetchDocuments();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la mise à jour",
         variant: "destructive",
       });
     },
@@ -1342,28 +1373,32 @@ export default function Dashboard() {
                                     <div className="flex items-start justify-between">
                                       <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded-lg ${
-                                          doc.status === "pending_creation" ? "bg-yellow-500/10" :
+                                          doc.status === "draft" ? "bg-yellow-500/10" :
                                           doc.status === "awaiting_signature" ? "bg-blue-500/10" :
                                           "bg-green-500/10"
                                         }`}>
-                                          {doc.status === "pending_creation" && <FilePenLine className="h-4 w-4 text-yellow-500" />}
+                                          {doc.status === "draft" && <FilePenLine className="h-4 w-4 text-yellow-500" />}
                                           {doc.status === "awaiting_signature" && <FileClock className="h-4 w-4 text-blue-500" />}
                                           {doc.status === "signed" && <FileCheck className="h-4 w-4 text-green-500" />}
                                         </div>
                                         <div>
                                           <p className="text-sm font-medium">
                                             {doc.type === "quote" ? "Devis" : "Facture"}
+                                            {doc.quoteTitle && ` - ${doc.quoteTitle}`}
                                           </p>
                                           <p className="text-xs text-muted-foreground">
-                                            {doc.status === "pending_creation" && "En attente d'édition"}
+                                            {doc.status === "draft" && "Brouillon - En cours d'édition"}
                                             {doc.status === "awaiting_signature" && "En attente de signature"}
                                             {doc.status === "signed" && "Signé"}
                                           </p>
+                                          {doc.quoteAmount && doc.status !== "draft" && (
+                                            <p className="text-sm font-medium mt-1">{doc.quoteAmount} €</p>
+                                          )}
                                         </div>
                                       </div>
                                       <div className="flex items-center gap-2">
                                         {/* Admin actions */}
-                                        {user.role === "admin" && doc.status === "pending_creation" && (
+                                        {user.role === "admin" && doc.status === "draft" && (
                                           <div className="flex items-center gap-2">
                                             <input
                                               type="file"
@@ -1381,7 +1416,7 @@ export default function Dashboard() {
                                               size="sm"
                                               variant="default"
                                               onClick={() => document.getElementById(`upload-quote-${doc.id}`)?.click()}
-                                              disabled={uploadQuoteMutation.isPending}
+                                              disabled={uploadQuoteMutation.isPending || !doc.quoteTitle || !doc.quoteAmount}
                                               data-testid={`button-upload-quote-${doc.id}`}
                                             >
                                               {uploadQuoteMutation.isPending ? (
@@ -1453,6 +1488,113 @@ export default function Dashboard() {
                                         )}
                                       </div>
                                     </div>
+
+                                    {/* Quote editing form for admin - draft status only */}
+                                    {user.role === "admin" && doc.status === "draft" && (
+                                      <form
+                                        className="mt-4 pt-4 border-t space-y-3"
+                                        onSubmit={(e) => {
+                                          e.preventDefault();
+                                          const formData = new FormData(e.currentTarget);
+                                          updateQuoteMutation.mutate({
+                                            documentId: doc.id,
+                                            data: {
+                                              quoteTitle: formData.get("quoteTitle") as string,
+                                              quoteDescription: formData.get("quoteDescription") as string || undefined,
+                                              quoteAmount: formData.get("quoteAmount") as string,
+                                              quoteValidityDays: formData.get("quoteValidityDays") as string || undefined,
+                                              quoteNotes: formData.get("quoteNotes") as string || undefined,
+                                            },
+                                          });
+                                        }}
+                                        data-testid={`form-quote-${doc.id}`}
+                                      >
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          <div className="space-y-1">
+                                            <Label htmlFor={`quoteTitle-${doc.id}`} className="text-xs">Titre du devis *</Label>
+                                            <Input
+                                              id={`quoteTitle-${doc.id}`}
+                                              name="quoteTitle"
+                                              defaultValue={doc.quoteTitle || ""}
+                                              placeholder="Ex: Développement site vitrine"
+                                              required
+                                              data-testid={`input-quote-title-${doc.id}`}
+                                            />
+                                          </div>
+                                          <div className="space-y-1">
+                                            <Label htmlFor={`quoteAmount-${doc.id}`} className="text-xs">Montant (€) *</Label>
+                                            <Input
+                                              id={`quoteAmount-${doc.id}`}
+                                              name="quoteAmount"
+                                              type="text"
+                                              defaultValue={doc.quoteAmount || ""}
+                                              placeholder="Ex: 5000"
+                                              required
+                                              data-testid={`input-quote-amount-${doc.id}`}
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                          <Label htmlFor={`quoteDescription-${doc.id}`} className="text-xs">Description</Label>
+                                          <Textarea
+                                            id={`quoteDescription-${doc.id}`}
+                                            name="quoteDescription"
+                                            defaultValue={doc.quoteDescription || ""}
+                                            placeholder="Description détaillée des prestations..."
+                                            rows={3}
+                                            data-testid={`input-quote-description-${doc.id}`}
+                                          />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          <div className="space-y-1">
+                                            <Label htmlFor={`quoteValidityDays-${doc.id}`} className="text-xs">Validité (jours)</Label>
+                                            <Input
+                                              id={`quoteValidityDays-${doc.id}`}
+                                              name="quoteValidityDays"
+                                              type="number"
+                                              defaultValue={doc.quoteValidityDays || "30"}
+                                              placeholder="30"
+                                              data-testid={`input-quote-validity-${doc.id}`}
+                                            />
+                                          </div>
+                                          <div className="space-y-1">
+                                            <Label htmlFor={`quoteNotes-${doc.id}`} className="text-xs">Notes internes</Label>
+                                            <Input
+                                              id={`quoteNotes-${doc.id}`}
+                                              name="quoteNotes"
+                                              defaultValue={doc.quoteNotes || ""}
+                                              placeholder="Notes pour vous..."
+                                              data-testid={`input-quote-notes-${doc.id}`}
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="flex justify-end">
+                                          <Button
+                                            type="submit"
+                                            size="sm"
+                                            disabled={updateQuoteMutation.isPending}
+                                            data-testid={`button-save-quote-${doc.id}`}
+                                          >
+                                            {updateQuoteMutation.isPending ? (
+                                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                            ) : (
+                                              <Save className="h-4 w-4 mr-2" />
+                                            )}
+                                            Enregistrer
+                                          </Button>
+                                        </div>
+                                      </form>
+                                    )}
+
+                                    {/* Show quote details for client when not draft */}
+                                    {user.role !== "admin" && doc.status !== "draft" && doc.quoteDescription && (
+                                      <div className="mt-3 pt-3 border-t">
+                                        <p className="text-sm text-muted-foreground">{doc.quoteDescription}</p>
+                                        {doc.quoteValidityDays && (
+                                          <p className="text-xs text-muted-foreground mt-1">Validité: {doc.quoteValidityDays} jours</p>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>
