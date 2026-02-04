@@ -13,7 +13,8 @@ import {
   Globe,
   Shield,
   Bot,
-  ChevronRight
+  ChevronRight,
+  Briefcase
 } from "lucide-react";
 
 import heroBg from "@/assets/images/hero-bg.jpg";
@@ -31,7 +32,7 @@ export default function Home() {
       description: "Des sites web élégants et performants qui mettent en valeur votre activité et captent l'attention de vos visiteurs."
     },
     {
-      icon: Code2,
+      icon: Briefcase,
       title: "Applications Web Entreprise",
       description: "Solutions sur mesure pour digitaliser vos processus métier et optimiser votre productivité."
     },
