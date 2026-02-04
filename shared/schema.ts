@@ -23,6 +23,7 @@ export const users = pgTable("users", {
   verificationToken: text("verification_token"),
   passwordResetToken: text("password_reset_token"),
   passwordResetExpires: timestamp("password_reset_expires"),
+  signature: text("signature"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
