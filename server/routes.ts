@@ -956,18 +956,52 @@ export async function registerRoutes(
       doc.fontSize(12).fillColor("#333333").text("MONTANT TOTAL HT", 60, amountY + 10);
       doc.fontSize(20).fillColor("#6366f1").text(`${document.quoteAmount} €`, 60, amountY + 28);
 
-      // Footer
-      const footerY = 750;
-      doc.fontSize(8).fillColor("#999999");
-      doc.text("Ce devis est valable pour la durée indiquée à compter de sa date d'émission.", 50, footerY, { align: "center", width: 495 });
-      doc.text("Signature précédée de la mention \"Bon pour accord\"", 50, footerY + 12, { align: "center", width: 495 });
-
-      // Signature boxes
-      doc.rect(50, footerY + 35, 200, 60).strokeColor("#e5e7eb").stroke();
-      doc.rect(295, footerY + 35, 200, 60).strokeColor("#e5e7eb").stroke();
-      doc.fontSize(8).fillColor("#666666");
-      doc.text("Signature Innov Studio", 50, footerY + 100, { width: 200, align: "center" });
-      doc.text("Signature Client", 295, footerY + 100, { width: 200, align: "center" });
+      // Signature section - positioned after content with enough space
+      const signatureY = Math.max(amountY + 80, 580);
+      
+      // Check if we need a new page
+      if (signatureY > 650) {
+        doc.addPage();
+        const newPageY = 50;
+        
+        // Signature title
+        doc.fontSize(11).fillColor("#6366f1").text("SIGNATURE", 50, newPageY);
+        
+        // Instructions
+        doc.fontSize(9).fillColor("#666666");
+        doc.text("Ce devis est valable pour la durée indiquée à compter de sa date d'émission.", 50, newPageY + 20);
+        doc.text("Merci de retourner ce document signé avec la mention \"Bon pour accord\".", 50, newPageY + 35);
+        
+        // Signature boxes
+        doc.rect(50, newPageY + 60, 220, 80).strokeColor("#d1d5db").lineWidth(1).stroke();
+        doc.rect(295, newPageY + 60, 220, 80).strokeColor("#d1d5db").lineWidth(1).stroke();
+        
+        // Labels inside boxes
+        doc.fontSize(8).fillColor("#9ca3af");
+        doc.text("Pour Innov Studio", 55, newPageY + 65);
+        doc.text("Date et signature :", 55, newPageY + 120);
+        doc.text("Le Client", 300, newPageY + 65);
+        doc.text("Date, signature et mention \"Bon pour accord\" :", 300, newPageY + 120);
+      } else {
+        // Signature section on same page
+        doc.fontSize(11).fillColor("#6366f1").text("SIGNATURE", 50, signatureY);
+        
+        // Instructions
+        doc.fontSize(9).fillColor("#666666");
+        doc.text("Ce devis est valable pour la durée indiquée à compter de sa date d'émission.", 50, signatureY + 20);
+        doc.text("Merci de retourner ce document signé avec la mention \"Bon pour accord\".", 50, signatureY + 35);
+        
+        // Signature boxes
+        doc.rect(50, signatureY + 55, 220, 80).strokeColor("#d1d5db").lineWidth(1).stroke();
+        doc.rect(295, signatureY + 55, 220, 80).strokeColor("#d1d5db").lineWidth(1).stroke();
+        
+        // Labels inside boxes
+        doc.fontSize(8).fillColor("#9ca3af");
+        doc.text("Pour Innov Studio", 55, signatureY + 60);
+        doc.text("Date et signature :", 55, signatureY + 115);
+        doc.text("Le Client", 300, signatureY + 60);
+        doc.text("Date, signature et mention \"Bon pour accord\" :", 300, signatureY + 115);
+      }
 
       doc.end();
     } catch (error) {
