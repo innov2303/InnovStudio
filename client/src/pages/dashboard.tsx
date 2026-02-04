@@ -1499,9 +1499,29 @@ export default function Dashboard() {
                                           </Button>
                                         )}
 
-                                        {/* Client upload signed document */}
+                                        {/* Client preview and download quote */}
                                         {user.role !== "admin" && doc.status === "awaiting_signature" && (
                                           <div className="flex items-center gap-2">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() => setPreviewQuote(previewQuote === doc.id ? null : doc.id)}
+                                              data-testid={`button-client-preview-${doc.id}`}
+                                            >
+                                              <Eye className="h-4 w-4 mr-1" />
+                                              Prévisualiser
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() => {
+                                                window.open(`/api/documents/${doc.id}/generate-pdf`, "_blank");
+                                              }}
+                                              data-testid={`button-client-download-${doc.id}`}
+                                            >
+                                              <Download className="h-4 w-4 mr-1" />
+                                              Télécharger PDF
+                                            </Button>
                                             <input
                                               type="file"
                                               id={`upload-signed-${doc.id}`}
@@ -1788,15 +1808,20 @@ export default function Dashboard() {
                                           <DialogTitle className="text-primary">Prévisualisation du devis</DialogTitle>
                                         </DialogHeader>
                                         {(() => {
-                                          const projectOwner = allUsers?.find(u => u.id === project.userId);
+                                          const projectOwner = user.role === "admin" 
+                                            ? allUsers?.find(u => u.id === project.userId)
+                                            : user;
+                                          const adminInfo = user.role === "admin" ? user : null;
                                           return (
                                             <div className="space-y-4">
                                               {/* Addresses section */}
                                               <div className="grid grid-cols-2 gap-4 pb-3 border-b">
                                                 <div>
                                                   <p className="text-xs text-muted-foreground mb-1">ÉMETTEUR</p>
-                                                  <p className="text-sm font-semibold">{user.company}</p>
-                                                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{user.address}</p>
+                                                  <p className="text-sm font-semibold">Innov Studio</p>
+                                                  {adminInfo && (
+                                                    <p className="text-xs text-muted-foreground whitespace-pre-wrap">{adminInfo.address}</p>
+                                                  )}
                                                 </div>
                                                 <div>
                                                   <p className="text-xs text-muted-foreground mb-1">CLIENT</p>
@@ -1870,7 +1895,7 @@ export default function Dashboard() {
                                                 <span>Validité: {doc.quoteValidityDays || "30"} jours</span>
                                                 <span>Date: {new Date().toLocaleDateString("fr-FR")}</span>
                                               </div>
-                                              {doc.quoteNotes && (
+                                              {user.role === "admin" && doc.quoteNotes && (
                                                 <div className="mt-2 p-2 bg-yellow-500/10 rounded text-xs">
                                                   <span className="font-semibold">Notes internes (non visible client):</span> {doc.quoteNotes}
                                                 </div>

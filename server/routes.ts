@@ -804,7 +804,7 @@ export async function registerRoutes(
   app.get("/api/documents/:id/generate-pdf", requireAuth, async (req, res) => {
     try {
       const currentUser = await storage.getUser(req.session.userId!);
-      if (!currentUser || currentUser.role !== "admin") {
+      if (!currentUser) {
         return res.status(403).json({ message: "Accès refusé" });
       }
 
@@ -814,13 +814,22 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Document non trouvé" });
       }
 
-      if (!document.quoteTitle || !document.quoteAmount) {
-        return res.status(400).json({ message: "Veuillez remplir le titre et le montant du devis" });
-      }
-
       const project = await storage.getProject(document.projectId);
       if (!project) {
         return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      // Allow admin OR project owner (when document is sent)
+      const isAdmin = currentUser.role === "admin";
+      const isOwner = project.userId === currentUser.id;
+      const documentSent = document.status !== "draft";
+      
+      if (!isAdmin && !(isOwner && documentSent)) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      if (!document.quoteTitle || !document.quoteAmount) {
+        return res.status(400).json({ message: "Veuillez remplir le titre et le montant du devis" });
       }
 
       const projectOwner = await storage.getUser(project.userId);
