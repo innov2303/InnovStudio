@@ -1668,6 +1668,19 @@ export default function Dashboard() {
                                             )}
                                             Enregistrer
                                           </Button>
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="secondary"
+                                            disabled={!doc.quoteTitle || !doc.quoteAmount}
+                                            onClick={() => {
+                                              window.open(`/api/documents/${doc.id}/generate-pdf`, "_blank");
+                                            }}
+                                            data-testid={`button-download-pdf-${doc.id}`}
+                                          >
+                                            <Download className="h-4 w-4 mr-2" />
+                                            Télécharger PDF
+                                          </Button>
                                         </div>
                                       </form>
                                     )}

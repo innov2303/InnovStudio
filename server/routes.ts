@@ -11,6 +11,7 @@ import { sendVerificationEmail, sendPasswordResetEmail } from "./email";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import PDFDocument from "pdfkit";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -793,6 +794,139 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Download document error:", error);
       res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Generate PDF quote
+  app.get("/api/documents/:id/generate-pdf", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.getDocument(documentId);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      if (!document.quoteTitle || !document.quoteAmount) {
+        return res.status(400).json({ message: "Veuillez remplir le titre et le montant du devis" });
+      }
+
+      const project = await storage.getProject(document.projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      const projectOwner = await storage.getUser(project.userId);
+      const admin = currentUser;
+
+      // Create PDF
+      const doc = new PDFDocument({ margin: 50, size: "A4" });
+      
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename=Devis_${document.quoteTitle.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+      
+      doc.pipe(res);
+
+      // Header with company info
+      doc.fontSize(24).fillColor("#6366f1").text("INNOV STUDIO", 50, 50);
+      doc.fontSize(10).fillColor("#666666").text("Studio de Production Web", 50, 80);
+      
+      // Company address
+      doc.fontSize(9).fillColor("#333333");
+      doc.text(admin.company || "Innov Studio", 50, 100);
+      if (admin.address) {
+        const addressLines = admin.address.split("\n");
+        let yPos = 112;
+        addressLines.forEach(line => {
+          doc.text(line.trim(), 50, yPos);
+          yPos += 12;
+        });
+      }
+      if (admin.email) {
+        doc.text(admin.email, 50, doc.y + 5);
+      }
+
+      // DEVIS title
+      doc.fontSize(28).fillColor("#1a1a1a").text("DEVIS", 400, 50, { align: "right" });
+      
+      // Quote number and date
+      doc.fontSize(10).fillColor("#666666");
+      doc.text(`N° ${documentId.substring(0, 8).toUpperCase()}`, 350, 85, { align: "right" });
+      doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 350, 100, { align: "right" });
+      doc.text(`Validité: ${document.quoteValidityDays || "30"} jours`, 350, 115, { align: "right" });
+
+      // Separator line
+      doc.moveTo(50, 160).lineTo(545, 160).strokeColor("#e5e7eb").stroke();
+
+      // Client section
+      doc.fontSize(11).fillColor("#6366f1").text("DESTINATAIRE", 350, 180);
+      doc.fontSize(10).fillColor("#333333");
+      
+      if (projectOwner) {
+        doc.text(projectOwner.company || `${projectOwner.firstName} ${projectOwner.lastName}`, 350, 195);
+        doc.text(`${projectOwner.firstName} ${projectOwner.lastName}`, 350, 210);
+        if (projectOwner.billingAddress || projectOwner.address) {
+          const clientAddress = (projectOwner.billingAddress || projectOwner.address || "").split("\n");
+          let yPos = 225;
+          clientAddress.forEach(line => {
+            doc.text(line.trim(), 350, yPos);
+            yPos += 12;
+          });
+        }
+      }
+
+      // Project info
+      doc.fontSize(11).fillColor("#6366f1").text("PROJET", 50, 180);
+      doc.fontSize(10).fillColor("#333333").text(project.title, 50, 195);
+
+      // Quote title
+      doc.fontSize(14).fillColor("#1a1a1a").text(document.quoteTitle, 50, 280);
+
+      // Separator
+      doc.moveTo(50, 305).lineTo(545, 305).strokeColor("#e5e7eb").stroke();
+
+      // Description
+      if (document.quoteDescription) {
+        doc.fontSize(11).fillColor("#6366f1").text("DESCRIPTION", 50, 320);
+        doc.fontSize(10).fillColor("#333333").text(document.quoteDescription, 50, 340, { width: 495 });
+      }
+
+      // Amount section
+      const amountY = document.quoteDescription ? Math.max(doc.y + 40, 420) : 340;
+      
+      doc.rect(50, amountY, 495, 60).fillColor("#f8fafc").fill();
+      doc.fontSize(12).fillColor("#333333").text("MONTANT TOTAL HT", 60, amountY + 10);
+      doc.fontSize(20).fillColor("#6366f1").text(`${document.quoteAmount} €`, 60, amountY + 28);
+
+      // Deposit if specified
+      if (document.quoteDepositPercent) {
+        const depositAmount = (parseFloat(document.quoteAmount) * parseFloat(document.quoteDepositPercent) / 100).toFixed(2);
+        doc.rect(50, amountY + 70, 495, 40).fillColor("#fef3c7").fill();
+        doc.fontSize(10).fillColor("#92400e").text(`Acompte à la signature (${document.quoteDepositPercent}%)`, 60, amountY + 80);
+        doc.fontSize(14).fillColor("#92400e").text(`${depositAmount} €`, 60, amountY + 95);
+      }
+
+      // Footer
+      const footerY = 750;
+      doc.fontSize(8).fillColor("#999999");
+      doc.text("Ce devis est valable pour la durée indiquée à compter de sa date d'émission.", 50, footerY, { align: "center", width: 495 });
+      doc.text("Signature précédée de la mention \"Bon pour accord\"", 50, footerY + 12, { align: "center", width: 495 });
+
+      // Signature boxes
+      doc.rect(50, footerY + 35, 200, 60).strokeColor("#e5e7eb").stroke();
+      doc.rect(295, footerY + 35, 200, 60).strokeColor("#e5e7eb").stroke();
+      doc.fontSize(8).fillColor("#666666");
+      doc.text("Signature Innov Studio", 50, footerY + 100, { width: 200, align: "center" });
+      doc.text("Signature Client", 295, footerY + 100, { width: 200, align: "center" });
+
+      doc.end();
+    } catch (error) {
+      console.error("Generate PDF error:", error);
+      res.status(500).json({ message: "Erreur lors de la génération du PDF" });
     }
   });
 
