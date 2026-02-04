@@ -1290,7 +1290,11 @@ export default function Dashboard() {
                                               size="icon"
                                               variant="ghost"
                                               className="h-8 w-8 text-destructive hover:text-destructive"
-                                              onClick={() => deleteFeatureMutation.mutate(feature.id)}
+                                              onClick={() => {
+                                                if (confirm("Êtes-vous sûr de vouloir supprimer cette fonctionnalité ?")) {
+                                                  deleteFeatureMutation.mutate(feature.id);
+                                                }
+                                              }}
                                               disabled={deleteFeatureMutation.isPending}
                                               data-testid={`button-delete-feature-${feature.id}`}
                                             >
