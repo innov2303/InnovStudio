@@ -13,6 +13,10 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - **Système de projets** : Demandes de projet avec suivi d'état visuel (graphique de progression avec 5 étapes)
 - **Suivi des fonctionnalités** : Les clients déposent des fonctionnalités, l'admin gère les statuts (pending, in_progress, completed, blocked)
 - **Gestion des fonctionnalités** : Les clients peuvent modifier ou supprimer leurs fonctionnalités tant qu'elles sont en attente
+- **Gestion des documents** : Système de devis avec workflow de signature
+  - Quand un projet est en "Étude", l'admin peut créer un devis
+  - L'admin upload le devis → statut "En attente de signature"
+  - Le client télécharge, signe et upload le document signé → statut "Signé"
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
 - **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
@@ -78,6 +82,12 @@ shared/
 - `POST /api/auth/resend-verification` - Renvoyer email de vérification
 - `POST /api/auth/forgot-password` - Demander réinitialisation mot de passe
 - `POST /api/auth/reset-password` - Réinitialiser mot de passe avec token
+- `GET /api/projects/:projectId/documents` - Liste des documents d'un projet
+- `POST /api/projects/:projectId/documents` - Créer un document (admin only)
+- `POST /api/documents/:id/upload-quote` - Admin upload le devis
+- `POST /api/documents/:id/upload-signed` - Client upload le document signé
+- `GET /api/documents/:id/download` - Télécharger un document
+- `PATCH /api/documents/:id/status` - Modifier statut document (admin only)
 
 ## Environment Variables
 - `DATABASE_URL` - URL PostgreSQL
