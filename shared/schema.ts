@@ -143,3 +143,27 @@ export const createFeatureSchema = insertFeatureSchema.extend({
 export type InsertFeature = z.infer<typeof insertFeatureSchema>;
 export type ProjectFeature = typeof projectFeatures.$inferSelect;
 export type CreateFeatureData = z.infer<typeof createFeatureSchema>;
+
+// Document status enum
+export const documentStatusEnum = ["pending_creation", "awaiting_signature", "signed"] as const;
+export const documentTypeEnum = ["quote", "invoice"] as const;
+
+// Project Documents table
+export const projectDocuments = pgTable("project_documents", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id", { length: 36 }).notNull(),
+  type: text("type").notNull().default("quote"),
+  status: text("status").notNull().default("pending_creation"),
+  fileName: text("file_name"),
+  signedFileName: text("signed_file_name"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDocumentSchema = createInsertSchema(projectDocuments).pick({
+  projectId: true,
+  type: true,
+});
+
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type ProjectDocument = typeof projectDocuments.$inferSelect;
