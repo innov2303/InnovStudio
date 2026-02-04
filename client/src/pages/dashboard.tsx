@@ -315,14 +315,19 @@ export default function Dashboard() {
   });
 
   const createDocumentMutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      const response = await apiRequest("POST", `/api/projects/${projectId}/documents`, { type: "quote" });
+    mutationFn: async ({ projectId, type, defaultDescription }: { projectId: string; type: string; defaultDescription?: string }) => {
+      const response = await apiRequest("POST", `/api/projects/${projectId}/documents`, { 
+        type,
+        quoteDescription: defaultDescription 
+      });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast({
-        title: "Devis créé",
-        description: "Le devis a été créé et est en attente d'édition.",
+        title: variables.type === "deposit" ? "Acompte créé" : "Devis créé",
+        description: variables.type === "deposit" 
+          ? "L'acompte a été créé et est en attente d'édition."
+          : "Le devis a été créé et est en attente d'édition.",
       });
       refetchDocuments();
     },
@@ -1387,20 +1392,40 @@ export default function Dashboard() {
                             <div className="flex items-center justify-between">
                               <h4 className="text-sm font-semibold">Documents du projet</h4>
                               {user.role === "admin" && project.status === "in_review" && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => createDocumentMutation.mutate(project.id)}
-                                  disabled={createDocumentMutation.isPending}
-                                  data-testid={`button-create-document-${project.id}`}
-                                >
-                                  {createDocumentMutation.isPending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                  ) : (
-                                    <Plus className="h-4 w-4 mr-2" />
-                                  )}
-                                  Créer un devis
-                                </Button>
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => createDocumentMutation.mutate({ projectId: project.id, type: "quote" })}
+                                    disabled={createDocumentMutation.isPending}
+                                    data-testid={`button-create-quote-${project.id}`}
+                                  >
+                                    {createDocumentMutation.isPending ? (
+                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    ) : (
+                                      <Plus className="h-4 w-4 mr-2" />
+                                    )}
+                                    Devis
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => createDocumentMutation.mutate({ 
+                                      projectId: project.id, 
+                                      type: "deposit",
+                                      defaultDescription: "Frais initiaux de développement du projet"
+                                    })}
+                                    disabled={createDocumentMutation.isPending}
+                                    data-testid={`button-create-deposit-${project.id}`}
+                                  >
+                                    {createDocumentMutation.isPending ? (
+                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    ) : (
+                                      <Plus className="h-4 w-4 mr-2" />
+                                    )}
+                                    Acompte
+                                  </Button>
+                                </div>
                               )}
                             </div>
 
@@ -1425,7 +1450,7 @@ export default function Dashboard() {
                                         </div>
                                         <div>
                                           <p className="text-sm font-medium">
-                                            {doc.type === "quote" ? "Devis" : "Facture"}
+                                            {doc.type === "quote" ? "Devis" : doc.type === "deposit" ? "Acompte" : "Document"}
                                             {doc.quoteTitle && ` - ${doc.quoteTitle}`}
                                           </p>
                                           <p className="text-xs text-muted-foreground">
@@ -1566,7 +1591,7 @@ export default function Dashboard() {
                                       >
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                           <div className="space-y-1">
-                                            <Label htmlFor={`quoteTitle-${doc.id}`} className="text-xs">Titre du devis *</Label>
+                                            <Label htmlFor={`quoteTitle-${doc.id}`} className="text-xs">Titre {doc.type === "deposit" ? "de l'acompte" : "du devis"} *</Label>
                                             <Input
                                               id={`quoteTitle-${doc.id}`}
                                               name="quoteTitle"
@@ -1658,7 +1683,7 @@ export default function Dashboard() {
                                       return (
                                       <div className="mt-4 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-background">
                                         <div className="flex items-center justify-between mb-4">
-                                          <h5 className="text-sm font-semibold text-primary">Prévisualisation du devis</h5>
+                                          <h5 className="text-sm font-semibold text-primary">Prévisualisation {doc.type === "deposit" ? "de l'acompte" : "du devis"}</h5>
                                           <Button
                                             size="icon"
                                             variant="ghost"
@@ -1692,7 +1717,7 @@ export default function Dashboard() {
 
                                           <div className="flex items-center justify-between border-b pb-3">
                                             <div>
-                                              <p className="text-xs text-muted-foreground">DEVIS</p>
+                                              <p className="text-xs text-muted-foreground">{doc.type === "deposit" ? "ACOMPTE" : "DEVIS"}</p>
                                               <p className="text-lg font-bold">{doc.quoteTitle}</p>
                                               <p className="text-xs text-muted-foreground">Projet: {project.title}</p>
                                             </div>

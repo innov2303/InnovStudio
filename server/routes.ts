@@ -645,8 +645,8 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Projet non trouvé" });
       }
 
-      const { type = "quote" } = req.body;
-      const document = await storage.createDocument(projectId, type);
+      const { type = "quote", quoteDescription } = req.body;
+      const document = await storage.createDocument(projectId, type, quoteDescription);
       res.status(201).json(document);
     } catch (error) {
       console.error("Create document error:", error);

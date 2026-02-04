@@ -31,7 +31,7 @@ export interface IStorage {
   updateFeatureStatus(id: string, status: string, adminNotes?: string): Promise<ProjectFeature | undefined>;
   deleteFeature(id: string): Promise<boolean>;
   // Documents
-  createDocument(projectId: string, type: string): Promise<ProjectDocument>;
+  createDocument(projectId: string, type: string, quoteDescription?: string): Promise<ProjectDocument>;
   getDocument(id: string): Promise<ProjectDocument | undefined>;
   getDocumentsByProject(projectId: string): Promise<ProjectDocument[]>;
   updateDocumentStatus(id: string, status: string): Promise<ProjectDocument | undefined>;
@@ -225,12 +225,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Document operations
-  async createDocument(projectId: string, type: string): Promise<ProjectDocument> {
+  async createDocument(projectId: string, type: string, quoteDescription?: string): Promise<ProjectDocument> {
     const [doc] = await db
       .insert(projectDocuments)
       .values({
         projectId,
         type,
+        quoteDescription,
       })
       .returning();
     return doc;
