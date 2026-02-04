@@ -795,6 +795,32 @@ export async function registerRoutes(
     }
   });
 
+  // Delete document (admin only, only when draft)
+  app.delete("/api/documents/:id", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.getDocument(documentId);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      if (document.status !== "draft") {
+        return res.status(400).json({ message: "Seuls les devis en brouillon peuvent être supprimés" });
+      }
+
+      await storage.deleteDocument(documentId);
+      res.json({ message: "Document supprimé" });
+    } catch (error) {
+      console.error("Delete document error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Update document status (admin only)
   app.patch("/api/documents/:id/status", requireAuth, async (req, res) => {
     try {

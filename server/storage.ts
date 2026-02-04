@@ -38,6 +38,7 @@ export interface IStorage {
   updateDocumentFile(id: string, fileName: string): Promise<ProjectDocument | undefined>;
   updateDocumentSignedFile(id: string, signedFileName: string): Promise<ProjectDocument | undefined>;
   updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteAmount?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined>;
+  deleteDocument(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -278,6 +279,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(projectDocuments.id, id))
       .returning();
     return doc;
+  }
+
+  async deleteDocument(id: string): Promise<boolean> {
+    await db.delete(projectDocuments).where(eq(projectDocuments.id, id));
+    return true;
   }
 }
 

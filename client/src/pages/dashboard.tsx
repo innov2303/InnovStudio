@@ -383,6 +383,34 @@ export default function Dashboard() {
     },
   });
 
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (documentId: string) => {
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur lors de la suppression");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Devis supprimé",
+        description: "Le devis a été supprimé.",
+      });
+      refetchDocuments();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la suppression",
+        variant: "destructive",
+      });
+    },
+  });
+
   const uploadSignedMutation = useMutation({
     mutationFn: async ({ documentId, file }: { documentId: string; file: File }) => {
       const formData = new FormData();
@@ -1426,6 +1454,23 @@ export default function Dashboard() {
                                                 <Upload className="h-4 w-4 mr-2" />
                                               )}
                                               Envoyer le devis
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="destructive"
+                                              onClick={() => {
+                                                if (confirm("Êtes-vous sûr de vouloir supprimer ce devis ?")) {
+                                                  deleteDocumentMutation.mutate(doc.id);
+                                                }
+                                              }}
+                                              disabled={deleteDocumentMutation.isPending}
+                                              data-testid={`button-delete-quote-${doc.id}`}
+                                            >
+                                              {deleteDocumentMutation.isPending ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                              ) : (
+                                                <Trash2 className="h-4 w-4" />
+                                              )}
                                             </Button>
                                           </div>
                                         )}
