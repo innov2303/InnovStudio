@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useForceDark } from "@/hooks/use-force-dark";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
 export default function VerifyEmail() {
+  useForceDark();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
@@ -51,7 +52,6 @@ export default function VerifyEmail() {
               Innov Studio
             </span>
           </Link>
-          <ThemeToggle />
         </div>
       </header>
 

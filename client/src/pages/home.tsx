@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useForceDark } from "@/hooks/use-force-dark";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
 import { 
@@ -21,6 +21,7 @@ import featuresBg from "@/assets/images/features-bg.jpg";
 import projectTracking from "@/assets/images/project-tracking.png";
 
 export default function Home() {
+  useForceDark();
   const { user } = useAuth();
 
   const services = [
@@ -90,7 +91,6 @@ export default function Home() {
             </a>
           </nav>
           <div className="flex items-center gap-2">
-            <ThemeToggle />
             {user ? (
               <Link href="/dashboard">
                 <Button data-testid="button-dashboard">

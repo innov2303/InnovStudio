@@ -9,12 +9,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useForceDark } from "@/hooks/use-force-dark";
 import { registerSchema, type RegisterData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Loader2, Mail, CheckCircle, Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
+  useForceDark();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +99,6 @@ export default function Register() {
               Innov Studio
             </span>
           </Link>
-          <ThemeToggle />
         </div>
       </header>
 
