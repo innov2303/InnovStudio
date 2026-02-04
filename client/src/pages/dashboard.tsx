@@ -1007,7 +1007,7 @@ export default function Dashboard() {
                                 <SelectItem value="pending">En attente</SelectItem>
                                 <SelectItem value="in_review">En cours d'étude</SelectItem>
                                 <SelectItem value="awaiting_signature">En attente de signature</SelectItem>
-                                <SelectItem value="approved">Approuvé</SelectItem>
+                                <SelectItem value="approved">Acompte reçu</SelectItem>
                                 <SelectItem value="in_progress">En cours</SelectItem>
                                 <SelectItem value="completed">Terminé</SelectItem>
                                 <SelectItem value="cancelled">Annulé</SelectItem>
@@ -1023,7 +1023,7 @@ export default function Dashboard() {
                               {project.status === "pending" && "En attente"}
                               {project.status === "in_review" && "En cours d'étude"}
                               {project.status === "awaiting_signature" && "En attente de signature"}
-                              {project.status === "approved" && "Approuvé"}
+                              {project.status === "approved" && "Acompte reçu"}
                               {project.status === "in_progress" && "En cours"}
                               {project.status === "completed" && "Terminé"}
                               {project.status === "cancelled" && "Annulé"}
@@ -1089,7 +1089,7 @@ export default function Dashboard() {
                                   { key: "pending", label: "Déposé" },
                                   { key: "in_review", label: "Étude" },
                                   { key: "awaiting_signature", label: "Signature" },
-                                  { key: "approved", label: "Approuvé" },
+                                  { key: "approved", label: "Acompte" },
                                   { key: "in_progress", label: "En cours" },
                                   { key: "completed", label: "Terminé" }
                                 ].map((step, index) => {
