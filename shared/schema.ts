@@ -157,6 +157,7 @@ export const projectDocuments = pgTable("project_documents", {
   // Quote details
   quoteTitle: text("quote_title"),
   quoteDescription: text("quote_description"),
+  quoteLineItems: text("quote_line_items"), // JSON array of {description, amount}
   quoteAmount: text("quote_amount"),
   quoteDepositPercent: text("quote_deposit_percent"),
   quoteValidityDays: text("quote_validity_days"),
@@ -176,11 +177,17 @@ export const insertDocumentSchema = createInsertSchema(projectDocuments).pick({
 export const updateQuoteSchema = z.object({
   quoteTitle: z.string().min(1, "Titre requis"),
   quoteDescription: z.string().optional(),
+  quoteLineItems: z.string().optional(), // JSON string
   quoteAmount: z.string().min(1, "Montant requis"),
   quoteDepositPercent: z.string().optional(),
   quoteValidityDays: z.string().optional(),
   quoteNotes: z.string().optional(),
 });
+
+export type QuoteLineItem = {
+  description: string;
+  amount: string;
+};
 
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type ProjectDocument = typeof projectDocuments.$inferSelect;

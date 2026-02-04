@@ -673,10 +673,11 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Le devis ne peut plus être modifié une fois envoyé" });
       }
 
-      const { quoteTitle, quoteDescription, quoteAmount, quoteDepositPercent, quoteValidityDays, quoteNotes } = req.body;
+      const { quoteTitle, quoteDescription, quoteLineItems, quoteAmount, quoteDepositPercent, quoteValidityDays, quoteNotes } = req.body;
       const updatedDoc = await storage.updateQuoteDetails(documentId, {
         quoteTitle,
         quoteDescription,
+        quoteLineItems,
         quoteAmount,
         quoteDepositPercent,
         quoteValidityDays,
@@ -889,14 +890,57 @@ export async function registerRoutes(
       // Separator
       doc.moveTo(50, 305).lineTo(545, 305).strokeColor("#e5e7eb").stroke();
 
-      // Description
+      // Prestations table
+      let currentY = 320;
+      
+      // Parse line items
+      let lineItems: Array<{ description: string; amount: string }> = [];
+      if (document.quoteLineItems) {
+        try {
+          lineItems = JSON.parse(document.quoteLineItems);
+        } catch (e) {
+          console.error("Error parsing line items:", e);
+        }
+      }
+      
+      if (lineItems.length > 0) {
+        doc.fontSize(11).fillColor("#6366f1").text("PRESTATIONS", 50, currentY);
+        currentY += 20;
+        
+        // Table header
+        doc.rect(50, currentY, 425, 25).fillColor("#f1f5f9").fill();
+        doc.rect(475, currentY, 70, 25).fillColor("#f1f5f9").fill();
+        doc.fontSize(9).fillColor("#64748b").text("Description", 60, currentY + 8);
+        doc.text("Montant", 480, currentY + 8);
+        currentY += 25;
+        
+        // Table rows
+        lineItems.forEach((item, index) => {
+          const isEven = index % 2 === 0;
+          if (isEven) {
+            doc.rect(50, currentY, 495, 22).fillColor("#fafafa").fill();
+          }
+          doc.fontSize(10).fillColor("#333333").text(item.description, 60, currentY + 6, { width: 400 });
+          doc.text(`${item.amount} €`, 480, currentY + 6);
+          currentY += 22;
+        });
+        
+        // Total line
+        doc.rect(50, currentY, 495, 28).fillColor("#e2e8f0").fill();
+        doc.fontSize(11).fillColor("#1a1a1a").text("Total HT", 60, currentY + 8);
+        doc.fontSize(12).fillColor("#6366f1").text(`${document.quoteAmount} €`, 475, currentY + 7);
+        currentY += 40;
+      }
+
+      // Notes section
       if (document.quoteDescription) {
-        doc.fontSize(11).fillColor("#6366f1").text("DESCRIPTION", 50, 320);
-        doc.fontSize(10).fillColor("#333333").text(document.quoteDescription, 50, 340, { width: 495 });
+        doc.fontSize(11).fillColor("#6366f1").text("NOTES", 50, currentY);
+        doc.fontSize(10).fillColor("#333333").text(document.quoteDescription, 50, currentY + 15, { width: 495 });
+        currentY = doc.y + 30;
       }
 
       // Amount section
-      const amountY = document.quoteDescription ? Math.max(doc.y + 40, 420) : 340;
+      const amountY = Math.max(currentY, lineItems.length > 0 ? currentY : 340);
       
       doc.rect(50, amountY, 495, 60).fillColor("#f8fafc").fill();
       doc.fontSize(12).fillColor("#333333").text("MONTANT TOTAL HT", 60, amountY + 10);

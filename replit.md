@@ -15,7 +15,11 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - **Gestion des fonctionnalités** : Les clients peuvent modifier ou supprimer leurs fonctionnalités tant qu'elles sont en attente
 - **Gestion des documents** : Système de devis avec workflow de signature
   - Quand un projet est en "Étude", l'admin peut créer un devis
-  - L'admin upload le devis → statut "En attente de signature"
+  - Système de prestations : lignes multiples avec description et montant individuel (stockées en JSON)
+  - Pourcentage d'acompte configurable avec calcul automatique
+  - Génération PDF professionnelle avec tableau des prestations
+  - Prévisualisation du devis avant génération
+  - L'admin génère et télécharge le PDF du devis
   - Le client télécharge, signe et upload le document signé → statut "Signé"
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
 - **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)

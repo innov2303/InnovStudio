@@ -302,6 +302,7 @@ export default function Dashboard() {
   // Documents state and queries
   const [expandedDocuments, setExpandedDocuments] = useState<string | null>(null);
   const [previewQuote, setPreviewQuote] = useState<string | null>(null);
+  const [lineItems, setLineItems] = useState<Record<string, Array<{ description: string; amount: string }>>>({});
 
   const { data: documents, refetch: refetchDocuments } = useQuery<ProjectDocument[]>({
     queryKey: ["/api/projects", expandedDocuments, "documents"],
@@ -1609,14 +1610,87 @@ export default function Dashboard() {
                                             )}
                                           </div>
                                         </div>
+                                        <div className="space-y-2">
+                                          <div className="flex items-center justify-between">
+                                            <Label className="text-xs">Prestations</Label>
+                                            <Button
+                                              type="button"
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() => {
+                                                const currentItems = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                setLineItems({
+                                                  ...lineItems,
+                                                  [doc.id]: [...currentItems, { description: "", amount: "" }]
+                                                });
+                                              }}
+                                              data-testid={`button-add-line-item-${doc.id}`}
+                                            >
+                                              <Plus className="h-3 w-3 mr-1" />
+                                              Ajouter
+                                            </Button>
+                                          </div>
+                                          <div className="space-y-2">
+                                            {(lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : [])).map((item: { description: string; amount: string }, index: number) => (
+                                              <div key={index} className="flex gap-2 items-start">
+                                                <Input
+                                                  placeholder="Description de la prestation"
+                                                  value={item.description}
+                                                  onChange={(e) => {
+                                                    const currentItems = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                    const newItems = [...currentItems];
+                                                    newItems[index] = { ...newItems[index], description: e.target.value };
+                                                    setLineItems({ ...lineItems, [doc.id]: newItems });
+                                                  }}
+                                                  className="flex-1"
+                                                  data-testid={`input-line-item-desc-${doc.id}-${index}`}
+                                                />
+                                                <Input
+                                                  type="number"
+                                                  placeholder="€"
+                                                  value={item.amount}
+                                                  onChange={(e) => {
+                                                    const currentItems = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                    const newItems = [...currentItems];
+                                                    newItems[index] = { ...newItems[index], amount: e.target.value };
+                                                    setLineItems({ ...lineItems, [doc.id]: newItems });
+                                                  }}
+                                                  className="w-24"
+                                                  data-testid={`input-line-item-amount-${doc.id}-${index}`}
+                                                />
+                                                <Button
+                                                  type="button"
+                                                  size="icon"
+                                                  variant="ghost"
+                                                  onClick={() => {
+                                                    const currentItems = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                    const newItems = currentItems.filter((_: unknown, i: number) => i !== index);
+                                                    setLineItems({ ...lineItems, [doc.id]: newItems });
+                                                  }}
+                                                  data-testid={`button-remove-line-item-${doc.id}-${index}`}
+                                                >
+                                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                              </div>
+                                            ))}
+                                            {(lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : [])).length === 0 && (
+                                              <p className="text-xs text-muted-foreground italic">Aucune prestation ajoutée</p>
+                                            )}
+                                          </div>
+                                          <input 
+                                            type="hidden" 
+                                            name="quoteLineItems" 
+                                            value={JSON.stringify(lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []))}
+                                          />
+                                        </div>
                                         <div className="space-y-1">
-                                          <Label htmlFor={`quoteDescription-${doc.id}`} className="text-xs">Description</Label>
+                                          <Label htmlFor={`quoteDescription-${doc.id}`} className="text-xs">Notes additionnelles</Label>
                                           <Textarea
                                             id={`quoteDescription-${doc.id}`}
                                             name="quoteDescription"
                                             defaultValue={doc.quoteDescription || ""}
-                                            placeholder="Description détaillée des prestations..."
-                                            rows={3}
+                                            placeholder="Notes ou conditions particulières..."
+                                            rows={2}
                                             data-testid={`input-quote-description-${doc.id}`}
                                           />
                                         </div>
@@ -1739,9 +1813,41 @@ export default function Dashboard() {
                                               )}
                                             </div>
                                           </div>
+                                          {/* Line items */}
+                                          {doc.quoteLineItems && (() => {
+                                            try {
+                                              const items = JSON.parse(doc.quoteLineItems) as Array<{ description: string; amount: string }>;
+                                              if (items.length > 0) {
+                                                return (
+                                                  <div>
+                                                    <p className="text-xs text-muted-foreground mb-2">PRESTATIONS</p>
+                                                    <div className="border rounded-md overflow-hidden">
+                                                      <div className="flex bg-muted/50 p-2 text-xs font-medium">
+                                                        <span className="flex-1">Description</span>
+                                                        <span className="w-24 text-right">Montant</span>
+                                                      </div>
+                                                      {items.map((item, idx) => (
+                                                        <div key={idx} className={`flex p-2 text-sm ${idx % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
+                                                          <span className="flex-1">{item.description}</span>
+                                                          <span className="w-24 text-right">{item.amount} €</span>
+                                                        </div>
+                                                      ))}
+                                                      <div className="flex p-2 bg-muted/50 font-semibold">
+                                                        <span className="flex-1">Total HT</span>
+                                                        <span className="w-24 text-right text-primary">{doc.quoteAmount} €</span>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                );
+                                              }
+                                            } catch (e) {
+                                              return null;
+                                            }
+                                            return null;
+                                          })()}
                                           {doc.quoteDescription && (
                                             <div>
-                                              <p className="text-xs text-muted-foreground mb-1">DESCRIPTION</p>
+                                              <p className="text-xs text-muted-foreground mb-1">NOTES</p>
                                               <p className="text-sm whitespace-pre-wrap">{doc.quoteDescription}</p>
                                             </div>
                                           )}
