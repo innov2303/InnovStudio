@@ -1584,19 +1584,25 @@ export default function Dashboard() {
                                             />
                                           </div>
                                           <div className="space-y-1">
-                                            <Label htmlFor={`quoteAmount-${doc.id}`} className="text-xs">Montant (€) *</Label>
-                                            <Input
-                                              id={`quoteAmount-${doc.id}`}
-                                              name="quoteAmount"
-                                              type="text"
-                                              defaultValue={doc.quoteAmount || ""}
-                                              placeholder="Ex: 5000"
-                                              required
-                                              data-testid={`input-quote-amount-${doc.id}`}
+                                            <Label className="text-xs">Total calculé</Label>
+                                            <div className="h-9 px-3 py-2 bg-muted rounded-md text-sm font-semibold text-primary">
+                                              {(() => {
+                                                const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                const total = items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0);
+                                                return `${total.toFixed(2)} €`;
+                                              })()}
+                                            </div>
+                                            <input 
+                                              type="hidden" 
+                                              name="quoteAmount" 
+                                              value={(() => {
+                                                const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                return items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0).toFixed(2);
+                                              })()}
                                             />
                                           </div>
                                         </div>
-                                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                           <div className="space-y-1">
                                             <Label htmlFor={`quoteDepositPercent-${doc.id}`} className="text-xs">Acompte (%)</Label>
                                             <Input
@@ -1611,8 +1617,12 @@ export default function Dashboard() {
                                             />
                                           </div>
                                           <div className="flex items-end text-xs text-muted-foreground pb-2">
-                                            {doc.quoteAmount && doc.quoteDepositPercent && (
-                                              <span>Acompte: {(parseFloat(doc.quoteAmount) * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2)} €</span>
+                                            {doc.quoteDepositPercent && (
+                                              <span>Acompte: {(() => {
+                                                const items = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                                const total = items.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0);
+                                                return (total * parseFloat(doc.quoteDepositPercent) / 100).toFixed(2);
+                                              })()} €</span>
                                             )}
                                           </div>
                                         </div>
@@ -1729,7 +1739,7 @@ export default function Dashboard() {
                                             size="sm"
                                             variant="outline"
                                             onClick={() => setPreviewQuote(doc.id)}
-                                            disabled={!doc.quoteTitle || !doc.quoteAmount}
+                                            disabled={!doc.quoteTitle || ((lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : [])).length === 0)}
                                             data-testid={`button-preview-quote-${doc.id}`}
                                           >
                                             <Eye className="h-4 w-4 mr-2" />
