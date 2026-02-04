@@ -949,15 +949,8 @@ export async function registerRoutes(
         currentY = doc.y + 30;
       }
 
-      // Amount section
-      const amountY = Math.max(currentY, lineItems.length > 0 ? currentY : 340);
-      
-      doc.rect(50, amountY, 495, 60).fillColor("#f8fafc").fill();
-      doc.fontSize(12).fillColor("#333333").text("MONTANT TOTAL HT", 60, amountY + 10);
-      doc.fontSize(20).fillColor("#6366f1").text(`${document.quoteAmount} €`, 60, amountY + 28);
-
       // Signature section - positioned after content with enough space
-      const signatureY = Math.max(amountY + 80, 580);
+      const signatureY = Math.max(currentY + 20, 580);
       
       // Check if we need a new page
       if (signatureY > 650) {
