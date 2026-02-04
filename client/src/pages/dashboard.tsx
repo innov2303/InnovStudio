@@ -1690,12 +1690,12 @@ export default function Dashboard() {
                                           />
                                         </div>
                                         <div className="space-y-1">
-                                          <Label htmlFor={`quoteDescription-${doc.id}`} className="text-xs">Notes additionnelles</Label>
+                                          <Label htmlFor={`quoteDescription-${doc.id}`} className="text-xs">Fonctionnalités du site</Label>
                                           <Textarea
                                             id={`quoteDescription-${doc.id}`}
                                             name="quoteDescription"
                                             defaultValue={doc.quoteDescription || ""}
-                                            placeholder="Notes ou conditions particulières..."
+                                            placeholder="Liste des fonctionnalités prévues..."
                                             rows={2}
                                             data-testid={`input-quote-description-${doc.id}`}
                                           />
@@ -1846,7 +1846,7 @@ export default function Dashboard() {
                                               })()}
                                               {doc.quoteDescription && (
                                                 <div>
-                                                  <p className="text-xs text-muted-foreground mb-1">NOTES</p>
+                                                  <p className="text-xs text-muted-foreground mb-1">FONCTIONNALITÉS DU SITE</p>
                                                   <p className="text-sm whitespace-pre-wrap">{doc.quoteDescription}</p>
                                                 </div>
                                               )}

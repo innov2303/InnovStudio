@@ -932,9 +932,9 @@ export async function registerRoutes(
         currentY += 40;
       }
 
-      // Notes section
+      // Features section
       if (document.quoteDescription) {
-        doc.fontSize(11).fillColor("#6366f1").text("NOTES", 50, currentY);
+        doc.fontSize(11).fillColor("#6366f1").text("FONCTIONNALITÉS DU SITE", 50, currentY);
         doc.fontSize(10).fillColor("#333333").text(document.quoteDescription, 50, currentY + 15, { width: 495 });
         currentY = doc.y + 30;
       }
