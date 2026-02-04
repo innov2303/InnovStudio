@@ -8,6 +8,39 @@ import bcrypt from "bcrypt";
 import { pool } from "./db";
 import connectPgSimple from "connect-pg-simple";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./email";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Configure multer for file uploads
+const uploadDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + "-" + file.originalname);
+  },
+});
+
+const upload = multer({
+  storage: multerStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedTypes.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Type de fichier non autorisé"));
+    }
+  },
+});
 
 declare module "express-session" {
   interface SessionData {
@@ -566,6 +599,205 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Delete feature error:", error);
       res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Document routes
+  
+  // Get documents for a project
+  app.get("/api/projects/:projectId/documents", requireAuth, async (req, res) => {
+    try {
+      const projectId = req.params.projectId as string;
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Check access rights
+      if (currentUser.role !== "admin" && project.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const documents = await storage.getDocumentsByProject(projectId);
+      res.json(documents);
+    } catch (error) {
+      console.error("Get documents error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Create a document (triggered when project status changes to in_review)
+  app.post("/api/projects/:projectId/documents", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const projectId = req.params.projectId as string;
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      const { type = "quote" } = req.body;
+      const document = await storage.createDocument(projectId, type);
+      res.status(201).json(document);
+    } catch (error) {
+      console.error("Create document error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Admin uploads/generates the quote file
+  app.post("/api/documents/:id/upload-quote", requireAuth, upload.single("file"), async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.getDocument(documentId);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Fichier requis" });
+      }
+
+      // Update document with file and change status to awaiting_signature
+      const updatedDoc = await storage.updateDocumentFile(documentId, req.file.filename);
+      await storage.updateDocumentStatus(documentId, "awaiting_signature");
+      
+      const finalDoc = await storage.getDocument(documentId);
+      res.json(finalDoc);
+    } catch (error) {
+      console.error("Upload quote error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Client uploads signed document
+  app.post("/api/documents/:id/upload-signed", requireAuth, upload.single("file"), async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.getDocument(documentId);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      // Check if user owns the project
+      const project = await storage.getProject(document.projectId);
+      if (!project || (project.userId !== currentUser.id && currentUser.role !== "admin")) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Can only upload signed doc if status is awaiting_signature
+      if (document.status !== "awaiting_signature") {
+        return res.status(400).json({ message: "Ce document n'est pas en attente de signature" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Fichier requis" });
+      }
+
+      // Update document with signed file and change status
+      const updatedDoc = await storage.updateDocumentSignedFile(documentId, req.file.filename);
+      res.json(updatedDoc);
+    } catch (error) {
+      console.error("Upload signed document error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Download document file
+  app.get("/api/documents/:id/download", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.getDocument(documentId);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      // Check access rights
+      const project = await storage.getProject(document.projectId);
+      if (!project || (project.userId !== currentUser.id && currentUser.role !== "admin")) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const fileType = req.query.type as string;
+      const fileName = fileType === "signed" ? document.signedFileName : document.fileName;
+      
+      if (!fileName) {
+        return res.status(404).json({ message: "Fichier non trouvé" });
+      }
+
+      const filePath = path.join(uploadDir, fileName);
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "Fichier non trouvé" });
+      }
+
+      res.download(filePath, fileName);
+    } catch (error) {
+      console.error("Download document error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Update document status (admin only)
+  app.patch("/api/documents/:id/status", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const { status } = req.body;
+      const validStatuses = ["pending_creation", "awaiting_signature", "signed"];
+      if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Statut invalide" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.updateDocumentStatus(documentId, status);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      res.json(document);
+    } catch (error) {
+      console.error("Update document status error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Serve uploaded files
+  app.use("/uploads", requireAuth, (req, res, next) => {
+    // Verify user can access the file
+    next();
+  }, (req, res) => {
+    const filePath = path.join(uploadDir, req.path);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).json({ message: "Fichier non trouvé" });
     }
   });
 
