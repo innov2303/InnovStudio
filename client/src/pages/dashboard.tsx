@@ -343,7 +343,7 @@ export default function Dashboard() {
   });
 
   const updateQuoteMutation = useMutation({
-    mutationFn: async ({ documentId, data }: { documentId: string; data: { quoteTitle: string; quoteDescription?: string; quoteAmount: string; quoteValidityDays?: string; quoteNotes?: string } }) => {
+    mutationFn: async ({ documentId, data }: { documentId: string; data: { quoteTitle: string; quoteDescription?: string; quoteLineItems?: string; quoteAmount: string; quoteDepositPercent?: string; quoteValidityDays?: string; quoteNotes?: string } }) => {
       const response = await fetch(`/api/documents/${documentId}/quote`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -1558,12 +1558,16 @@ export default function Dashboard() {
                                         onSubmit={(e) => {
                                           e.preventDefault();
                                           const formData = new FormData(e.currentTarget);
+                                          const currentLineItems = lineItems[doc.id] || (doc.quoteLineItems ? JSON.parse(doc.quoteLineItems) : []);
+                                          const totalAmount = currentLineItems.reduce((sum: number, item: { amount: string }) => sum + (parseFloat(item.amount) || 0), 0).toFixed(2);
                                           updateQuoteMutation.mutate({
                                             documentId: doc.id,
                                             data: {
                                               quoteTitle: formData.get("quoteTitle") as string,
                                               quoteDescription: formData.get("quoteDescription") as string || undefined,
-                                              quoteAmount: formData.get("quoteAmount") as string,
+                                              quoteLineItems: JSON.stringify(currentLineItems),
+                                              quoteAmount: totalAmount,
+                                              quoteDepositPercent: formData.get("quoteDepositPercent") as string || undefined,
                                               quoteValidityDays: formData.get("quoteValidityDays") as string || undefined,
                                               quoteNotes: formData.get("quoteNotes") as string || undefined,
                                             },
