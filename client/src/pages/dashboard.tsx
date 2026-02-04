@@ -94,6 +94,9 @@ export default function Dashboard() {
     }
   }, [user, setLocation]);
 
+  // Collapse all projects by default when they load
+  const [initialCollapseApplied, setInitialCollapseApplied] = useState(false);
+
   const { data: allUsers, isLoading: usersLoading } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
     enabled: user?.role === "admin",
@@ -103,6 +106,14 @@ export default function Dashboard() {
     queryKey: ["/api/projects"],
     enabled: !!user,
   });
+
+  // Collapse all projects by default when data first loads
+  useEffect(() => {
+    if (projects && projects.length > 0 && !initialCollapseApplied) {
+      setCollapsedProjects(new Set(projects.map(p => p.id)));
+      setInitialCollapseApplied(true);
+    }
+  }, [projects, initialCollapseApplied]);
 
   const projectForm = useForm<CreateProjectData>({
     resolver: zodResolver(createProjectSchema),
