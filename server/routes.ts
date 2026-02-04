@@ -929,7 +929,17 @@ export async function registerRoutes(
         doc.rect(50, currentY, 495, 28).fillColor("#e2e8f0").fill();
         doc.fontSize(11).fillColor("#1a1a1a").text("Total HT", 60, currentY + 8);
         doc.fontSize(12).fillColor("#6366f1").text(`${document.quoteAmount} €`, 475, currentY + 7);
-        currentY += 40;
+        currentY += 28;
+        
+        // Deposit line if specified
+        if (document.quoteDepositPercent) {
+          const depositAmount = (parseFloat(document.quoteAmount) * parseFloat(document.quoteDepositPercent) / 100).toFixed(2);
+          doc.rect(50, currentY, 495, 24).fillColor("#fef3c7").fill();
+          doc.fontSize(10).fillColor("#92400e").text(`Acompte à la commande (${document.quoteDepositPercent}%)`, 60, currentY + 6);
+          doc.fontSize(11).fillColor("#92400e").text(`${depositAmount} €`, 475, currentY + 5);
+          currentY += 24;
+        }
+        currentY += 15;
       }
 
       // Features section
@@ -945,14 +955,6 @@ export async function registerRoutes(
       doc.rect(50, amountY, 495, 60).fillColor("#f8fafc").fill();
       doc.fontSize(12).fillColor("#333333").text("MONTANT TOTAL HT", 60, amountY + 10);
       doc.fontSize(20).fillColor("#6366f1").text(`${document.quoteAmount} €`, 60, amountY + 28);
-
-      // Deposit if specified
-      if (document.quoteDepositPercent) {
-        const depositAmount = (parseFloat(document.quoteAmount) * parseFloat(document.quoteDepositPercent) / 100).toFixed(2);
-        doc.rect(50, amountY + 70, 495, 40).fillColor("#fef3c7").fill();
-        doc.fontSize(10).fillColor("#92400e").text(`Acompte à la signature (${document.quoteDepositPercent}%)`, 60, amountY + 80);
-        doc.fontSize(14).fillColor("#92400e").text(`${depositAmount} €`, 60, amountY + 95);
-      }
 
       // Footer
       const footerY = 750;
