@@ -47,8 +47,9 @@ import {
   X,
   Check
 } from "lucide-react";
-import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData } from "@shared/schema";
+import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock } from "lucide-react";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
 
@@ -283,6 +284,103 @@ export default function Dashboard() {
       description: newFeatureDescription.trim() || undefined 
     });
   };
+
+  // Documents state and queries
+  const [expandedDocuments, setExpandedDocuments] = useState<string | null>(null);
+
+  const { data: documents, refetch: refetchDocuments } = useQuery<ProjectDocument[]>({
+    queryKey: ["/api/projects", expandedDocuments, "documents"],
+    queryFn: async () => {
+      if (!expandedDocuments) return [];
+      const response = await fetch(`/api/projects/${expandedDocuments}/documents`, { credentials: "include" });
+      if (!response.ok) throw new Error("Erreur lors du chargement");
+      return response.json();
+    },
+    enabled: !!expandedDocuments,
+  });
+
+  const createDocumentMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const response = await apiRequest("POST", `/api/projects/${projectId}/documents`, { type: "quote" });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Devis créé",
+        description: "Le devis a été créé et est en attente d'édition.",
+      });
+      refetchDocuments();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la création",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const uploadQuoteMutation = useMutation({
+    mutationFn: async ({ documentId, file }: { documentId: string; file: File }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch(`/api/documents/${documentId}/upload-quote`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur lors de l'upload");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Devis envoyé",
+        description: "Le devis a été envoyé au client pour signature.",
+      });
+      refetchDocuments();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'upload",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const uploadSignedMutation = useMutation({
+    mutationFn: async ({ documentId, file }: { documentId: string; file: File }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch(`/api/documents/${documentId}/upload-signed`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur lors de l'upload");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Document signé",
+        description: "Votre document signé a été envoyé avec succès.",
+      });
+      refetchDocuments();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'upload",
+        variant: "destructive",
+      });
+    },
+  });
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -1187,6 +1285,182 @@ export default function Dashboard() {
                             ) : (
                               <div className="text-center py-4 text-muted-foreground text-sm">
                                 Aucune fonctionnalité demandée
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Documents toggle button */}
+                        <Button
+                          variant="ghost"
+                          className="w-full mt-3 justify-between"
+                          onClick={() => setExpandedDocuments(expandedDocuments === project.id ? null : project.id)}
+                          data-testid={`button-toggle-documents-${project.id}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">Documents</span>
+                          </div>
+                          {expandedDocuments === project.id ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+
+                        {/* Documents section - expanded */}
+                        {expandedDocuments === project.id && (
+                          <div className="mt-4 pt-4 border-t space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-semibold">Documents du projet</h4>
+                              {user.role === "admin" && project.status === "in_review" && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => createDocumentMutation.mutate(project.id)}
+                                  disabled={createDocumentMutation.isPending}
+                                  data-testid={`button-create-document-${project.id}`}
+                                >
+                                  {createDocumentMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  ) : (
+                                    <Plus className="h-4 w-4 mr-2" />
+                                  )}
+                                  Créer un devis
+                                </Button>
+                              )}
+                            </div>
+
+                            {documents && documents.length > 0 ? (
+                              <div className="space-y-3">
+                                {documents.map((doc) => (
+                                  <div 
+                                    key={doc.id} 
+                                    className="p-3 rounded-lg border bg-muted/30"
+                                    data-testid={`document-item-${doc.id}`}
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${
+                                          doc.status === "pending_creation" ? "bg-yellow-500/10" :
+                                          doc.status === "awaiting_signature" ? "bg-blue-500/10" :
+                                          "bg-green-500/10"
+                                        }`}>
+                                          {doc.status === "pending_creation" && <FilePenLine className="h-4 w-4 text-yellow-500" />}
+                                          {doc.status === "awaiting_signature" && <FileClock className="h-4 w-4 text-blue-500" />}
+                                          {doc.status === "signed" && <FileCheck className="h-4 w-4 text-green-500" />}
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium">
+                                            {doc.type === "quote" ? "Devis" : "Facture"}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {doc.status === "pending_creation" && "En attente d'édition"}
+                                            {doc.status === "awaiting_signature" && "En attente de signature"}
+                                            {doc.status === "signed" && "Signé"}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        {/* Admin actions */}
+                                        {user.role === "admin" && doc.status === "pending_creation" && (
+                                          <div className="flex items-center gap-2">
+                                            <input
+                                              type="file"
+                                              id={`upload-quote-${doc.id}`}
+                                              className="hidden"
+                                              accept=".pdf,.doc,.docx"
+                                              onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                  uploadQuoteMutation.mutate({ documentId: doc.id, file });
+                                                }
+                                              }}
+                                            />
+                                            <Button
+                                              size="sm"
+                                              variant="default"
+                                              onClick={() => document.getElementById(`upload-quote-${doc.id}`)?.click()}
+                                              disabled={uploadQuoteMutation.isPending}
+                                              data-testid={`button-upload-quote-${doc.id}`}
+                                            >
+                                              {uploadQuoteMutation.isPending ? (
+                                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                              ) : (
+                                                <Upload className="h-4 w-4 mr-2" />
+                                              )}
+                                              Envoyer le devis
+                                            </Button>
+                                          </div>
+                                        )}
+
+                                        {/* Download original document */}
+                                        {doc.fileName && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                                            data-testid={`button-download-${doc.id}`}
+                                          >
+                                            <Download className="h-4 w-4 mr-2" />
+                                            Télécharger
+                                          </Button>
+                                        )}
+
+                                        {/* Client upload signed document */}
+                                        {user.role !== "admin" && doc.status === "awaiting_signature" && (
+                                          <div className="flex items-center gap-2">
+                                            <input
+                                              type="file"
+                                              id={`upload-signed-${doc.id}`}
+                                              className="hidden"
+                                              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                              onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                  uploadSignedMutation.mutate({ documentId: doc.id, file });
+                                                }
+                                              }}
+                                            />
+                                            <Button
+                                              size="sm"
+                                              variant="default"
+                                              onClick={() => document.getElementById(`upload-signed-${doc.id}`)?.click()}
+                                              disabled={uploadSignedMutation.isPending}
+                                              data-testid={`button-upload-signed-${doc.id}`}
+                                            >
+                                              {uploadSignedMutation.isPending ? (
+                                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                              ) : (
+                                                <FileUp className="h-4 w-4 mr-2" />
+                                              )}
+                                              Envoyer signé
+                                            </Button>
+                                          </div>
+                                        )}
+
+                                        {/* Download signed document */}
+                                        {doc.signedFileName && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => window.open(`/api/documents/${doc.id}/download?type=signed`, '_blank')}
+                                            data-testid={`button-download-signed-${doc.id}`}
+                                          >
+                                            <FileCheck className="h-4 w-4 mr-2" />
+                                            Signé
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-4 text-muted-foreground text-sm">
+                                {project.status === "in_review" 
+                                  ? "Aucun document - Un devis sera bientôt disponible" 
+                                  : "Aucun document disponible"}
                               </div>
                             )}
                           </div>
