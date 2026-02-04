@@ -139,6 +139,7 @@ export default function ChangePassword() {
                             <Input
                               type={showCurrentPassword ? "text" : "password"}
                               placeholder="••••••••"
+                              className="pr-10"
                               data-testid="input-current-password"
                               {...field}
                             />
@@ -174,6 +175,7 @@ export default function ChangePassword() {
                             <Input
                               type={showNewPassword ? "text" : "password"}
                               placeholder="••••••••"
+                              className="pr-10"
                               data-testid="input-new-password"
                               {...field}
                             />
@@ -209,6 +211,7 @@ export default function ChangePassword() {
                             <Input
                               type={showConfirmPassword ? "text" : "password"}
                               placeholder="••••••••"
+                              className="pr-10"
                               data-testid="input-confirm-password"
                               {...field}
                             />

@@ -128,6 +128,7 @@ export default function Login() {
                             <Input
                               type={showPassword ? "text" : "password"}
                               placeholder="••••••••"
+                              className="pr-10"
                               data-testid="input-password"
                               {...field}
                             />

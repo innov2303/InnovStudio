@@ -180,6 +180,7 @@ export default function ResetPassword() {
                               <Input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="••••••••"
+                                className="pr-10"
                                 data-testid="input-new-password"
                                 {...field}
                               />
@@ -215,6 +216,7 @@ export default function ResetPassword() {
                               <Input
                                 type={showConfirmPassword ? "text" : "password"}
                                 placeholder="••••••••"
+                                className="pr-10"
                                 data-testid="input-confirm-password"
                                 {...field}
                               />
