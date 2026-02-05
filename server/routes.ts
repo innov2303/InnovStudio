@@ -1970,16 +1970,35 @@ export async function registerRoutes(
         try {
           // Create or update Stripe product
           let product;
+          let needsNewProduct = !offer.stripeProductId;
+          
+          // Try to retrieve existing product if we have an ID
           if (offer.stripeProductId) {
-            product = await stripeClient.products.update(offer.stripeProductId, {
-              name: `Abonnement ${offer.name}`,
-              description: offer.description,
-            });
-          } else {
+            try {
+              product = await stripeClient.products.update(offer.stripeProductId, {
+                name: `Abonnement ${offer.name}`,
+                description: offer.description,
+              });
+            } catch (retrieveError: any) {
+              // Product doesn't exist on this Stripe account, create a new one
+              if (retrieveError.code === 'resource_missing') {
+                needsNewProduct = true;
+              } else {
+                throw retrieveError;
+              }
+            }
+          }
+          
+          // Create new product if needed
+          if (needsNewProduct) {
             product = await stripeClient.products.create({
               name: `Abonnement ${offer.name}`,
               description: offer.description,
             });
+          }
+
+          if (!product) {
+            throw new Error("Failed to create or retrieve Stripe product");
           }
 
           // Create new price (Stripe prices are immutable)
