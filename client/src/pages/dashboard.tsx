@@ -2251,7 +2251,7 @@ export default function Dashboard() {
                                                 data-testid={`button-client-download-${doc.id}`}
                                               >
                                                 <Download className="h-4 w-4 mr-1" />
-                                                Télécharger PDF
+                                                Télécharger
                                               </Button>
                                             </div>
                                             <div className="flex items-center gap-2">
@@ -2315,7 +2315,7 @@ export default function Dashboard() {
                                               data-testid={`button-download-pdf-signed-${doc.id}`}
                                             >
                                               <Download className="h-4 w-4 mr-1" />
-                                              PDF
+                                              Télécharger
                                             </Button>
                                             {doc.signedFileName && (
                                               <Button
