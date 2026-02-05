@@ -786,6 +786,49 @@ export async function registerRoutes(
     }
   });
 
+  // Client electronic signature
+  app.post("/api/documents/:id/sign-electronic", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.getDocument(documentId);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      // Check if user owns the project
+      const project = await storage.getProject(document.projectId);
+      if (!project || project.userId !== currentUser.id) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Can only sign if status is awaiting_signature
+      if (document.status !== "awaiting_signature") {
+        return res.status(400).json({ message: "Ce document n'est pas en attente de signature" });
+      }
+
+      const { signature } = req.body;
+      if (!signature || typeof signature !== 'string') {
+        return res.status(400).json({ message: "Signature invalide" });
+      }
+
+      if (!signature.startsWith('data:image/png;base64,')) {
+        return res.status(400).json({ message: "Format de signature invalide" });
+      }
+
+      // Update document with client signature and change status to signed
+      const updatedDoc = await storage.updateDocumentClientSignature(documentId, signature);
+      res.json(updatedDoc);
+    } catch (error) {
+      console.error("Electronic signature error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Download document file
   app.get("/api/documents/:id/download", requireAuth, async (req, res) => {
     try {

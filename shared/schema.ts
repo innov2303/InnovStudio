@@ -166,6 +166,7 @@ export const projectDocuments = pgTable("project_documents", {
   // Files
   fileName: text("file_name"),
   signedFileName: text("signed_file_name"),
+  clientSignature: text("client_signature"), // Base64 PNG signature from client
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
