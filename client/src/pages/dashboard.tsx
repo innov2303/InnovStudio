@@ -1059,8 +1059,7 @@ export default function Dashboard() {
                                 <SelectItem value="pending">En attente</SelectItem>
                                 <SelectItem value="in_review">En cours d'étude</SelectItem>
                                 <SelectItem value="awaiting_signature">En attente de signature</SelectItem>
-                                <SelectItem value="awaiting_deposit">Attente de l'acompte</SelectItem>
-                                <SelectItem value="approved">Acompte reçu</SelectItem>
+                                <SelectItem value="approved">Acompte reçu (Validé)</SelectItem>
                                 <SelectItem value="in_progress_1">En cours - Phase 1</SelectItem>
                                 <SelectItem value="in_progress_2">En cours - Phase 2</SelectItem>
                                 <SelectItem value="completed">Terminé</SelectItem>
