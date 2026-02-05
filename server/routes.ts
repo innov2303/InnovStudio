@@ -1790,5 +1790,140 @@ export async function registerRoutes(
     }
   });
 
+  // ===================== SUBSCRIPTIONS =====================
+  
+  // Subscription offer prices (monthly)
+  const subscriptionOffers = {
+    maintenance: { name: "Maintenance du site", price: "99.00", description: "Mises à jour, corrections de bugs, support technique" },
+    hosting: { name: "Hébergement du site", price: "49.00", description: "Hébergement sécurisé, SSL, sauvegrades automatiques" },
+    pack: { name: "Pack Complet", price: "129.00", description: "Maintenance + Hébergement avec réduction" },
+  };
+
+  // Get available subscription offers
+  app.get("/api/subscriptions/offers", requireAuth, async (req, res) => {
+    res.json(subscriptionOffers);
+  });
+
+  // Get user subscriptions
+  app.get("/api/subscriptions", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      let subscriptions;
+      if (currentUser.role === "admin") {
+        subscriptions = await storage.getAllSubscriptions();
+      } else {
+        subscriptions = await storage.getSubscriptionsByUser(currentUser.id);
+      }
+
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Get subscriptions error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Create a subscription
+  app.post("/api/subscriptions", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const { projectId, offerType } = req.body;
+
+      if (!projectId || !offerType) {
+        return res.status(400).json({ message: "Projet et type d'offre requis" });
+      }
+
+      // Validate offer type
+      if (!["maintenance", "hosting", "pack"].includes(offerType)) {
+        return res.status(400).json({ message: "Type d'offre invalide" });
+      }
+
+      // Verify project exists and belongs to user (or user is admin)
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      if (project.userId !== currentUser.id && currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Check if project already has this subscription type
+      const existingSubscriptions = await storage.getSubscriptionsByProject(projectId);
+      const hasExisting = existingSubscriptions.some(
+        sub => sub.offerType === offerType && sub.status === "active"
+      );
+
+      if (hasExisting) {
+        return res.status(400).json({ message: "Ce projet a déjà un abonnement de ce type actif" });
+      }
+
+      // Get the price for this offer type
+      const offer = subscriptionOffers[offerType as keyof typeof subscriptionOffers];
+      const monthlyPrice = offer.price;
+
+      const subscription = await storage.createSubscription(
+        currentUser.id,
+        projectId,
+        offerType,
+        monthlyPrice
+      );
+
+      res.json(subscription);
+    } catch (error) {
+      console.error("Create subscription error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Cancel a subscription
+  app.patch("/api/subscriptions/:id/cancel", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const subscription = await storage.getSubscription(req.params.id);
+      if (!subscription) {
+        return res.status(404).json({ message: "Abonnement non trouvé" });
+      }
+
+      // Only owner or admin can cancel
+      if (subscription.userId !== currentUser.id && currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const updated = await storage.updateSubscriptionStatus(req.params.id, "cancelled");
+      res.json(updated);
+    } catch (error) {
+      console.error("Cancel subscription error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Delete a subscription (admin only)
+  app.delete("/api/subscriptions/:id", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      await storage.deleteSubscription(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete subscription error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   return httpServer;
 }
