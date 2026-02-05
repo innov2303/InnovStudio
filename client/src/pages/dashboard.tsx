@@ -1427,7 +1427,7 @@ export default function Dashboard() {
                           <div className="mt-4 pt-4 border-t space-y-4">
                             <div className="flex items-center justify-between">
                               <h4 className="text-sm font-semibold">Fonctionnalités demandées</h4>
-                              {user.role !== "admin" && (
+                              {user.role !== "admin" && project.status !== "completed" && (
                                 <Button 
                                   size="sm" 
                                   variant="outline"
@@ -1440,8 +1440,8 @@ export default function Dashboard() {
                               )}
                             </div>
 
-                            {/* Add feature form (client only) */}
-                            {showFeatureForm === project.id && user.role !== "admin" && (
+                            {/* Add feature form (client only, not for completed projects) */}
+                            {showFeatureForm === project.id && user.role !== "admin" && project.status !== "completed" && (
                               <div className="p-3 rounded-lg bg-muted/50 space-y-3">
                                 <Input
                                   placeholder="Titre de la fonctionnalité"

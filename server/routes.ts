@@ -531,6 +531,11 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
+      // Cannot add features to completed projects
+      if (project.status === "completed") {
+        return res.status(400).json({ message: "Impossible d'ajouter des fonctionnalités à un projet terminé" });
+      }
+
       const result = createFeatureSchema.safeParse(req.body);
       if (!result.success) {
         return res.status(400).json({ message: result.error.errors[0].message });
