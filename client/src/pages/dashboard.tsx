@@ -67,6 +67,7 @@ import {
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send } from "lucide-react";
+import { SignaturePad } from "@/components/signature-pad";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
 
@@ -473,6 +474,26 @@ export default function Dashboard() {
         description: "À bientôt !",
       });
       setLocation("/");
+    },
+  });
+
+  const saveSignatureMutation = useMutation({
+    mutationFn: async (signature: string) => {
+      await apiRequest("POST", "/api/auth/save-signature", { signature });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      toast({
+        title: "Signature enregistrée",
+        description: "Votre signature sera intégrée dans les prochains devis.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'enregistrer la signature.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -2062,6 +2083,28 @@ export default function Dashboard() {
                   </p>
                 </CardContent>
               </Card>
+
+              {/* Admin Signature Card - Only visible for admin */}
+              {user?.role === "admin" && (
+                <Card className="md:col-span-2">
+                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Pencil className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Signature électronique</CardTitle>
+                      <CardDescription>Votre signature sera intégrée dans les devis générés</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <SignaturePad 
+                      existingSignature={user?.signature}
+                      onSave={(signature) => saveSignatureMutation.mutate(signature)}
+                      isPending={saveSignatureMutation.isPending}
+                    />
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
         </main>
