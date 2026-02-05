@@ -66,7 +66,7 @@ import {
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
@@ -100,6 +100,8 @@ export default function Dashboard() {
   };
   const [newFeatureTitle, setNewFeatureTitle] = useState("");
   const [newFeatureDescription, setNewFeatureDescription] = useState("");
+  const [signDocumentId, setSignDocumentId] = useState<string | null>(null);
+  const [clientSignature, setClientSignature] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -457,6 +459,29 @@ export default function Dashboard() {
       toast({
         title: "Erreur",
         description: error.message || "Erreur lors de l'upload",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const signElectronicMutation = useMutation({
+    mutationFn: async ({ documentId, signature }: { documentId: string; signature: string }) => {
+      const response = await apiRequest("POST", `/api/documents/${documentId}/sign-electronic`, { signature });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Document signé",
+        description: "Votre signature électronique a été enregistrée avec succès.",
+      });
+      setSignDocumentId(null);
+      setClientSignature(null);
+      refetchDocuments();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la signature",
         variant: "destructive",
       });
     },
@@ -1522,53 +1547,68 @@ export default function Dashboard() {
 
                                         {/* Client preview and download quote */}
                                         {user.role !== "admin" && doc.status === "awaiting_signature" && (
-                                          <div className="flex items-center gap-2">
-                                            <Button
-                                              size="sm"
-                                              variant="outline"
-                                              onClick={() => setPreviewQuote(previewQuote === doc.id ? null : doc.id)}
-                                              data-testid={`button-client-preview-${doc.id}`}
-                                            >
-                                              <Eye className="h-4 w-4 mr-1" />
-                                              Prévisualiser
-                                            </Button>
-                                            <Button
-                                              size="sm"
-                                              variant="outline"
-                                              onClick={() => {
-                                                window.open(`/api/documents/${doc.id}/generate-pdf`, "_blank");
-                                              }}
-                                              data-testid={`button-client-download-${doc.id}`}
-                                            >
-                                              <Download className="h-4 w-4 mr-1" />
-                                              Télécharger PDF
-                                            </Button>
-                                            <input
-                                              type="file"
-                                              id={`upload-signed-${doc.id}`}
-                                              className="hidden"
-                                              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                                              onChange={(e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) {
-                                                  uploadSignedMutation.mutate({ documentId: doc.id, file });
-                                                }
-                                              }}
-                                            />
-                                            <Button
-                                              size="sm"
-                                              variant="default"
-                                              onClick={() => document.getElementById(`upload-signed-${doc.id}`)?.click()}
-                                              disabled={uploadSignedMutation.isPending}
-                                              data-testid={`button-upload-signed-${doc.id}`}
-                                            >
-                                              {uploadSignedMutation.isPending ? (
-                                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                              ) : (
-                                                <FileUp className="h-4 w-4 mr-2" />
-                                              )}
-                                              Envoyer signé
-                                            </Button>
+                                          <div className="flex flex-col gap-3">
+                                            <div className="flex items-center gap-2">
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => setPreviewQuote(previewQuote === doc.id ? null : doc.id)}
+                                                data-testid={`button-client-preview-${doc.id}`}
+                                              >
+                                                <Eye className="h-4 w-4 mr-1" />
+                                                Prévisualiser
+                                              </Button>
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                  window.open(`/api/documents/${doc.id}/generate-pdf`, "_blank");
+                                                }}
+                                                data-testid={`button-client-download-${doc.id}`}
+                                              >
+                                                <Download className="h-4 w-4 mr-1" />
+                                                Télécharger PDF
+                                              </Button>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              <Button
+                                                size="sm"
+                                                variant="default"
+                                                onClick={() => setSignDocumentId(doc.id)}
+                                                disabled={signElectronicMutation.isPending}
+                                                data-testid={`button-sign-electronic-${doc.id}`}
+                                              >
+                                                <PenLine className="h-4 w-4 mr-2" />
+                                                Signer électroniquement
+                                              </Button>
+                                              <span className="text-xs text-muted-foreground">ou</span>
+                                              <input
+                                                type="file"
+                                                id={`upload-signed-${doc.id}`}
+                                                className="hidden"
+                                                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                                onChange={(e) => {
+                                                  const file = e.target.files?.[0];
+                                                  if (file) {
+                                                    uploadSignedMutation.mutate({ documentId: doc.id, file });
+                                                  }
+                                                }}
+                                              />
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => document.getElementById(`upload-signed-${doc.id}`)?.click()}
+                                                disabled={uploadSignedMutation.isPending}
+                                                data-testid={`button-upload-signed-${doc.id}`}
+                                              >
+                                                {uploadSignedMutation.isPending ? (
+                                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                                ) : (
+                                                  <FileUp className="h-4 w-4 mr-2" />
+                                                )}
+                                                Envoyer PDF signé
+                                              </Button>
+                                            </div>
                                           </div>
                                         )}
 
@@ -2109,6 +2149,58 @@ export default function Dashboard() {
           )}
         </main>
       </div>
+
+      {/* Client Electronic Signature Dialog */}
+      <Dialog open={!!signDocumentId} onOpenChange={(open) => {
+        if (!open) {
+          setSignDocumentId(null);
+          setClientSignature(null);
+        }
+      }}>
+        <DialogContent className="max-w-md" data-testid="dialog-sign-electronic">
+          <DialogHeader>
+            <DialogTitle className="text-primary">Signature électronique</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Dessinez votre signature ci-dessous pour signer le devis électroniquement.
+            </p>
+            <SignaturePad
+              existingSignature={null}
+              onSave={(signature) => setClientSignature(signature)}
+              isPending={false}
+              saveButtonText="Valider ma signature"
+            />
+            {clientSignature && (
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setClientSignature(null)}
+                  data-testid="button-reset-signature"
+                >
+                  Recommencer
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (signDocumentId && clientSignature) {
+                      signElectronicMutation.mutate({ documentId: signDocumentId, signature: clientSignature });
+                    }
+                  }}
+                  disabled={signElectronicMutation.isPending}
+                  data-testid="button-confirm-signature"
+                >
+                  {signElectronicMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-2" />
+                  )}
+                  Confirmer la signature
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>

@@ -6,9 +6,10 @@ interface SignaturePadProps {
   onSave: (signature: string) => void;
   existingSignature?: string | null;
   isPending?: boolean;
+  saveButtonText?: string;
 }
 
-export function SignaturePad({ onSave, existingSignature, isPending }: SignaturePadProps) {
+export function SignaturePad({ onSave, existingSignature, isPending, saveButtonText }: SignaturePadProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
@@ -146,7 +147,7 @@ export function SignaturePad({ onSave, existingSignature, isPending }: Signature
           ) : (
             <>
               <Save className="h-4 w-4 mr-2" />
-              Enregistrer la signature
+              {saveButtonText || "Enregistrer la signature"}
             </>
           )}
         </Button>
