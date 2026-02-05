@@ -1,5 +1,8 @@
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+
+// Load .env from project root (works with bundled code)
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
