@@ -25,6 +25,11 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Pad de signature dans les paramètres pour dessiner la signature (canvas avec support souris/tactile)
   - Signature sauvegardée en base64 PNG dans la base de données
   - Signature automatiquement intégrée dans tous les PDF de devis générés (zone "Pour Innov Studio")
+- **Signature électronique client** :
+  - Le client peut choisir entre signer électroniquement OU uploader un PDF signé
+  - Dialog de signature avec pad de signature canvas
+  - Signature client sauvegardée en base64 PNG dans le document
+  - Les deux signatures (admin + client) intégrées dans le PDF final
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
 - **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
@@ -96,6 +101,7 @@ shared/
 - `POST /api/projects/:projectId/documents` - Créer un document (admin only)
 - `POST /api/documents/:id/upload-quote` - Admin upload le devis
 - `POST /api/documents/:id/upload-signed` - Client upload le document signé
+- `POST /api/documents/:id/sign-electronic` - Client signe électroniquement
 - `GET /api/documents/:id/download` - Télécharger un document
 - `PATCH /api/documents/:id/status` - Modifier statut document (admin only)
 

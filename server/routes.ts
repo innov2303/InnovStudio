@@ -1068,6 +1068,17 @@ export async function registerRoutes(
             console.error("Error embedding admin signature:", sigError);
           }
         }
+        
+        // Add client signature if available
+        if (document.clientSignature && document.clientSignature.startsWith("data:image/png;base64,")) {
+          try {
+            const clientSigBase64 = document.clientSignature.replace("data:image/png;base64,", "");
+            const clientSigBuffer = Buffer.from(clientSigBase64, "base64");
+            doc.image(clientSigBuffer, 315, newPageY + 75, { width: 160, height: 40 });
+          } catch (sigError) {
+            console.error("Error embedding client signature:", sigError);
+          }
+        }
       } else {
         // Signature section on same page
         doc.fontSize(11).fillColor("#6366f1").text("SIGNATURE", 50, signatureY);
@@ -1096,6 +1107,17 @@ export async function registerRoutes(
             doc.image(signatureBuffer, 70, signatureY + 70, { width: 160, height: 40 });
           } catch (sigError) {
             console.error("Error embedding admin signature:", sigError);
+          }
+        }
+        
+        // Add client signature if available
+        if (document.clientSignature && document.clientSignature.startsWith("data:image/png;base64,")) {
+          try {
+            const clientSigBase64 = document.clientSignature.replace("data:image/png;base64,", "");
+            const clientSigBuffer = Buffer.from(clientSigBase64, "base64");
+            doc.image(clientSigBuffer, 315, signatureY + 70, { width: 160, height: 40 });
+          } catch (sigError) {
+            console.error("Error embedding client signature:", sigError);
           }
         }
       }
