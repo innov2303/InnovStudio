@@ -1960,14 +1960,14 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
-      // Check if project already has this subscription type
+      // Check if project already has any active subscription
       const existingSubscriptions = await storage.getSubscriptionsByProject(projectId);
-      const hasExisting = existingSubscriptions.some(
-        sub => sub.offerType === offerType && sub.status === "active"
+      const hasActiveSubscription = existingSubscriptions.some(
+        sub => sub.status === "active"
       );
 
-      if (hasExisting) {
-        return res.status(400).json({ message: "Ce projet a déjà un abonnement de ce type actif" });
+      if (hasActiveSubscription) {
+        return res.status(400).json({ message: "Ce projet a déjà un abonnement actif. Veuillez d'abord résilier l'abonnement existant." });
       }
 
       // Get the price for this offer type from database
@@ -2061,14 +2061,14 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
-      // Check if project already has this subscription type
+      // Check if project already has any active subscription
       const existingSubscriptions = await storage.getSubscriptionsByProject(projectId);
-      const hasExisting = existingSubscriptions.some(
-        sub => sub.offerType === offerType && sub.status === "active"
+      const hasActiveSubscription = existingSubscriptions.some(
+        sub => sub.status === "active"
       );
 
-      if (hasExisting) {
-        return res.status(400).json({ message: "Ce projet a déjà un abonnement de ce type actif" });
+      if (hasActiveSubscription) {
+        return res.status(400).json({ message: "Ce projet a déjà un abonnement actif. Veuillez d'abord résilier l'abonnement existant." });
       }
 
       // Get the price for this offer type from database
