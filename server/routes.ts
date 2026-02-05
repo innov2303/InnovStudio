@@ -377,6 +377,27 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/auth/profile", requireAuth, async (req, res) => {
+    try {
+      const { updateProfileSchema } = await import("@shared/schema");
+      const result = updateProfileSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Données invalides", errors: result.error.flatten() });
+      }
+
+      const updatedUser = await storage.updateUserProfile(req.session.userId!, result.data);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   app.get("/api/users", requireAuth, async (req, res) => {
     try {
       const currentUser = await storage.getUser(req.session.userId!);

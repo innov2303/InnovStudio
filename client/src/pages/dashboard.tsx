@@ -102,6 +102,13 @@ export default function Dashboard() {
   const [newFeatureDescription, setNewFeatureDescription] = useState("");
   const [signDocumentId, setSignDocumentId] = useState<string | null>(null);
   const [clientSignature, setClientSignature] = useState<string | null>(null);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editProfileData, setEditProfileData] = useState({
+    company: "",
+    address: "",
+    billingAddress: "",
+    sameAsBilling: false,
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -510,6 +517,37 @@ export default function Dashboard() {
     },
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: { company: string; address: string; billingAddress?: string; sameAsBilling?: boolean }) => {
+      const response = await fetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur lors de la mise à jour");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profil mis à jour",
+        description: "Vos informations ont été mises à jour avec succès.",
+      });
+      setShowEditProfile(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la mise à jour",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
       const response = await fetch(`/api/projects/${projectId}`, {
@@ -837,58 +875,135 @@ export default function Dashboard() {
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Building2 className="h-5 w-5 text-primary" />
+                <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-2">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Building2 className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Entreprise & Adresses</CardTitle>
+                      <CardDescription>Informations de facturation</CardDescription>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditProfileData({
+                        company: user.company,
+                        address: user.address,
+                        billingAddress: user.billingAddress || "",
+                        sameAsBilling: user.sameAsBilling || false,
+                      });
+                      setShowEditProfile(true);
+                    }}
+                    data-testid="button-edit-profile"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Modifier
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Entreprise</p>
+                    <p className="text-lg font-semibold" data-testid="text-company">{user.company}</p>
                   </div>
                   <div>
-                    <CardTitle className="text-base">Entreprise</CardTitle>
-                    <CardDescription>Informations de votre société</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg font-semibold" data-testid="text-company">{user.company}</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <MapPin className="h-5 w-5 text-primary" />
+                    <p className="text-xs text-muted-foreground mb-1">Adresse principale</p>
+                    <p className="text-sm" data-testid="text-address">{user.address}</p>
                   </div>
                   <div>
-                    <CardTitle className="text-base">Adresse</CardTitle>
-                    <CardDescription>Adresse principale</CardDescription>
+                    <p className="text-xs text-muted-foreground mb-1">Adresse de facturation</p>
+                    <p className="text-sm" data-testid="text-billing-address">
+                      {user.sameAsBilling ? user.address : user.billingAddress}
+                    </p>
+                    {user.sameAsBilling && (
+                      <Badge variant="secondary" className="mt-2">
+                        Identique à l'adresse principale
+                      </Badge>
+                    )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm" data-testid="text-address">{user.address}</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Receipt className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">Facturation</CardTitle>
-                    <CardDescription>Adresse de facturation</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm" data-testid="text-billing-address">
-                    {user.sameAsBilling ? user.address : user.billingAddress}
-                  </p>
-                  {user.sameAsBilling && (
-                    <Badge variant="secondary" className="mt-2">
-                      Identique à l'adresse principale
-                    </Badge>
-                  )}
                 </CardContent>
               </Card>
             </div>
           )}
+
+          {/* Edit Profile Dialog */}
+          <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Modifier mes informations</DialogTitle>
+              </DialogHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  updateProfileMutation.mutate(editProfileData);
+                }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="edit-company">Entreprise</Label>
+                  <Input
+                    id="edit-company"
+                    value={editProfileData.company}
+                    onChange={(e) => setEditProfileData({ ...editProfileData, company: e.target.value })}
+                    placeholder="Nom de l'entreprise"
+                    data-testid="input-edit-company"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-address">Adresse principale</Label>
+                  <Textarea
+                    id="edit-address"
+                    value={editProfileData.address}
+                    onChange={(e) => setEditProfileData({ ...editProfileData, address: e.target.value })}
+                    placeholder="Adresse complète"
+                    rows={3}
+                    data-testid="input-edit-address"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="edit-same-billing"
+                    checked={editProfileData.sameAsBilling}
+                    onChange={(e) => setEditProfileData({ ...editProfileData, sameAsBilling: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300"
+                    data-testid="checkbox-edit-same-billing"
+                  />
+                  <Label htmlFor="edit-same-billing" className="text-sm font-normal cursor-pointer">
+                    Adresse de facturation identique
+                  </Label>
+                </div>
+                {!editProfileData.sameAsBilling && (
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-billing-address">Adresse de facturation</Label>
+                    <Textarea
+                      id="edit-billing-address"
+                      value={editProfileData.billingAddress}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, billingAddress: e.target.value })}
+                      placeholder="Adresse de facturation"
+                      rows={3}
+                      data-testid="input-edit-billing-address"
+                    />
+                  </div>
+                )}
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setShowEditProfile(false)}>
+                    Annuler
+                  </Button>
+                  <Button type="submit" disabled={updateProfileMutation.isPending} data-testid="button-save-profile">
+                    {updateProfileMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Enregistrer
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           {/* Projects Section */}
           {activeSection === "projects" && (

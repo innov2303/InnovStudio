@@ -77,6 +77,13 @@ export const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
+export const updateProfileSchema = z.object({
+  company: z.string().min(1, "Entreprise requise"),
+  address: z.string().min(1, "Adresse requise"),
+  billingAddress: z.string().optional(),
+  sameAsBilling: z.boolean().optional(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type LoginData = z.infer<typeof loginSchema>;
