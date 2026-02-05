@@ -304,3 +304,64 @@ export async function sendEmailChangeConfirmation(to: string, firstName: string,
     return false;
   }
 }
+
+export async function sendContactEmail(senderName: string, senderEmail: string, subject: string, message: string): Promise<boolean> {
+  try {
+    const { client, fromEmail } = await getResendClient();
+    
+    // Email to admin with the contact form message
+    const adminEmail = "contact@innov-studio.fr";
+    
+    const { error } = await client.emails.send({
+      from: fromEmail,
+      to: adminEmail,
+      replyTo: senderEmail,
+      subject: `[Contact] ${subject}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f3f4f6;">
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 32px; border-radius: 16px;">
+            <div style="background: white; padding: 32px; border-radius: 12px;">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <h1 style="color: #0ea5e9; font-size: 24px; font-weight: 300; margin: 0;">Innov Studio</h1>
+              </div>
+              <h2 style="color: #1f2937; font-size: 20px; font-weight: 600; margin: 0 0 8px 0; text-align: center;">
+                Nouveau message de contact
+              </h2>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+              <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="margin: 0 0 8px 0;"><strong>De:</strong> ${senderName}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Email:</strong> <a href="mailto:${senderEmail}" style="color: #0ea5e9;">${senderEmail}</a></p>
+                <p style="margin: 0;"><strong>Sujet:</strong> ${subject}</p>
+              </div>
+              <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px;">
+                <p style="margin: 0 0 8px 0;"><strong>Message:</strong></p>
+                <p style="margin: 0; white-space: pre-wrap;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+              </div>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
+                Vous pouvez répondre directement à cet email pour contacter ${senderName}.
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending contact email:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error sending contact email:', error);
+    return false;
+  }
+}

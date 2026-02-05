@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useForceDark } from "@/hooks/use-force-dark";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
+import { useState } from "react";
 import { 
   Code2, 
   Sparkles, 
@@ -17,8 +18,24 @@ import {
   Briefcase,
   LogOut,
   Headphones,
-  Server
+  Server,
+  Mail,
+  MessageSquare,
+  Send,
+  Loader2
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 import heroBg from "@/assets/images/hero-bg.jpg";
 import featuresBg from "@/assets/images/features-bg.jpg";
@@ -27,6 +44,56 @@ import projectTracking from "@/assets/images/project-tracking.png";
 export default function Home() {
   useForceDark();
   const { user, logout } = useAuth();
+  const { toast } = useToast();
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+  const [isSending, setIsSending] = useState(false);
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSending(true);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm)
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Message envoyé",
+          description: "Merci pour votre message ! Je vous répondrai dans les plus brefs délais."
+        });
+        setContactForm({ name: "", email: "", subject: "", message: "" });
+        setContactOpen(false);
+      } else {
+        const data = await response.json();
+        throw new Error(data.message || "Erreur lors de l'envoi");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible d'envoyer le message. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const services = [
     {
@@ -304,6 +371,99 @@ export default function Home() {
                     </Link>
                   </>
                 )}
+              </div>
+              
+              <div className="mt-16 pt-12 border-t border-border/50">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <MessageSquare className="h-6 w-6 text-primary" />
+                  <h3 className="text-xl md:text-2xl font-semibold">
+                    Besoin de plus d'informations ?
+                  </h3>
+                </div>
+                <p className="text-muted-foreground mb-6">
+                  N'hésitez pas à me contacter pour discuter de votre projet ou poser vos questions.
+                </p>
+                <Dialog open={contactOpen} onOpenChange={setContactOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" variant="outline" className="gap-2" data-testid="button-contact-me">
+                      <Mail className="h-4 w-4" />
+                      Contactez moi
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Mail className="h-5 w-5 text-primary" />
+                        Formulaire de contact
+                      </DialogTitle>
+                      <DialogDescription>
+                        Envoyez-moi un message et je vous répondrai dans les plus brefs délais.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleContactSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="contact-name">Nom complet *</Label>
+                        <Input
+                          id="contact-name"
+                          placeholder="Votre nom"
+                          value={contactForm.name}
+                          onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                          data-testid="input-contact-name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="contact-email">Email *</Label>
+                        <Input
+                          id="contact-email"
+                          type="email"
+                          placeholder="votre@email.com"
+                          value={contactForm.email}
+                          onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                          data-testid="input-contact-email"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="contact-subject">Sujet</Label>
+                        <Input
+                          id="contact-subject"
+                          placeholder="Sujet de votre message"
+                          value={contactForm.subject}
+                          onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                          data-testid="input-contact-subject"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="contact-message">Message *</Label>
+                        <Textarea
+                          id="contact-message"
+                          placeholder="Décrivez votre projet ou posez vos questions..."
+                          rows={4}
+                          value={contactForm.message}
+                          onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                          data-testid="input-contact-message"
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full gap-2" 
+                        disabled={isSending}
+                        data-testid="button-send-contact"
+                      >
+                        {isSending ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Envoi en cours...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4" />
+                            Envoyer le message
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>

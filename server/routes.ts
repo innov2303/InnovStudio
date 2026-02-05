@@ -616,6 +616,35 @@ export async function registerRoutes(
     }
   });
 
+  // Contact form endpoint (public, rate limited)
+  app.post("/api/contact", generalLimiter, async (req, res) => {
+    try {
+      const { name, email, subject, message } = req.body;
+      
+      if (!name || !email || !message) {
+        return res.status(400).json({ message: "Nom, email et message sont requis" });
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Format d'email invalide" });
+      }
+      
+      const { sendContactEmail } = await import("./email");
+      const sent = await sendContactEmail(name, email, subject || "Sans sujet", message);
+      
+      if (!sent) {
+        return res.status(500).json({ message: "Erreur lors de l'envoi du message" });
+      }
+      
+      res.json({ message: "Message envoyé avec succès" });
+    } catch (error) {
+      console.error("Contact form error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Projects routes
   app.post("/api/projects", requireAuth, async (req, res) => {
     try {
