@@ -429,6 +429,9 @@ export default function Dashboard() {
       });
       if (!response.ok) {
         const error = await response.json();
+        if (error.requiresSignature) {
+          throw new Error("REQUIRES_SIGNATURE:" + error.message);
+        }
         throw new Error(error.message || "Erreur lors de l'envoi");
       }
       return response.json();
@@ -442,11 +445,20 @@ export default function Dashboard() {
       refetchProjects();
     },
     onError: (error: Error) => {
-      toast({
-        title: "Erreur",
-        description: error.message || "Erreur lors de l'upload",
-        variant: "destructive",
-      });
+      if (error.message.startsWith("REQUIRES_SIGNATURE:")) {
+        toast({
+          title: "Signature requise",
+          description: "Veuillez enregistrer votre signature dans les Paramètres avant d'envoyer un devis.",
+          variant: "destructive",
+        });
+        setActiveSection("settings");
+      } else {
+        toast({
+          title: "Erreur",
+          description: error.message || "Erreur lors de l'upload",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -1599,6 +1611,12 @@ export default function Dashboard() {
                                         {/* Admin actions */}
                                         {user.role === "admin" && doc.status === "draft" && (
                                           <div className="flex items-center gap-2">
+                                            {!user.signature && (
+                                              <div className="flex items-center gap-1 text-amber-500 text-xs">
+                                                <AlertCircle className="h-3 w-3" />
+                                                <span>Signature requise</span>
+                                              </div>
+                                            )}
                                             <Button
                                               size="sm"
                                               variant="default"

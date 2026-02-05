@@ -725,6 +725,15 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
+      // Check if admin has a signature saved
+      const adminUser = await storage.getUserByUsername("admin");
+      if (!adminUser?.signature || !adminUser.signature.startsWith("data:image/png;base64,")) {
+        return res.status(400).json({ 
+          message: "Veuillez d'abord enregistrer votre signature électronique dans les paramètres avant d'envoyer un devis",
+          requiresSignature: true
+        });
+      }
+
       const documentId = req.params.id as string;
       const document = await storage.getDocument(documentId);
       if (!document) {
