@@ -817,7 +817,8 @@ export default function Dashboard() {
     { id: "profile" as MenuSection, label: "Mon Profil", icon: User },
     ...(user.role !== "admin" ? [{ id: "projects" as MenuSection, label: "Mes Projets", icon: FolderKanban }] : []),
     ...(user.role === "admin" ? [{ id: "projects" as MenuSection, label: "Gestion des projets", icon: FolderKanban }] : []),
-    { id: "documents" as MenuSection, label: "Mes abonnements", icon: FileText },
+    ...(user.role !== "admin" ? [{ id: "documents" as MenuSection, label: "Mes abonnements", icon: FileText }] : []),
+    ...(user.role === "admin" ? [{ id: "documents" as MenuSection, label: "Abonnements actifs", icon: FileText }] : []),
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
   ];
 
@@ -2642,7 +2643,90 @@ export default function Dashboard() {
           {/* Subscriptions Section */}
           {activeSection === "documents" && (
             <div className="space-y-6">
-              {/* Subscription Offers */}
+              {/* Admin View - All active subscriptions grouped by project */}
+              {user.role === "admin" ? (
+                <Card>
+                  <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle>Abonnements actifs</CardTitle>
+                      <CardDescription>Liste de tous les projets avec abonnements actifs</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {subscriptionsLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      </div>
+                    ) : subscriptions && subscriptions.filter(s => s.status === "active").length > 0 ? (
+                      <div className="space-y-4">
+                        {/* Group subscriptions by project */}
+                        {Array.from(new Set(subscriptions.filter(s => s.status === "active").map(s => s.projectId))).map(projectId => {
+                          const project = projects?.find(p => p.id === projectId);
+                          const projectUser = allUsers?.find(u => u.id === project?.userId);
+                          const projectSubscriptions = subscriptions.filter(s => s.projectId === projectId && s.status === "active");
+                          
+                          return (
+                            <div key={projectId} className="border rounded-lg p-4 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h3 className="font-semibold text-lg">{project?.title || "Projet inconnu"}</h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    Client : {projectUser?.firstName} {projectUser?.lastName} ({projectUser?.company || "N/A"})
+                                  </p>
+                                </div>
+                                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+                                  {projectSubscriptions.length} abonnement{projectSubscriptions.length > 1 ? "s" : ""}
+                                </Badge>
+                              </div>
+                              <div className="grid gap-2">
+                                {projectSubscriptions.map(subscription => {
+                                  const offerInfo = subscriptionOffers?.[subscription.offerType as keyof typeof subscriptionOffers];
+                                  return (
+                                    <div 
+                                      key={subscription.id}
+                                      className="flex items-center justify-between p-3 bg-muted/30 rounded-md"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                                          subscription.offerType === "maintenance" ? "bg-blue-500/10" :
+                                          subscription.offerType === "hosting" ? "bg-purple-500/10" :
+                                          "bg-primary/10"
+                                        }`}>
+                                          {subscription.offerType === "maintenance" && <Zap className="h-4 w-4 text-blue-500" />}
+                                          {subscription.offerType === "hosting" && <Building2 className="h-4 w-4 text-purple-500" />}
+                                          {subscription.offerType === "pack" && <Shield className="h-4 w-4 text-primary" />}
+                                        </div>
+                                        <div>
+                                          <p className="font-medium text-sm">{offerInfo?.name || subscription.offerType}</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            Depuis le {subscription.startDate ? new Date(subscription.startDate).toLocaleDateString('fr-FR') : 'N/A'}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <p className="font-semibold">{subscription.monthlyPrice}€/mois</p>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                        <p className="text-muted-foreground">Aucun abonnement actif</p>
+                        <p className="text-sm text-muted-foreground mt-1">Les abonnements des clients apparaîtront ici</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+              <>
+              {/* User View - Subscription Offers */}
               <div>
                 <h2 className="text-xl font-semibold mb-4">Nos offres d'abonnement</h2>
                 <div className="grid gap-4 md:grid-cols-3">
@@ -2852,6 +2936,8 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
+              )}
+              </>
               )}
             </div>
           )}
