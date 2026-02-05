@@ -858,7 +858,10 @@ export async function registerRoutes(
       }
 
       const projectOwner = await storage.getUser(project.userId);
-      const admin = currentUser;
+      
+      // Fetch admin user for company info and signature (always use the admin account)
+      const adminUser = await storage.getUserByUsername("admin");
+      const admin = adminUser || currentUser;
 
       // Create PDF
       const doc = new PDFDocument({ margin: 50, size: "A4" });
@@ -1011,6 +1014,17 @@ export async function registerRoutes(
         doc.text("Date et signature :", 55, newPageY + 120);
         doc.text("Le Client", 300, newPageY + 65);
         doc.text("Date, signature et mention \"Bon pour accord\" :", 300, newPageY + 120);
+        
+        // Add admin signature if available
+        if (admin.signature && admin.signature.startsWith("data:image/png;base64,")) {
+          try {
+            const signatureBase64 = admin.signature.replace("data:image/png;base64,", "");
+            const signatureBuffer = Buffer.from(signatureBase64, "base64");
+            doc.image(signatureBuffer, 70, newPageY + 75, { width: 160, height: 40 });
+          } catch (sigError) {
+            console.error("Error embedding admin signature:", sigError);
+          }
+        }
       } else {
         // Signature section on same page
         doc.fontSize(11).fillColor("#6366f1").text("SIGNATURE", 50, signatureY);
@@ -1030,6 +1044,17 @@ export async function registerRoutes(
         doc.text("Date et signature :", 55, signatureY + 115);
         doc.text("Le Client", 300, signatureY + 60);
         doc.text("Date, signature et mention \"Bon pour accord\" :", 300, signatureY + 115);
+        
+        // Add admin signature if available
+        if (admin.signature && admin.signature.startsWith("data:image/png;base64,")) {
+          try {
+            const signatureBase64 = admin.signature.replace("data:image/png;base64,", "");
+            const signatureBuffer = Buffer.from(signatureBase64, "base64");
+            doc.image(signatureBuffer, 70, signatureY + 70, { width: 160, height: 40 });
+          } catch (sigError) {
+            console.error("Error embedding admin signature:", sigError);
+          }
+        }
       }
 
       doc.end();
