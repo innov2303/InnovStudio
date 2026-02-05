@@ -398,6 +398,103 @@ export async function registerRoutes(
     }
   });
 
+  // Request password change via email (for logged-in users)
+  app.post("/api/auth/request-password-change", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user || !user.email) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      
+      await storage.setPasswordResetToken(user.id, resetToken, expires);
+      
+      const { sendPasswordChangeEmail } = await import("./email");
+      const sent = await sendPasswordChangeEmail(user.email, user.firstName, resetToken);
+      
+      if (!sent) {
+        return res.status(500).json({ message: "Erreur lors de l'envoi de l'email" });
+      }
+
+      res.json({ message: "Un email de confirmation a été envoyé" });
+    } catch (error) {
+      console.error("Request password change error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Request email change (sends confirmation to current email)
+  app.post("/api/auth/request-email-change", requireAuth, async (req, res) => {
+    try {
+      const { newEmail } = req.body;
+      if (!newEmail || typeof newEmail !== "string") {
+        return res.status(400).json({ message: "Nouvel email requis" });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newEmail)) {
+        return res.status(400).json({ message: "Format d'email invalide" });
+      }
+
+      const user = await storage.getUser(req.session.userId!);
+      if (!user || !user.email) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Check if new email is already in use
+      const existingUser = await storage.getUserByEmail(newEmail);
+      if (existingUser) {
+        return res.status(400).json({ message: "Cet email est déjà utilisé" });
+      }
+
+      const token = crypto.randomBytes(32).toString("hex");
+      const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      
+      await storage.setEmailChangeRequest(user.id, newEmail, token, expires);
+      
+      const { sendEmailChangeConfirmation } = await import("./email");
+      const sent = await sendEmailChangeConfirmation(user.email, user.firstName, newEmail, token);
+      
+      if (!sent) {
+        return res.status(500).json({ message: "Erreur lors de l'envoi de l'email" });
+      }
+
+      res.json({ message: "Un email de confirmation a été envoyé à votre adresse actuelle" });
+    } catch (error) {
+      console.error("Request email change error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Confirm email change via token
+  app.get("/api/auth/confirm-email-change", async (req, res) => {
+    try {
+      const { token } = req.query;
+      if (!token || typeof token !== "string") {
+        return res.status(400).json({ message: "Token invalide" });
+      }
+
+      const user = await storage.getUserByEmailChangeToken(token);
+      if (!user) {
+        return res.status(400).json({ message: "Token invalide ou expiré" });
+      }
+
+      if (user.emailChangeExpires && new Date() > user.emailChangeExpires) {
+        return res.status(400).json({ message: "Le lien a expiré" });
+      }
+
+      await storage.confirmEmailChange(user.id);
+      
+      res.json({ message: "Email modifié avec succès", newEmail: user.pendingEmail });
+    } catch (error) {
+      console.error("Confirm email change error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   app.get("/api/users", requireAuth, async (req, res) => {
     try {
       const currentUser = await storage.getUser(req.session.userId!);

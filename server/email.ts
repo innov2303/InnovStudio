@@ -159,3 +159,122 @@ export async function sendPasswordResetEmail(to: string, firstName: string, rese
     return false;
   }
 }
+
+export async function sendPasswordChangeEmail(to: string, firstName: string, resetToken: string): Promise<boolean> {
+  try {
+    const { client, fromEmail } = await getResendClient();
+    
+    const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+    
+    const { error } = await client.emails.send({
+      from: fromEmail || 'Innov Studio <noreply@resend.dev>',
+      to: [to],
+      subject: 'Modification de votre mot de passe - Innov Studio',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+          <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%); padding: 32px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 2px;">Innov Studio</h1>
+            </div>
+            <div style="padding: 40px;">
+              <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 24px;">Modification du mot de passe</h2>
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                Bonjour ${firstName}, vous avez demandé à modifier votre mot de passe. Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe.
+              </p>
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${resetUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 500;">
+                  Modifier mon mot de passe
+                </a>
+              </div>
+              <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 24px 0 0 0;">
+                Ce lien est valable pendant 1 heure.
+              </p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0;">
+              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
+                Si vous n'avez pas demandé cette modification, ignorez cet email.
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending password change email:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error sending password change email:', error);
+    return false;
+  }
+}
+
+export async function sendEmailChangeConfirmation(to: string, firstName: string, newEmail: string, confirmToken: string): Promise<boolean> {
+  try {
+    const { client, fromEmail } = await getResendClient();
+    
+    const confirmUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/confirm-email-change?token=${confirmToken}`;
+    
+    const { error } = await client.emails.send({
+      from: fromEmail || 'Innov Studio <noreply@resend.dev>',
+      to: [to],
+      subject: 'Confirmez le changement d\'email - Innov Studio',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+          <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%); padding: 32px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 2px;">Innov Studio</h1>
+            </div>
+            <div style="padding: 40px;">
+              <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 24px;">Changement d'adresse email</h2>
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                Bonjour ${firstName}, vous avez demandé à changer votre adresse email vers :
+              </p>
+              <p style="color: #6366f1; font-size: 18px; font-weight: 600; text-align: center; margin: 0 0 24px 0;">
+                ${newEmail}
+              </p>
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${confirmUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 500;">
+                  Confirmer le changement
+                </a>
+              </div>
+              <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 24px 0 0 0;">
+                Ce lien est valable pendant 1 heure.
+              </p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0;">
+              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
+                Si vous n'avez pas demandé ce changement, ignorez cet email.
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending email change confirmation:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error sending email change confirmation:', error);
+    return false;
+  }
+}

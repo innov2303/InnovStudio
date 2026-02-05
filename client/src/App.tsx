@@ -12,6 +12,7 @@ import ChangePassword from "@/pages/change-password";
 import VerifyEmail from "@/pages/verify-email";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
+import ConfirmEmailChange from "@/pages/confirm-email-change";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/verify-email" component={VerifyEmail} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/confirm-email-change" component={ConfirmEmailChange} />
       <Route component={NotFound} />
     </Switch>
   );

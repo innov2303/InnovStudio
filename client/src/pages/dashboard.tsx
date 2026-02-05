@@ -107,6 +107,8 @@ export default function Dashboard() {
     billingAddress: "",
     sameAsBilling: false,
   });
+  const [showEmailChangeDialog, setShowEmailChangeDialog] = useState(false);
+  const [newEmailValue, setNewEmailValue] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -546,6 +548,64 @@ export default function Dashboard() {
     },
   });
 
+  const requestPasswordChangeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/auth/request-password-change", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email envoyé",
+        description: "Un lien de modification a été envoyé à votre adresse email.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'envoi",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const requestEmailChangeMutation = useMutation({
+    mutationFn: async (newEmail: string) => {
+      const response = await fetch("/api/auth/request-email-change", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ newEmail }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email envoyé",
+        description: "Un lien de confirmation a été envoyé à votre adresse email actuelle.",
+      });
+      setShowEmailChangeDialog(false);
+      setNewEmailValue("");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'envoi",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
       const response = await fetch(`/api/projects/${projectId}`, {
@@ -930,15 +990,36 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <CardTitle className="text-base">Sécurité</CardTitle>
-                    <CardDescription>Gérer votre mot de passe</CardDescription>
+                    <CardDescription>Gérer votre mot de passe et email</CardDescription>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <Link href="/change-password">
-                    <Button variant="outline" className="w-full" data-testid="button-change-password">
-                      Changer le mot de passe
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Email actuel</p>
+                    <p className="text-sm font-medium" data-testid="text-email">{user.email}</p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => requestPasswordChangeMutation.mutate()}
+                      disabled={requestPasswordChangeMutation.isPending}
+                      data-testid="button-request-password-change"
+                    >
+                      {requestPasswordChangeMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : null}
+                      Modifier le mot de passe par email
                     </Button>
-                  </Link>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setShowEmailChangeDialog(true)}
+                      data-testid="button-change-email"
+                    >
+                      Modifier l'adresse email
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -1036,6 +1117,54 @@ export default function Dashboard() {
                       <Save className="h-4 w-4 mr-2" />
                     )}
                     Enregistrer
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Email Change Dialog */}
+          <Dialog open={showEmailChangeDialog} onOpenChange={setShowEmailChangeDialog}>
+            <DialogContent className="sm:max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle>Modifier l'adresse email</DialogTitle>
+              </DialogHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (newEmailValue) {
+                    requestEmailChangeMutation.mutate(newEmailValue);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="new-email">Nouvelle adresse email</Label>
+                  <Input
+                    id="new-email"
+                    type="email"
+                    value={newEmailValue}
+                    onChange={(e) => setNewEmailValue(e.target.value)}
+                    placeholder="nouveau@email.com"
+                    data-testid="input-new-email"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Un email de confirmation sera envoyé à votre adresse actuelle.
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setShowEmailChangeDialog(false)}>
+                    Annuler
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={requestEmailChangeMutation.isPending || !newEmailValue}
+                    data-testid="button-confirm-email-change"
+                  >
+                    {requestEmailChangeMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    Envoyer la confirmation
                   </Button>
                 </div>
               </form>

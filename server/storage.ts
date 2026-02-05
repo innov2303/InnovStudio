@@ -17,6 +17,9 @@ export interface IStorage {
   clearPasswordResetToken(userId: string): Promise<void>;
   updateUserSignature(userId: string, signature: string): Promise<void>;
   updateUserProfile(userId: string, data: { company: string; address: string; billingAddress?: string; sameAsBilling?: boolean }): Promise<User | undefined>;
+  setEmailChangeRequest(userId: string, newEmail: string, token: string, expires: Date): Promise<void>;
+  getUserByEmailChangeToken(token: string): Promise<User | undefined>;
+  confirmEmailChange(userId: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   initializeAdmin(): Promise<void>;
   // Projects
@@ -144,6 +147,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async setEmailChangeRequest(userId: string, newEmail: string, token: string, expires: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ pendingEmail: newEmail, emailChangeToken: token, emailChangeExpires: expires })
+      .where(eq(users.id, userId));
+  }
+
+  async getUserByEmailChangeToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.emailChangeToken, token));
+    return user;
+  }
+
+  async confirmEmailChange(userId: string): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user || !user.pendingEmail) return undefined;
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        email: user.pendingEmail, 
+        pendingEmail: null, 
+        emailChangeToken: null, 
+        emailChangeExpires: null 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
   }
 
   async getAllUsers(): Promise<User[]> {

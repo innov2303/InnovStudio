@@ -51,6 +51,8 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Impossible d'ajouter de nouvelles fonctionnalités sur un projet terminé
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
 - **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)
+- **Modification mot de passe par email** : Les utilisateurs connectés peuvent demander un lien par email pour modifier leur mot de passe
+- **Modification email par confirmation** : Les utilisateurs peuvent changer leur adresse email via un lien de confirmation envoyé à leur email actuel
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
 
 ## Tech Stack

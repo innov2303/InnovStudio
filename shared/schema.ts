@@ -23,6 +23,9 @@ export const users = pgTable("users", {
   verificationToken: text("verification_token"),
   passwordResetToken: text("password_reset_token"),
   passwordResetExpires: timestamp("password_reset_expires"),
+  pendingEmail: text("pending_email"),
+  emailChangeToken: text("email_change_token"),
+  emailChangeExpires: timestamp("email_change_expires"),
   signature: text("signature"),
   createdAt: timestamp("created_at").defaultNow(),
 });
