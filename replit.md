@@ -21,6 +21,10 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Prévisualisation du devis avant génération
   - L'admin génère et télécharge le PDF du devis
   - Le client télécharge, signe et upload le document signé → statut "Signé"
+- **Signature électronique admin** : 
+  - Pad de signature dans les paramètres pour dessiner la signature (canvas avec support souris/tactile)
+  - Signature sauvegardée en base64 PNG dans la base de données
+  - Signature automatiquement intégrée dans tous les PDF de devis générés (zone "Pour Innov Studio")
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
 - **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
@@ -44,7 +48,8 @@ client/
 │   │   ├── forgot-password.tsx
 │   │   └── reset-password.tsx
 │   ├── components/
-│   │   └── theme-toggle.tsx  # Dark/light mode toggle
+│   │   ├── theme-toggle.tsx  # Dark/light mode toggle
+│   │   └── signature-pad.tsx # Pad de signature canvas
 │   ├── lib/
 │   │   ├── auth.tsx          # Auth context provider
 │   │   └── queryClient.ts
@@ -86,6 +91,7 @@ shared/
 - `POST /api/auth/resend-verification` - Renvoyer email de vérification
 - `POST /api/auth/forgot-password` - Demander réinitialisation mot de passe
 - `POST /api/auth/reset-password` - Réinitialiser mot de passe avec token
+- `POST /api/auth/save-signature` - Enregistrer signature admin (admin only)
 - `GET /api/projects/:projectId/documents` - Liste des documents d'un projet
 - `POST /api/projects/:projectId/documents` - Créer un document (admin only)
 - `POST /api/documents/:id/upload-quote` - Admin upload le devis
@@ -110,7 +116,8 @@ shared/
   billingAddress: string,
   sameAsBilling: boolean,
   role: "user" | "admin",
-  mustChangePassword: boolean
+  mustChangePassword: boolean,
+  signature: string (base64 PNG, admin only)
 }
 ```
 
