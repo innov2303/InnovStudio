@@ -1891,7 +1891,8 @@ export async function registerRoutes(
         return res.status(401).json({ message: "Non authentifié" });
       }
 
-      const subscription = await storage.getSubscription(req.params.id);
+      const subscriptionId = req.params.id as string;
+      const subscription = await storage.getSubscription(subscriptionId);
       if (!subscription) {
         return res.status(404).json({ message: "Abonnement non trouvé" });
       }
@@ -1901,7 +1902,7 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
-      const updated = await storage.updateSubscriptionStatus(req.params.id, "cancelled");
+      const updated = await storage.updateSubscriptionStatus(subscriptionId, "cancelled");
       res.json(updated);
     } catch (error) {
       console.error("Cancel subscription error:", error);
@@ -1917,7 +1918,8 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
-      await storage.deleteSubscription(req.params.id);
+      const subscriptionId = req.params.id as string;
+      await storage.deleteSubscription(subscriptionId);
       res.json({ success: true });
     } catch (error) {
       console.error("Delete subscription error:", error);

@@ -62,8 +62,14 @@ import {
   X,
   Check
 } from "lucide-react";
-import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument } from "@shared/schema";
+import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument, Subscription } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
+
+type SubscriptionOffer = {
+  name: string;
+  price: string;
+  description: string;
+};
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
@@ -159,6 +165,22 @@ export default function Dashboard() {
     queryKey: ["/api/projects"],
     enabled: !!user,
   });
+
+  // Subscriptions queries
+  const { data: subscriptionOffers } = useQuery<Record<string, SubscriptionOffer>>({
+    queryKey: ["/api/subscriptions/offers"],
+    enabled: !!user,
+  });
+
+  const { data: subscriptions, isLoading: subscriptionsLoading, refetch: refetchSubscriptions } = useQuery<Subscription[]>({
+    queryKey: ["/api/subscriptions"],
+    enabled: !!user,
+  });
+
+  // Subscription state
+  const [selectedOffer, setSelectedOffer] = useState<string | null>(null);
+  const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
+  const [selectedProjectForSubscription, setSelectedProjectForSubscription] = useState<string>("");
 
   // Collapse all projects by default when data first loads
   useEffect(() => {
@@ -629,6 +651,59 @@ export default function Dashboard() {
       toast({
         title: "Erreur",
         description: error.message || "Erreur lors de la suppression",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Subscription mutations
+  const createSubscriptionMutation = useMutation({
+    mutationFn: async ({ projectId, offerType }: { projectId: string; offerType: string }) => {
+      const response = await apiRequest("POST", "/api/subscriptions", { projectId, offerType });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Abonnement activé",
+        description: "Votre abonnement a été créé avec succès.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions"] });
+      setShowSubscriptionDialog(false);
+      setSelectedOffer(null);
+      setSelectedProjectForSubscription("");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la création de l'abonnement",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: async (subscriptionId: string) => {
+      const response = await fetch(`/api/subscriptions/${subscriptionId}/cancel`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur lors de l'annulation");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Abonnement annulé",
+        description: "L'abonnement a été annulé.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'annulation",
         variant: "destructive",
       });
     },
@@ -2564,20 +2639,294 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Documents Section */}
+          {/* Subscriptions Section */}
           {activeSection === "documents" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Documents</CardTitle>
-                <CardDescription>Vos devis, factures et contrats</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Aucun document disponible</p>
-                <p className="text-sm text-muted-foreground mt-1">Vos documents seront accessibles ici</p>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              {/* Subscription Offers */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Nos offres d'abonnement</h2>
+                <div className="grid gap-4 md:grid-cols-3">
+                  {/* Maintenance Offer */}
+                  <Card className="relative overflow-hidden">
+                    <CardHeader>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 mb-2">
+                        <Zap className="h-5 w-5 text-blue-500" />
+                      </div>
+                      <CardTitle className="text-lg">Maintenance du site</CardTitle>
+                      <CardDescription>Mises à jour, corrections de bugs, support technique</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold mb-4">99<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Mises à jour de sécurité</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Correction de bugs</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support technique 5j/7</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Rapport mensuel</li>
+                      </ul>
+                      <Button 
+                        className="w-full" 
+                        onClick={() => {
+                          setSelectedOffer("maintenance");
+                          setShowSubscriptionDialog(true);
+                        }}
+                        data-testid="button-select-maintenance"
+                      >
+                        Souscrire
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Hosting Offer */}
+                  <Card className="relative overflow-hidden">
+                    <CardHeader>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 mb-2">
+                        <Building2 className="h-5 w-5 text-purple-500" />
+                      </div>
+                      <CardTitle className="text-lg">Hébergement du site</CardTitle>
+                      <CardDescription>Hébergement sécurisé, SSL, sauvegardes automatiques</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold mb-4">49<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute disponibilité</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Certificat SSL inclus</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Sauvegardes quotidiennes</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Protection DDoS</li>
+                      </ul>
+                      <Button 
+                        className="w-full" 
+                        onClick={() => {
+                          setSelectedOffer("hosting");
+                          setShowSubscriptionDialog(true);
+                        }}
+                        data-testid="button-select-hosting"
+                      >
+                        Souscrire
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Pack Offer */}
+                  <Card className="relative overflow-hidden border-primary">
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
+                      Recommandé
+                    </div>
+                    <CardHeader>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 mb-2">
+                        <Shield className="h-5 w-5 text-primary" />
+                      </div>
+                      <CardTitle className="text-lg">Pack Complet</CardTitle>
+                      <CardDescription>Maintenance + Hébergement avec réduction</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold mb-1">129<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                      <p className="text-sm text-green-600 mb-4">Économisez 19/mois</p>
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tout de Maintenance</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tout de Hébergement</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support prioritaire</li>
+                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tarif préférentiel</li>
+                      </ul>
+                      <Button 
+                        className="w-full" 
+                        onClick={() => {
+                          setSelectedOffer("pack");
+                          setShowSubscriptionDialog(true);
+                        }}
+                        data-testid="button-select-pack"
+                      >
+                        Souscrire
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Current Subscriptions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mes abonnements actifs</CardTitle>
+                  <CardDescription>Gérez vos abonnements en cours</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {subscriptionsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  ) : subscriptions && subscriptions.filter(s => s.status === "active").length > 0 ? (
+                    <div className="space-y-4">
+                      {subscriptions.filter(s => s.status === "active").map((subscription) => {
+                        const project = projects?.find(p => p.id === subscription.projectId);
+                        const offerInfo = subscriptionOffers?.[subscription.offerType as keyof typeof subscriptionOffers];
+                        return (
+                          <div 
+                            key={subscription.id} 
+                            className="flex items-center justify-between p-4 border rounded-lg"
+                            data-testid={`subscription-${subscription.id}`}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                                subscription.offerType === "maintenance" ? "bg-blue-500/10" :
+                                subscription.offerType === "hosting" ? "bg-purple-500/10" :
+                                "bg-primary/10"
+                              }`}>
+                                {subscription.offerType === "maintenance" && <Zap className="h-5 w-5 text-blue-500" />}
+                                {subscription.offerType === "hosting" && <Building2 className="h-5 w-5 text-purple-500" />}
+                                {subscription.offerType === "pack" && <Shield className="h-5 w-5 text-primary" />}
+                              </div>
+                              <div>
+                                <p className="font-medium">{offerInfo?.name || subscription.offerType}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  Projet : {project?.title || "Projet inconnu"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <p className="font-semibold">{subscription.monthlyPrice}/mois</p>
+                                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+                                  Actif
+                                </Badge>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => cancelSubscriptionMutation.mutate(subscription.id)}
+                                disabled={cancelSubscriptionMutation.isPending}
+                                data-testid={`button-cancel-subscription-${subscription.id}`}
+                              >
+                                {cancelSubscriptionMutation.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-destructive" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground">Aucun abonnement actif</p>
+                      <p className="text-sm text-muted-foreground mt-1">Choisissez une offre ci-dessus pour commencer</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Cancelled/Expired Subscriptions */}
+              {subscriptions && subscriptions.filter(s => s.status !== "active").length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Historique des abonnements</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {subscriptions.filter(s => s.status !== "active").map((subscription) => {
+                        const project = projects?.find(p => p.id === subscription.projectId);
+                        const offerInfo = subscriptionOffers?.[subscription.offerType as keyof typeof subscriptionOffers];
+                        return (
+                          <div 
+                            key={subscription.id} 
+                            className="flex items-center justify-between p-3 border rounded-lg opacity-60"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                                {subscription.offerType === "maintenance" && <Zap className="h-4 w-4" />}
+                                {subscription.offerType === "hosting" && <Building2 className="h-4 w-4" />}
+                                {subscription.offerType === "pack" && <Shield className="h-4 w-4" />}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{offerInfo?.name || subscription.offerType}</p>
+                                <p className="text-xs text-muted-foreground">Projet : {project?.title || "Projet inconnu"}</p>
+                              </div>
+                            </div>
+                            <Badge variant="secondary">
+                              {subscription.status === "cancelled" ? "Annulé" : "Expiré"}
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
+
+          {/* Subscription Dialog */}
+          <Dialog open={showSubscriptionDialog} onOpenChange={setShowSubscriptionDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Choisir un projet</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Sélectionnez le projet auquel vous souhaitez associer cet abonnement :
+                </p>
+                {projects && projects.length > 0 ? (
+                  <>
+                    <Select value={selectedProjectForSubscription} onValueChange={setSelectedProjectForSubscription}>
+                      <SelectTrigger data-testid="select-project-for-subscription">
+                        <SelectValue placeholder="Sélectionnez un projet" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {projects.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setShowSubscriptionDialog(false);
+                          setSelectedOffer(null);
+                          setSelectedProjectForSubscription("");
+                        }}
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (selectedOffer && selectedProjectForSubscription) {
+                            createSubscriptionMutation.mutate({
+                              projectId: selectedProjectForSubscription,
+                              offerType: selectedOffer,
+                            });
+                          }
+                        }}
+                        disabled={!selectedProjectForSubscription || createSubscriptionMutation.isPending}
+                        data-testid="button-confirm-subscription"
+                      >
+                        {createSubscriptionMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : null}
+                        Confirmer l'abonnement
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground mb-4">Vous n'avez pas encore de projets.</p>
+                    <Button 
+                      onClick={() => {
+                        setShowSubscriptionDialog(false);
+                        setActiveSection("projects");
+                        setShowProjectForm(true);
+                      }}
+                    >
+                      Créer un projet
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Users Section (Admin only) */}
           {activeSection === "users" && user.role === "admin" && (
