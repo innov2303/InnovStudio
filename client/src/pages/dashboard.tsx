@@ -1747,8 +1747,8 @@ export default function Dashboard() {
                             {/* Mini progress bar when collapsed */}
                             {collapsedProjects.has(project.id) && project.status !== "cancelled" && (
                               <div className="mt-2 flex items-center gap-3">
-                                <div className="flex-1 max-w-[200px]">
-                                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div className="flex-1">
+                                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                                     <div 
                                       className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
                                       style={{ 
