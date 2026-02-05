@@ -1014,10 +1014,11 @@ export default function Dashboard() {
                                       className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
                                       style={{ 
                                         width: project.status === "pending" ? "0%" :
-                                               project.status === "in_review" ? "20%" :
-                                               project.status === "awaiting_signature" ? "40%" :
-                                               project.status === "approved" ? "60%" :
-                                               project.status === "in_progress" ? "80%" : "100%"
+                                               project.status === "in_review" ? "16%" :
+                                               project.status === "awaiting_signature" ? "33%" :
+                                               project.status === "awaiting_deposit" ? "50%" :
+                                               project.status === "approved" ? "66%" :
+                                               project.status === "in_progress" ? "83%" : "100%"
                                       }}
                                     />
                                   </div>
@@ -1026,6 +1027,7 @@ export default function Dashboard() {
                                   {project.status === "pending" && "Déposé"}
                                   {project.status === "in_review" && "Étude"}
                                   {project.status === "awaiting_signature" && "Signature"}
+                                  {project.status === "awaiting_deposit" && "Acompte"}
                                   {project.status === "approved" && "Approuvé"}
                                   {project.status === "in_progress" && "En cours"}
                                   {project.status === "completed" && "Terminé"}
@@ -1053,6 +1055,7 @@ export default function Dashboard() {
                                 <SelectItem value="pending">En attente</SelectItem>
                                 <SelectItem value="in_review">En cours d'étude</SelectItem>
                                 <SelectItem value="awaiting_signature">En attente de signature</SelectItem>
+                                <SelectItem value="awaiting_deposit">Attente de l'acompte</SelectItem>
                                 <SelectItem value="approved">Acompte reçu</SelectItem>
                                 <SelectItem value="in_progress">En cours</SelectItem>
                                 <SelectItem value="completed">Terminé</SelectItem>
@@ -1063,12 +1066,14 @@ export default function Dashboard() {
                             <Badge variant={
                               project.status === "pending" ? "secondary" :
                               project.status === "awaiting_signature" ? "default" :
+                              project.status === "awaiting_deposit" ? "default" :
                               project.status === "in_progress" ? "default" :
                               project.status === "completed" ? "outline" : "secondary"
                             }>
                               {project.status === "pending" && "En attente"}
                               {project.status === "in_review" && "En cours d'étude"}
                               {project.status === "awaiting_signature" && "En attente de signature"}
+                              {project.status === "awaiting_deposit" && "Attente de l'acompte"}
                               {project.status === "approved" && "Acompte reçu"}
                               {project.status === "in_progress" && "En cours"}
                               {project.status === "completed" && "Terminé"}
@@ -1108,10 +1113,11 @@ export default function Dashboard() {
                               <span className="text-xs font-medium">Progression</span>
                               <span className="text-xs text-muted-foreground">
                                 {project.status === "pending" && "0%"}
-                                {project.status === "in_review" && "20%"}
-                                {project.status === "awaiting_signature" && "40%"}
-                                {project.status === "approved" && "60%"}
-                                {project.status === "in_progress" && "80%"}
+                                {project.status === "in_review" && "16%"}
+                                {project.status === "awaiting_signature" && "33%"}
+                                {project.status === "awaiting_deposit" && "50%"}
+                                {project.status === "approved" && "66%"}
+                                {project.status === "in_progress" && "83%"}
                                 {project.status === "completed" && "100%"}
                               </span>
                             </div>
@@ -1122,10 +1128,11 @@ export default function Dashboard() {
                                   className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
                                   style={{ 
                                     width: project.status === "pending" ? "0%" :
-                                           project.status === "in_review" ? "20%" :
-                                           project.status === "awaiting_signature" ? "40%" :
-                                           project.status === "approved" ? "60%" :
-                                           project.status === "in_progress" ? "80%" : "100%"
+                                           project.status === "in_review" ? "16%" :
+                                           project.status === "awaiting_signature" ? "33%" :
+                                           project.status === "awaiting_deposit" ? "50%" :
+                                           project.status === "approved" ? "66%" :
+                                           project.status === "in_progress" ? "83%" : "100%"
                                   }}
                                 />
                               </div>
@@ -1135,11 +1142,12 @@ export default function Dashboard() {
                                   { key: "pending", label: "Déposé" },
                                   { key: "in_review", label: "Étude" },
                                   { key: "awaiting_signature", label: "Signature" },
-                                  { key: "approved", label: "Acompte" },
+                                  { key: "awaiting_deposit", label: "Acompte" },
+                                  { key: "approved", label: "Validé" },
                                   { key: "in_progress", label: "En cours" },
                                   { key: "completed", label: "Terminé" }
                                 ].map((step, index) => {
-                                  const statusOrder = ["pending", "in_review", "awaiting_signature", "approved", "in_progress", "completed"];
+                                  const statusOrder = ["pending", "in_review", "awaiting_signature", "awaiting_deposit", "approved", "in_progress", "completed"];
                                   const currentIndex = statusOrder.indexOf(project.status);
                                   const isCompleted = index < currentIndex;
                                   const isCurrent = index === currentIndex;

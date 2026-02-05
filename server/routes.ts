@@ -779,6 +779,10 @@ export async function registerRoutes(
 
       // Update document with signed file and change status
       const updatedDoc = await storage.updateDocumentSignedFile(documentId, req.file.filename);
+      
+      // Update project status to awaiting_deposit
+      await storage.updateProjectStatus(document.projectId, "awaiting_deposit");
+      
       res.json(updatedDoc);
     } catch (error) {
       console.error("Upload signed document error:", error);
@@ -822,6 +826,10 @@ export async function registerRoutes(
 
       // Update document with client signature and change status to signed
       const updatedDoc = await storage.updateDocumentClientSignature(documentId, signature);
+      
+      // Update project status to awaiting_deposit
+      await storage.updateProjectStatus(document.projectId, "awaiting_deposit");
+      
       res.json(updatedDoc);
     } catch (error) {
       console.error("Electronic signature error:", error);
