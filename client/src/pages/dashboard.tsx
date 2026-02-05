@@ -1000,57 +1000,189 @@ export default function Dashboard() {
           {/* Dashboard Section */}
           {activeSection === "dashboard" && (
             <div className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Projets actifs</CardTitle>
-                    <FolderKanban className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">0</div>
-                    <p className="text-xs text-muted-foreground">Aucun projet en cours</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Documents</CardTitle>
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">0</div>
-                    <p className="text-xs text-muted-foreground">Aucun document</p>
-                  </CardContent>
-                </Card>
-                {user.role === "admin" && (
-                  <>
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{allUsers?.length || 0}</div>
-                        <p className="text-xs text-muted-foreground">Comptes enregistrés</p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Statut</CardTitle>
-                        <Shield className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <Badge>Administrateur</Badge>
-                      </CardContent>
-                    </Card>
-                  </>
-                )}
-              </div>
+              {/* Stats for regular users */}
+              {user.role !== "admin" && (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Projets actifs</CardTitle>
+                      <FolderKanban className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-active-projects">
+                        {projects?.filter(p => p.status !== "completed").length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {projects?.filter(p => p.status !== "completed").length === 0 
+                          ? "Aucun projet en cours" 
+                          : `sur ${projects?.length || 0} projet(s) total`}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Projets terminés</CardTitle>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-completed-projects">
+                        {projects?.filter(p => p.status === "completed").length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Projets livrés
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Abonnements actifs</CardTitle>
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-active-subscriptions">
+                        {subscriptions?.filter(s => s.status === "active").length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {subscriptions?.filter(s => s.status === "active" && s.cancelAtPeriodEnd).length 
+                          ? `${subscriptions.filter(s => s.status === "active" && s.cancelAtPeriodEnd).length} en cours de résiliation`
+                          : "Abonnements en cours"}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Paiements en attente</CardTitle>
+                      <Receipt className="h-4 w-4 text-amber-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-pending-payments">
+                        {projects?.filter(p => p.status === "awaiting_deposit" || p.status === "awaiting_final_payment").length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {projects?.filter(p => p.status === "awaiting_deposit" || p.status === "awaiting_final_payment").length === 0 
+                          ? "Aucun paiement en attente" 
+                          : "À régler"}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Stats for admin */}
+              {user.role === "admin" && (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Projets en cours</CardTitle>
+                      <FolderKanban className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-admin-active-projects">
+                        {projects?.filter(p => p.status !== "completed" && p.status !== "submitted").length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {projects?.filter(p => p.status === "submitted").length || 0} nouvelle(s) demande(s)
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-users">{allUsers?.filter(u => u.role !== "admin").length || 0}</div>
+                      <p className="text-xs text-muted-foreground">Clients enregistrés</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Abonnements actifs</CardTitle>
+                      <CreditCard className="h-4 w-4 text-emerald-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-admin-subscriptions">
+                        {subscriptions?.filter(s => s.status === "active").length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {(() => {
+                          const activeSubsTotal = subscriptions?.filter(s => s.status === "active")
+                            .reduce((sum, s) => sum + parseFloat(s.monthlyPrice || "0"), 0) || 0;
+                          return `${activeSubsTotal.toFixed(2)} €/mois`;
+                        })()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Actions requises</CardTitle>
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-admin-actions">
+                        {(projects?.filter(p => p.status === "submitted" || p.status === "review").length || 0)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Projets à traiter
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Additional stats row for admin */}
+              {user.role === "admin" && (
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Projets terminés</CardTitle>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-admin-completed">
+                        {projects?.filter(p => p.status === "completed").length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        sur {projects?.length || 0} projet(s) total
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">En attente de paiement</CardTitle>
+                      <Receipt className="h-4 w-4 text-amber-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold" data-testid="stat-admin-awaiting-payment">
+                        {projects?.filter(p => p.status === "awaiting_deposit" || p.status === "awaiting_final_payment").length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {projects?.filter(p => p.status === "awaiting_deposit").length || 0} acompte(s), {projects?.filter(p => p.status === "awaiting_final_payment").length || 0} règlement(s)
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Statut</CardTitle>
+                      <Shield className="h-4 w-4 text-primary" />
+                    </CardHeader>
+                    <CardContent>
+                      <Badge className="bg-primary">Administrateur</Badge>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Accès complet
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
               
               <Card>
                 <CardHeader>
                   <CardTitle>Bienvenue, {user.firstName} !</CardTitle>
                   <CardDescription>
-                    Utilisez le menu à gauche pour naviguer dans votre espace client.
+                    {user.role === "admin" 
+                      ? "Gérez les projets, utilisateurs et abonnements depuis votre espace administrateur."
+                      : "Utilisez le menu à gauche pour naviguer dans votre espace client."}
                   </CardDescription>
                 </CardHeader>
               </Card>
