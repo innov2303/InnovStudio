@@ -12,6 +12,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import PDFDocument from "pdfkit";
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -1200,6 +1201,129 @@ export async function registerRoutes(
       res.sendFile(filePath);
     } else {
       res.status(404).json({ message: "Fichier non trouvé" });
+    }
+  });
+
+  // Stripe payment routes
+  
+  // Get Stripe publishable key
+  app.get("/api/stripe/config", async (req, res) => {
+    try {
+      const publishableKey = await getStripePublishableKey();
+      res.json({ publishableKey });
+    } catch (error) {
+      console.error("Get Stripe config error:", error);
+      res.status(500).json({ message: "Erreur de configuration Stripe" });
+    }
+  });
+
+  // Create checkout session for deposit payment
+  app.post("/api/projects/:projectId/pay-deposit", requireAuth, async (req, res) => {
+    try {
+      const projectId = req.params.projectId as string;
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Only project owner can pay deposit
+      if (project.userId !== currentUser.id) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Check project is in awaiting_deposit status
+      if (project.status !== "awaiting_deposit") {
+        return res.status(400).json({ message: "Ce projet n'est pas en attente de paiement d'acompte" });
+      }
+
+      // Get signed quote document to find deposit amount
+      const documents = await storage.getDocumentsByProject(projectId);
+      const signedQuote = documents.find(d => d.type === "quote" && d.status === "signed");
+      
+      if (!signedQuote) {
+        return res.status(400).json({ message: "Aucun devis signé trouvé" });
+      }
+
+      // Calculate deposit amount
+      const quoteAmount = parseFloat(signedQuote.quoteAmount || "0");
+      const depositPercent = parseFloat(signedQuote.quoteDepositPercent || "30");
+      const depositAmount = Math.round((quoteAmount * depositPercent / 100) * 100); // Convert to cents
+
+      if (depositAmount <= 0) {
+        return res.status(400).json({ message: "Montant d'acompte invalide" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+
+      // Get domain from request
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['host'];
+      const baseUrl = `${protocol}://${host}`;
+
+      // Create Stripe Checkout session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: `Acompte - ${project.name}`,
+              description: `Acompte de ${depositPercent}% pour le projet "${project.name}"`,
+            },
+            unit_amount: depositAmount,
+          },
+          quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: `${baseUrl}/dashboard?payment=success&project=${projectId}`,
+        cancel_url: `${baseUrl}/dashboard?payment=cancelled&project=${projectId}`,
+        metadata: {
+          projectId: projectId,
+          documentId: signedQuote.id,
+          userId: currentUser.id,
+          type: 'deposit',
+        },
+        customer_email: currentUser.email,
+      });
+
+      res.json({ url: session.url });
+    } catch (error) {
+      console.error("Create deposit checkout error:", error);
+      res.status(500).json({ message: "Erreur lors de la création de la session de paiement" });
+    }
+  });
+
+  // Handle successful payment (called from webhook or verified manually)
+  app.post("/api/projects/:projectId/confirm-payment", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const projectId = req.params.projectId as string;
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      if (project.status !== "awaiting_deposit") {
+        return res.status(400).json({ message: "Ce projet n'est pas en attente de paiement" });
+      }
+
+      // Update project status to approved
+      const updatedProject = await storage.updateProjectStatus(projectId, "approved");
+      res.json(updatedProject);
+    } catch (error) {
+      console.error("Confirm payment error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
     }
   });
 
