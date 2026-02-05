@@ -6,7 +6,7 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 ## Features
 - **Page d'accueil moderne** : Hero section, services (Sites Vitrines, Applications Web, Intégration IA, Design UI/UX), avantages, Technologies Modernes
 - **Authentification locale** : Login/Register avec sessions PostgreSQL
-- **Compte admin par défaut** : username "admin", password "admin" (changement obligatoire à la première connexion)
+- **Compte admin par défaut** : email "admin@innov-studio.fr", password "admin" (changement obligatoire à la première connexion)
 - **Inscription utilisateurs** : Prénom, Nom, Entreprise, Adresse, Adresse de facturation (checkbox "identique")
 - **Dashboard** : Profil utilisateur, panneau admin pour voir tous les utilisateurs
 - **Mode sombre/clair** : Toggle disponible uniquement après connexion (dashboard), pages publiques toujours en mode sombre
@@ -21,6 +21,7 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Prévisualisation du devis avant génération
   - L'admin génère et télécharge le PDF du devis
   - Le client télécharge, signe et upload le document signé → statut "Signé"
+  - Bouton "Télécharger" uniforme sur tous les documents
 - **Signature électronique admin** : 
   - Pad de signature dans les paramètres pour dessiner la signature (canvas avec support souris/tactile)
   - Signature sauvegardée en base64 PNG dans la base de données
@@ -43,7 +44,7 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Webhook Stripe pour passage automatique en statut "completed" après paiement
 - **Génération automatique de facture** :
   - À la fin du paiement final, une facture est automatiquement générée
-  - Basée sur le devis initial mais avec le statut "payée"
+  - Titre de la facture : "Facture - [Nom du projet]"
   - PDF de facture professionnelle avec badge "PAYÉE" vert
   - Affiche le détail des paiements (acompte + solde)
   - Visible dans les documents du projet avec icône verte
@@ -55,10 +56,16 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - **Modification email par confirmation** : Les utilisateurs peuvent changer leur adresse email via un lien de confirmation envoyé à leur email actuel
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
 - **Système d'abonnements** : 
-  - 3 offres disponibles : Maintenance (99€/mois), Hébergement (49€/mois), Pack Complet (129€/mois)
+  - 3 offres disponibles : Maintenance, Hébergement, Pack Complet (prix configurables par l'admin)
   - Attribution des abonnements à un projet spécifique
-  - Gestion des abonnements actifs avec possibilité d'annulation
+  - Un seul abonnement actif par projet (impossible d'en prendre un autre tant que l'actif n'est pas résilié)
+  - Paiement récurrent via Stripe avec renouvellement automatique mensuel
+  - Email du client pré-rempli dans le checkout Stripe
+  - Résiliation avec effet différé (fin de période en cours)
+  - Réactivation possible avant la fin de période (annuler la résiliation)
+  - Factures d'abonnement automatiques : titre "Facture - Abonnement '[Nom offre]'"
   - Historique des abonnements annulés/expirés
+  - Synchronisation des prix avec Stripe
 
 ## Tech Stack
 - **Frontend** : React + Vite + TypeScript + Tailwind CSS + shadcn/ui
@@ -88,6 +95,8 @@ client/
 │   └── App.tsx               # Routes
 server/
 ├── routes.ts                 # API endpoints
+├── webhookHandlers.ts        # Stripe webhook handlers
+├── stripeClient.ts           # Stripe client configuration
 ├── storage.ts                # Database operations
 ├── db.ts                     # PostgreSQL connection
 └── index.ts
@@ -105,45 +114,73 @@ shared/
 - `/reset-password` - Nouveau mot de passe (avec token)
 
 ## API Endpoints
+
+### Authentification
 - `POST /api/auth/login` - Connexion
 - `POST /api/auth/register` - Inscription
 - `GET /api/auth/me` - Utilisateur courant
 - `POST /api/auth/logout` - Déconnexion
 - `POST /api/auth/change-password` - Changer mot de passe
-- `GET /api/users` - Liste utilisateurs (admin only)
-- `POST /api/projects` - Créer un projet
-- `GET /api/projects` - Liste des projets (user: ses projets, admin: tous)
-- `PATCH /api/projects/:id/status` - Mettre à jour statut projet (admin only)
-- `POST /api/projects/:projectId/features` - Ajouter une fonctionnalité (owner only)
-- `GET /api/projects/:projectId/features` - Liste fonctionnalités d'un projet
-- `PATCH /api/features/:id/status` - Mettre à jour statut fonctionnalité (admin only)
-- `PATCH /api/features/:id` - Modifier fonctionnalité (owner only, si pending)
-- `DELETE /api/features/:id` - Supprimer fonctionnalité (owner only, si pending)
 - `GET /api/auth/verify-email` - Vérifier email avec token
 - `POST /api/auth/resend-verification` - Renvoyer email de vérification
 - `POST /api/auth/forgot-password` - Demander réinitialisation mot de passe
 - `POST /api/auth/reset-password` - Réinitialiser mot de passe avec token
 - `POST /api/auth/save-signature` - Enregistrer signature admin (admin only)
+
+### Utilisateurs
+- `GET /api/users` - Liste utilisateurs (admin only)
+
+### Projets
+- `POST /api/projects` - Créer un projet
+- `GET /api/projects` - Liste des projets (user: ses projets, admin: tous)
+- `PATCH /api/projects/:id/status` - Mettre à jour statut projet (admin only)
+
+### Fonctionnalités
+- `POST /api/projects/:projectId/features` - Ajouter une fonctionnalité (owner only)
+- `GET /api/projects/:projectId/features` - Liste fonctionnalités d'un projet
+- `PATCH /api/features/:id/status` - Mettre à jour statut fonctionnalité (admin only)
+- `PATCH /api/features/:id` - Modifier fonctionnalité (owner only, si pending)
+- `DELETE /api/features/:id` - Supprimer fonctionnalité (owner only, si pending)
+
+### Documents
 - `GET /api/projects/:projectId/documents` - Liste des documents d'un projet
 - `POST /api/projects/:projectId/documents` - Créer un document (admin only)
 - `POST /api/documents/:id/upload-quote` - Admin upload le devis
 - `POST /api/documents/:id/upload-signed` - Client upload le document signé
 - `POST /api/documents/:id/sign-electronic` - Client signe électroniquement
 - `GET /api/documents/:id/download` - Télécharger un document
+- `GET /api/documents/:id/generate-pdf` - Générer PDF du devis
+- `GET /api/documents/:id/generate-invoice-pdf` - Générer PDF de facture
 - `PATCH /api/documents/:id/status` - Modifier statut document (admin only)
+- `DELETE /api/documents/:id` - Supprimer un document
+
+### Paiements Stripe
 - `GET /api/stripe/config` - Récupérer la clé publique Stripe
-- `POST /api/projects/:projectId/pay-deposit` - Créer une session de paiement Stripe pour l'acompte
-- `POST /api/stripe/webhook` - Webhook Stripe pour les notifications de paiement
+- `POST /api/projects/:projectId/pay-deposit` - Session de paiement pour l'acompte
+- `POST /api/projects/:projectId/pay-final` - Session de paiement final
+- `POST /api/stripe/webhook` - Webhook Stripe pour notifications
+
+### Abonnements
+- `GET /api/subscription-offers` - Liste des offres d'abonnement
+- `PATCH /api/subscription-offers/:type` - Modifier prix d'une offre (admin only)
+- `POST /api/subscriptions/checkout` - Créer session checkout abonnement
+- `POST /api/subscriptions` - Créer abonnement (legacy)
+- `GET /api/subscriptions` - Liste des abonnements de l'utilisateur
+- `GET /api/admin/subscriptions` - Liste tous les abonnements (admin only)
+- `PATCH /api/subscriptions/:id/cancel` - Résilier un abonnement
+- `PATCH /api/subscriptions/:id/reactivate` - Réactiver un abonnement (annuler résiliation)
 
 ## Environment Variables
 - `DATABASE_URL` - URL PostgreSQL
 - `SESSION_SECRET` - Clé de session
+- Variables Stripe (gérées automatiquement par l'intégration)
 
 ## User Schema
 ```typescript
 {
   id: string,
   username: string,
+  email: string,
   password: string (hashed),
   firstName: string,
   lastName: string,
@@ -153,7 +190,24 @@ shared/
   sameAsBilling: boolean,
   role: "user" | "admin",
   mustChangePassword: boolean,
+  emailVerified: boolean,
   signature: string (base64 PNG, admin only)
+}
+```
+
+## Subscription Schema
+```typescript
+{
+  id: string,
+  userId: string,
+  projectId: string,
+  offerType: "maintenance" | "hosting" | "pack",
+  monthlyPrice: string,
+  status: "active" | "cancelled" | "expired",
+  stripeSubscriptionId: string,
+  currentPeriodEnd: Date,
+  cancelAtPeriodEnd: boolean,
+  createdAt: Date
 }
 ```
 
