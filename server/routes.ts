@@ -1988,6 +1988,7 @@ export async function registerRoutes(
       const session = await stripeClient.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment', // One-time payment for first month
+        customer_email: currentUser.email || undefined,
         line_items: [
           {
             price_data: {
