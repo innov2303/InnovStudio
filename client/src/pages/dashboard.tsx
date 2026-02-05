@@ -73,7 +73,7 @@ type SubscriptionOffer = {
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
-type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "subscription_settings" | "users";
+type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "subscription_settings" | "users" | "security_logs";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -184,6 +184,22 @@ export default function Dashboard() {
   const { data: allUsers, isLoading: usersLoading } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
     enabled: user?.role === "admin",
+  });
+
+  type SecurityLog = {
+    id: string;
+    type: string;
+    userId: string | null;
+    email: string | null;
+    ipAddress: string | null;
+    userAgent: string | null;
+    details: string | null;
+    createdAt: string;
+  };
+
+  const { data: securityLogs, isLoading: securityLogsLoading } = useQuery<SecurityLog[]>({
+    queryKey: ["/api/admin/security-logs"],
+    enabled: user?.role === "admin" && activeSection === "security_logs",
   });
 
   const { data: projects, isLoading: projectsLoading, refetch: refetchProjects } = useQuery<Project[]>({
@@ -909,6 +925,7 @@ export default function Dashboard() {
     ...(user.role === "admin" ? [{ id: "documents" as MenuSection, label: "Abonnements", icon: FileText }] : []),
     ...(user.role === "admin" ? [{ id: "subscription_settings" as MenuSection, label: "Gérer les abonnements", icon: Settings }] : []),
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
+    ...(user.role === "admin" ? [{ id: "security_logs" as MenuSection, label: "Logs de sécurité", icon: Shield }] : []),
   ];
 
   return (
@@ -3473,6 +3490,83 @@ export default function Dashboard() {
                 ) : (
                   <p className="text-center text-muted-foreground py-8">
                     Aucun utilisateur enregistré
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Security Logs Section (Admin only) */}
+          {activeSection === "security_logs" && user.role === "admin" && (
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Shield className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>Logs de sécurité</CardTitle>
+                  <CardDescription>Historique des événements de sécurité</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {securityLogsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : securityLogs && securityLogs.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Date</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Type</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Email</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">IP</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Détails</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {securityLogs.map((log) => (
+                          <tr key={log.id} className="border-b last:border-0" data-testid={`row-log-${log.id}`}>
+                            <td className="py-3 px-4">
+                              <span className="text-sm">
+                                {new Date(log.createdAt).toLocaleString('fr-FR')}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge variant={
+                                log.type === 'login_success' ? 'default' :
+                                log.type === 'login_failed' ? 'destructive' :
+                                log.type === 'register' ? 'secondary' :
+                                log.type === 'rate_limit_exceeded' ? 'destructive' :
+                                'outline'
+                              }>
+                                {log.type === 'login_success' ? 'Connexion réussie' :
+                                 log.type === 'login_failed' ? 'Échec connexion' :
+                                 log.type === 'register' ? 'Inscription' :
+                                 log.type === 'password_reset_request' ? 'Demande MDP' :
+                                 log.type === 'password_changed' ? 'MDP modifié' :
+                                 log.type === 'rate_limit_exceeded' ? 'Rate limit' :
+                                 log.type}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="text-sm">{log.email || '-'}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="text-sm font-mono text-xs">{log.ipAddress || '-'}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="text-sm text-muted-foreground">{log.details || '-'}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Aucun log de sécurité
                   </p>
                 )}
               </CardContent>

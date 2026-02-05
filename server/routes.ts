@@ -14,6 +14,33 @@ import path from "path";
 import fs from "fs";
 import PDFDocument from "pdfkit";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+
+// Helper pour obtenir l'IP réelle
+function getClientIp(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.ip || req.socket.remoteAddress || 'unknown';
+}
+
+// Helper pour logger les événements de sécurité
+async function logSecurityEvent(type: string, req: Request, email?: string, userId?: string, details?: string) {
+  try {
+    await storage.createSecurityLog({
+      type,
+      userId,
+      email,
+      ipAddress: getClientIp(req),
+      userAgent: req.headers['user-agent'] || 'unknown',
+      details,
+    });
+  } catch (error) {
+    console.error('Failed to log security event:', error);
+  }
+}
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -60,6 +87,27 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// Rate limiters
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 tentatives par fenêtre
+  message: { message: "Trop de tentatives. Réessayez dans 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: async (req, res) => {
+    await logSecurityEvent('rate_limit_exceeded', req, undefined, undefined, 'Auth rate limit exceeded');
+    res.status(429).json({ message: "Trop de tentatives. Réessayez dans 15 minutes." });
+  },
+});
+
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // 100 requêtes par minute
+  message: { message: "Trop de requêtes. Veuillez patienter." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -69,6 +117,25 @@ export async function registerRoutes(
   if (process.env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
   }
+  
+  // Helmet - Headers de sécurité
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com"],
+        frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
+        connectSrc: ["'self'", "https://api.stripe.com", "wss:", "ws:"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  }));
+  
+  // Rate limiting général
+  app.use(generalLimiter);
   
   app.use(
     session({
@@ -91,7 +158,7 @@ export async function registerRoutes(
 
   await storage.initializeAdmin();
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", authLimiter, async (req, res) => {
     try {
       const result = loginSchema.safeParse(req.body);
       if (!result.success) {
@@ -108,11 +175,13 @@ export async function registerRoutes(
       }
       
       if (!user) {
+        await logSecurityEvent('login_failed', req, email, undefined, 'User not found');
         return res.status(401).json({ message: "Identifiants incorrects" });
       }
 
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
+        await logSecurityEvent('login_failed', req, email, user.id, 'Wrong password');
         return res.status(401).json({ message: "Identifiants incorrects" });
       }
 
@@ -126,6 +195,8 @@ export async function registerRoutes(
 
       req.session.userId = user.id;
       
+      await logSecurityEvent('login_success', req, email, user.id);
+      
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
@@ -134,7 +205,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("/api/auth/register", authLimiter, async (req, res) => {
     try {
       const result = registerSchema.safeParse(req.body);
       if (!result.success) {
@@ -165,6 +236,8 @@ export async function registerRoutes(
       if (!emailSent) {
         console.error("Failed to send verification email to:", result.data.email);
       }
+
+      await logSecurityEvent('register', req, result.data.email, user.id);
 
       const { password: _, ...userWithoutPassword } = user;
       res.status(201).json({ 
@@ -237,7 +310,7 @@ export async function registerRoutes(
   });
 
   // Forgot password endpoint
-  app.post("/api/auth/forgot-password", async (req, res) => {
+  app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
     try {
       const result = forgotPasswordSchema.safeParse(req.body);
       if (!result.success) {
@@ -265,6 +338,8 @@ export async function registerRoutes(
         console.error("Failed to send password reset email to:", email);
       }
 
+      await logSecurityEvent('password_reset_request', req, email, user.id);
+
       res.json({ message: "Si cet email existe, un lien de réinitialisation a été envoyé" });
     } catch (error) {
       console.error("Forgot password error:", error);
@@ -273,7 +348,7 @@ export async function registerRoutes(
   });
 
   // Reset password endpoint
-  app.post("/api/auth/reset-password", async (req, res) => {
+  app.post("/api/auth/reset-password", authLimiter, async (req, res) => {
     try {
       const result = resetPasswordSchema.safeParse(req.body);
       if (!result.success) {
@@ -296,6 +371,8 @@ export async function registerRoutes(
       // Update password and clear reset token
       await storage.updateUserPassword(user.id, newPassword);
       await storage.clearPasswordResetToken(user.id);
+
+      await logSecurityEvent('password_changed', req, user.email || undefined, user.id, 'Password reset via token');
 
       res.json({ message: "Mot de passe réinitialisé avec succès" });
     } catch (error) {
@@ -514,6 +591,24 @@ export async function registerRoutes(
       res.json(usersWithoutPasswords);
     } catch (error) {
       console.error("Get users error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Security logs (admin only)
+  app.get("/api/admin/security-logs", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 100;
+      const logs = await storage.getSecurityLogs(Math.min(limit, 500));
+      
+      res.json(logs);
+    } catch (error) {
+      console.error("Get security logs error:", error);
       res.status(500).json({ message: "Erreur serveur" });
     }
   });

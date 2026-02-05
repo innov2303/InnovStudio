@@ -1,4 +1,4 @@
-import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers, securityLogs, type SecurityLog } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -64,6 +64,10 @@ export interface IStorage {
   getSubscriptionOffers(): Promise<SubscriptionOffer[]>;
   getSubscriptionOffer(id: string): Promise<SubscriptionOffer | undefined>;
   updateSubscriptionOffer(id: string, price: string): Promise<SubscriptionOffer | undefined>;
+  
+  // Security Logs
+  createSecurityLog(log: { type: string; userId?: string; email?: string; ipAddress?: string; userAgent?: string; details?: string }): Promise<void>;
+  getSecurityLogs(limit?: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -531,6 +535,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(subscriptionOffers.id, id))
       .returning();
     return offer;
+  }
+
+  // Security Logs
+  async createSecurityLog(log: { type: string; userId?: string; email?: string; ipAddress?: string; userAgent?: string; details?: string }): Promise<void> {
+    await db.insert(securityLogs).values(log);
+  }
+
+  async getSecurityLogs(limit: number = 100): Promise<SecurityLog[]> {
+    return db.select().from(securityLogs).orderBy(desc(securityLogs.createdAt)).limit(limit);
   }
 }
 

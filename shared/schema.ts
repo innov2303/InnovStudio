@@ -273,3 +273,29 @@ export const createSubscriptionSchema = insertSubscriptionSchema.extend({
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type CreateSubscriptionData = z.infer<typeof createSubscriptionSchema>;
+
+// Security Logs
+export const securityLogTypeEnum = ["login_success", "login_failed", "register", "password_reset_request", "password_changed", "account_locked", "suspicious_activity", "rate_limit_exceeded"] as const;
+
+export const securityLogs = pgTable("security_logs", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull(),
+  userId: varchar("user_id", { length: 36 }),
+  email: text("email"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  details: text("details"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSecurityLogSchema = createInsertSchema(securityLogs).pick({
+  type: true,
+  userId: true,
+  email: true,
+  ipAddress: true,
+  userAgent: true,
+  details: true,
+});
+
+export type InsertSecurityLog = z.infer<typeof insertSecurityLogSchema>;
+export type SecurityLog = typeof securityLogs.$inferSelect;
