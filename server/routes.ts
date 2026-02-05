@@ -1931,7 +1931,95 @@ export async function registerRoutes(
     }
   });
 
-  // Create a subscription
+  // Create a subscription checkout session (redirect to Stripe)
+  app.post("/api/subscriptions/checkout", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const { projectId, offerType } = req.body;
+
+      if (!projectId || !offerType) {
+        return res.status(400).json({ message: "Projet et type d'offre requis" });
+      }
+
+      // Validate offer type
+      if (!["maintenance", "hosting", "pack"].includes(offerType)) {
+        return res.status(400).json({ message: "Type d'offre invalide" });
+      }
+
+      // Verify project exists and belongs to user (or user is admin)
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      if (project.userId !== currentUser.id && currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Check if project already has this subscription type
+      const existingSubscriptions = await storage.getSubscriptionsByProject(projectId);
+      const hasExisting = existingSubscriptions.some(
+        sub => sub.offerType === offerType && sub.status === "active"
+      );
+
+      if (hasExisting) {
+        return res.status(400).json({ message: "Ce projet a déjà un abonnement de ce type actif" });
+      }
+
+      // Get the price for this offer type from database
+      const offer = await storage.getSubscriptionOffer(offerType);
+      if (!offer) {
+        return res.status(400).json({ message: "Type d'offre invalide" });
+      }
+      
+      const priceInCents = Math.round(parseFloat(offer.price) * 100);
+      const stripeClient = await getUncachableStripeClient();
+
+      // Get base URL for redirect
+      const host = req.headers.host || 'localhost:5000';
+      const protocol = req.headers['x-forwarded-proto'] || 'http';
+      const baseUrl = `${protocol}://${host}`;
+
+      // Create Stripe Checkout Session for subscription
+      const session = await stripeClient.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment', // One-time payment for first month
+        line_items: [
+          {
+            price_data: {
+              currency: 'eur',
+              product_data: {
+                name: `Abonnement ${offer.name}`,
+                description: `${offer.description} - Premier mois`,
+              },
+              unit_amount: priceInCents,
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          type: 'subscription',
+          projectId,
+          offerType,
+          userId: currentUser.id,
+          monthlyPrice: offer.price,
+        },
+        success_url: `${baseUrl}/dashboard?subscription_success=true&project=${projectId}`,
+        cancel_url: `${baseUrl}/dashboard?subscription_cancelled=true`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error) {
+      console.error("Create subscription checkout error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Create a subscription (legacy - now used by webhook)
   app.post("/api/subscriptions", requireAuth, async (req, res) => {
     try {
       const currentUser = await storage.getUser(req.session.userId!);

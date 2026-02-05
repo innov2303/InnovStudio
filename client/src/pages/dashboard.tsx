@@ -151,6 +151,27 @@ export default function Dashboard() {
       // Remove query params from URL without reloading
       window.history.replaceState({}, '', '/dashboard');
     }
+    
+    // Handle subscription success/cancel
+    const subscriptionSuccess = urlParams.get('subscription_success');
+    const subscriptionCancelled = urlParams.get('subscription_cancelled');
+    
+    if (subscriptionSuccess === 'true') {
+      toast({
+        title: "Abonnement activé",
+        description: "Votre abonnement a été créé avec succès. La facture est disponible dans les documents du projet.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      window.history.replaceState({}, '', '/dashboard');
+    } else if (subscriptionCancelled === 'true') {
+      toast({
+        title: "Abonnement annulé",
+        description: "La souscription a été annulée. Vous pouvez réessayer à tout moment.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, '', '/dashboard');
+    }
   }, [toast]);
 
   // Collapse all projects by default when they load
@@ -693,21 +714,17 @@ export default function Dashboard() {
     },
   });
 
-  // Subscription mutations
+  // Subscription mutations - redirect to Stripe checkout
   const createSubscriptionMutation = useMutation({
     mutationFn: async ({ projectId, offerType }: { projectId: string; offerType: string }) => {
-      const response = await apiRequest("POST", "/api/subscriptions", { projectId, offerType });
+      const response = await apiRequest("POST", "/api/subscriptions/checkout", { projectId, offerType });
       return response.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Abonnement activé",
-        description: "Votre abonnement a été créé avec succès.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions"] });
-      setShowSubscriptionDialog(false);
-      setSelectedOffer(null);
-      setSelectedProjectForSubscription("");
+    onSuccess: (data: { url: string }) => {
+      // Redirect to Stripe checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -3029,8 +3046,10 @@ export default function Dashboard() {
                       >
                         {createSubscriptionMutation.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : null}
-                        Confirmer l'abonnement
+                        ) : (
+                          <CreditCard className="h-4 w-4 mr-2" />
+                        )}
+                        Payer et s'abonner
                       </Button>
                     </div>
                   </>

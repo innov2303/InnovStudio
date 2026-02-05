@@ -47,6 +47,7 @@ export interface IStorage {
   updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteLineItems?: string; quoteAmount?: string; quoteDepositPercent?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined>;
   deleteDocument(id: string): Promise<boolean>;
   createInvoiceFromQuote(quoteId: string): Promise<ProjectDocument | undefined>;
+  createSubscriptionInvoice(projectId: string, subscriptionId: string, offerName: string, amount: string): Promise<ProjectDocument | undefined>;
   // Subscriptions
   createSubscription(userId: string, projectId: string, offerType: string, monthlyPrice: string): Promise<Subscription>;
   getSubscription(id: string): Promise<Subscription | undefined>;
@@ -400,6 +401,25 @@ export class DatabaseStorage implements IStorage {
         quoteValidityDays: quote.quoteValidityDays,
         quoteNotes: quote.quoteNotes,
         clientSignature: quote.clientSignature,
+      })
+      .returning();
+    return invoice;
+  }
+
+  async createSubscriptionInvoice(projectId: string, subscriptionId: string, offerName: string, amount: string): Promise<ProjectDocument | undefined> {
+    // Create subscription invoice document
+    const [invoice] = await db
+      .insert(projectDocuments)
+      .values({
+        projectId,
+        type: "subscription_invoice",
+        status: "paid",
+        quoteTitle: `Facture Abonnement - ${offerName}`,
+        quoteDescription: `Abonnement mensuel ${offerName}`,
+        quoteLineItems: JSON.stringify([{ description: `Abonnement ${offerName} - Premier mois`, amount }]),
+        quoteAmount: amount,
+        quoteDepositPercent: "100",
+        quoteNotes: `Abonnement ID: ${subscriptionId}`,
       })
       .returning();
     return invoice;
