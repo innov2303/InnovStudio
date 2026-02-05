@@ -2,7 +2,25 @@ import { Resend } from 'resend';
 
 let connectionSettings: any;
 
+// Détection du mode auto-hébergé
+function isSelfHosted(): boolean {
+  return !process.env.REPLIT_CONNECTORS_HOSTNAME;
+}
+
 async function getCredentials() {
+  // Mode auto-hébergé : utiliser les variables d'environnement
+  if (isSelfHosted()) {
+    const apiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Innov Studio <noreply@innov-studio.fr>';
+    
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY not configured for self-hosted mode');
+    }
+    
+    return { apiKey, fromEmail };
+  }
+  
+  // Mode Replit : utiliser le connecteur
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY 
     ? 'repl ' + process.env.REPL_IDENTITY 
@@ -38,11 +56,19 @@ async function getResendClient() {
   };
 }
 
+// Obtenir l'URL de base pour les liens dans les emails
+function getBaseUrl(): string {
+  if (isSelfHosted()) {
+    return process.env.APP_URL || 'https://innov-studio.fr';
+  }
+  return process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000';
+}
+
 export async function sendVerificationEmail(to: string, firstName: string, verificationToken: string): Promise<boolean> {
   try {
     const { client, fromEmail } = await getResendClient();
     
-    const verificationUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${getBaseUrl()}/verify-email?token=${verificationToken}`;
     
     const { error } = await client.emails.send({
       from: fromEmail || 'Innov Studio <noreply@innov-studio.fr>',
@@ -103,7 +129,7 @@ export async function sendPasswordResetEmail(to: string, firstName: string, rese
   try {
     const { client, fromEmail } = await getResendClient();
     
-    const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${getBaseUrl()}/reset-password?token=${resetToken}`;
     
     const { error } = await client.emails.send({
       from: fromEmail || 'Innov Studio <noreply@innov-studio.fr>',
@@ -164,7 +190,7 @@ export async function sendPasswordChangeEmail(to: string, firstName: string, res
   try {
     const { client, fromEmail } = await getResendClient();
     
-    const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${getBaseUrl()}/reset-password?token=${resetToken}`;
     
     const { error } = await client.emails.send({
       from: fromEmail || 'Innov Studio <noreply@innov-studio.fr>',
@@ -222,7 +248,7 @@ export async function sendEmailChangeConfirmation(to: string, firstName: string,
   try {
     const { client, fromEmail } = await getResendClient();
     
-    const confirmUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/confirm-email-change?token=${confirmToken}`;
+    const confirmUrl = `${getBaseUrl()}/confirm-email-change?token=${confirmToken}`;
     
     const { error } = await client.emails.send({
       from: fromEmail || 'Innov Studio <noreply@innov-studio.fr>',
