@@ -30,6 +30,12 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Dialog de signature avec pad de signature canvas
   - Signature client sauvegardée en base64 PNG dans le document
   - Les deux signatures (admin + client) intégrées dans le PDF final
+- **Paiement d'acompte Stripe** :
+  - Après signature du devis, le projet passe en statut "awaiting_deposit"
+  - Bouton de paiement visible pour le client sur le dashboard
+  - Redirection vers Stripe Checkout pour paiement sécurisé
+  - Montant calculé automatiquement depuis le pourcentage d'acompte du devis
+  - Webhook Stripe pour mise à jour automatique du statut projet après paiement réussi
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
 - **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
@@ -39,6 +45,7 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - **Backend** : Express.js + TypeScript
 - **Database** : PostgreSQL (Drizzle ORM)
 - **Auth** : express-session + bcrypt + connect-pg-simple
+- **Payments** : Stripe (via stripe-replit-sync pour la gestion automatique des webhooks)
 
 ## Project Structure
 ```
@@ -104,6 +111,9 @@ shared/
 - `POST /api/documents/:id/sign-electronic` - Client signe électroniquement
 - `GET /api/documents/:id/download` - Télécharger un document
 - `PATCH /api/documents/:id/status` - Modifier statut document (admin only)
+- `GET /api/stripe/config` - Récupérer la clé publique Stripe
+- `POST /api/projects/:projectId/pay-deposit` - Créer une session de paiement Stripe pour l'acompte
+- `POST /api/stripe/webhook` - Webhook Stripe pour les notifications de paiement
 
 ## Environment Variables
 - `DATABASE_URL` - URL PostgreSQL

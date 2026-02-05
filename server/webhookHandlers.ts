@@ -1,4 +1,4 @@
-import { getStripeSync, getUncachableStripeClient } from './stripeClient';
+import { getStripeSync } from './stripeClient';
 import { storage } from './storage';
 
 export class WebhookHandlers {
@@ -11,27 +11,25 @@ export class WebhookHandlers {
     }
 
     const sync = await getStripeSync();
-    
-    try {
-      const stripe = await getUncachableStripeClient();
-      const event = stripe.webhooks.constructEvent(
-        payload,
-        signature,
-        process.env.STRIPE_WEBHOOK_SECRET || ''
-      );
 
-      if (event.type === 'checkout.session.completed') {
-        const session = event.data.object as any;
-        await WebhookHandlers.handleCheckoutComplete(session);
+    // Process the webhook using stripe-replit-sync which handles signature verification
+    await sync.processWebhook(payload, signature);
+    
+    // Parse the event payload to handle custom logic
+    try {
+      const eventPayload = JSON.parse(payload.toString());
+      
+      if (eventPayload.type === 'checkout.session.completed') {
+        await WebhookHandlers.handleCheckoutComplete(eventPayload.data?.object);
       }
     } catch (err: any) {
-      console.log('Custom webhook handling not available, using stripe-replit-sync:', err.message);
+      console.log('Error parsing webhook event:', err.message);
     }
-
-    await sync.processWebhook(payload, signature);
   }
 
   static async handleCheckoutComplete(session: any): Promise<void> {
+    if (!session) return;
+    
     const projectId = session.metadata?.projectId;
     const type = session.metadata?.type;
     
@@ -41,8 +39,14 @@ export class WebhookHandlers {
     }
 
     if (session.payment_status === 'paid') {
-      await storage.updateProjectStatus(projectId, 'approved');
-      console.log(`Project ${projectId} status updated to approved after deposit payment`);
+      // Verify the project exists and is in correct status before updating
+      const project = await storage.getProject(projectId);
+      if (project && project.status === 'awaiting_deposit') {
+        await storage.updateProjectStatus(projectId, 'approved');
+        console.log(`Project ${projectId} status updated to approved after deposit payment`);
+      } else {
+        console.log(`Project ${projectId} not in awaiting_deposit status, skipping update`);
+      }
     }
   }
 }
