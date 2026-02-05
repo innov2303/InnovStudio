@@ -206,10 +206,11 @@ export class DatabaseStorage implements IStorage {
   async initializeAdmin(): Promise<void> {
     const existingAdmin = await this.getUserByUsername("admin");
     if (!existingAdmin) {
-      await this.createUser({
+      const hashedPassword = await bcrypt.hash("admin", 10);
+      await db.insert(users).values({
         username: "admin",
         email: "admin@innov-studio.fr",
-        password: "admin",
+        password: hashedPassword,
         firstName: "Admin",
         lastName: "Studio",
         company: "Innov Studio",
@@ -218,6 +219,7 @@ export class DatabaseStorage implements IStorage {
         sameAsBilling: true,
         role: "admin",
         mustChangePassword: true,
+        emailVerified: true,
       });
       console.log("Admin user created with default credentials");
     } else if (!existingAdmin.email) {
