@@ -25,6 +25,20 @@ async function initStripe() {
     return;
   }
 
+  // Check if running on Replit
+  const isReplit = !!process.env.REPLIT_CONNECTORS_HOSTNAME;
+  
+  if (!isReplit) {
+    // Self-hosted mode: skip stripe-replit-sync, just verify Stripe keys exist
+    const hasStripeKeys = process.env.STRIPE_PUBLISHABLE_KEY && process.env.STRIPE_SECRET_KEY;
+    if (hasStripeKeys) {
+      console.log('Stripe initialized in self-hosted mode');
+    } else {
+      console.log('Stripe keys not configured, payments will be disabled');
+    }
+    return;
+  }
+
   try {
     console.log('Initializing Stripe schema...');
     await runMigrations({ databaseUrl, schema: 'stripe' });

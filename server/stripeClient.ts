@@ -1,8 +1,22 @@
 import Stripe from 'stripe';
 
-let connectionSettings: any;
+// Check if running on Replit or self-hosted
+const isReplit = !!process.env.REPLIT_CONNECTORS_HOSTNAME;
 
 async function getCredentials() {
+  // Self-hosted mode: use environment variables
+  if (!isReplit) {
+    const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY;
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    
+    if (!publishableKey || !secretKey) {
+      throw new Error('STRIPE_PUBLISHABLE_KEY and STRIPE_SECRET_KEY must be set');
+    }
+    
+    return { publishableKey, secretKey };
+  }
+
+  // Replit mode: use connector
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? 'repl ' + process.env.REPL_IDENTITY
@@ -32,7 +46,7 @@ async function getCredentials() {
 
   const data = await response.json();
   
-  connectionSettings = data.items?.[0];
+  const connectionSettings = data.items?.[0];
 
   if (!connectionSettings || (!connectionSettings.settings.publishable || !connectionSettings.settings.secret)) {
     throw new Error(`Stripe ${targetEnvironment} connection not found`);
