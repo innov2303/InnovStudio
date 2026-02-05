@@ -417,7 +417,7 @@ export class DatabaseStorage implements IStorage {
         projectId,
         type: "subscription_invoice",
         status: "paid",
-        quoteTitle: `Facture Abonnement - ${offerName}`,
+        quoteTitle: `Facture - Abonnement '${offerName}'`,
         quoteDescription: `Abonnement mensuel ${offerName}`,
         quoteLineItems: JSON.stringify([{ description: `Abonnement ${offerName} - Premier mois`, amount }]),
         quoteAmount: amount,

@@ -2108,28 +2108,28 @@ export default function Dashboard() {
                                     <div className="flex items-start justify-between">
                                       <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded-lg ${
-                                          doc.type === "invoice" ? "bg-emerald-500/10" :
+                                          (doc.type === "invoice" || doc.type === "subscription_invoice") ? "bg-emerald-500/10" :
                                           doc.status === "draft" ? "bg-yellow-500/10" :
                                           doc.status === "awaiting_signature" ? "bg-blue-500/10" :
                                           "bg-green-500/10"
                                         }`}>
-                                          {doc.type === "invoice" && <Receipt className="h-4 w-4 text-emerald-500" />}
-                                          {doc.type !== "invoice" && doc.status === "draft" && <FilePenLine className="h-4 w-4 text-yellow-500" />}
-                                          {doc.type !== "invoice" && doc.status === "awaiting_signature" && <FileClock className="h-4 w-4 text-blue-500" />}
-                                          {doc.type !== "invoice" && doc.status === "signed" && <FileCheck className="h-4 w-4 text-green-500" />}
+                                          {(doc.type === "invoice" || doc.type === "subscription_invoice") && <Receipt className="h-4 w-4 text-emerald-500" />}
+                                          {doc.type !== "invoice" && doc.type !== "subscription_invoice" && doc.status === "draft" && <FilePenLine className="h-4 w-4 text-yellow-500" />}
+                                          {doc.type !== "invoice" && doc.type !== "subscription_invoice" && doc.status === "awaiting_signature" && <FileClock className="h-4 w-4 text-blue-500" />}
+                                          {doc.type !== "invoice" && doc.type !== "subscription_invoice" && doc.status === "signed" && <FileCheck className="h-4 w-4 text-green-500" />}
                                         </div>
                                         <div>
                                           <p className="text-sm font-medium">
-                                            {doc.type === "invoice" ? "Facture" : "Devis"}
-                                            {doc.quoteTitle && ` - ${doc.quoteTitle}`}
+                                            {(doc.type === "invoice" || doc.type === "subscription_invoice") ? doc.quoteTitle : "Devis"}
+                                            {doc.type !== "invoice" && doc.type !== "subscription_invoice" && doc.quoteTitle && ` - ${doc.quoteTitle}`}
                                           </p>
                                           <p className="text-xs text-muted-foreground">
-                                            {doc.type === "invoice" && doc.status === "paid" && "Payée"}
-                                            {doc.type !== "invoice" && doc.status === "draft" && "Brouillon - En cours d'édition"}
-                                            {doc.type !== "invoice" && doc.status === "awaiting_signature" && "En attente de signature"}
-                                            {doc.type !== "invoice" && doc.status === "signed" && "Signé"}
+                                            {(doc.type === "invoice" || doc.type === "subscription_invoice") && doc.status === "paid" && "Payée"}
+                                            {doc.type !== "invoice" && doc.type !== "subscription_invoice" && doc.status === "draft" && "Brouillon - En cours d'édition"}
+                                            {doc.type !== "invoice" && doc.type !== "subscription_invoice" && doc.status === "awaiting_signature" && "En attente de signature"}
+                                            {doc.type !== "invoice" && doc.type !== "subscription_invoice" && doc.status === "signed" && "Signé"}
                                           </p>
-                                          {doc.quoteAmount && (doc.status !== "draft" || doc.type === "invoice") && (
+                                          {doc.quoteAmount && (doc.status !== "draft" || doc.type === "invoice" || doc.type === "subscription_invoice") && (
                                             <p className="text-sm font-medium mt-1">{doc.quoteAmount} €</p>
                                           )}
                                         </div>
@@ -2188,7 +2188,7 @@ export default function Dashboard() {
                                         )}
 
                                         {/* Client can delete documents that are not yet signed (not invoices) */}
-                                        {user.role !== "admin" && doc.status !== "signed" && doc.type !== "invoice" && (
+                                        {user.role !== "admin" && doc.status !== "signed" && doc.type !== "invoice" && doc.type !== "subscription_invoice" && (
                                           <Button
                                             size="sm"
                                             variant="destructive"
@@ -2272,7 +2272,7 @@ export default function Dashboard() {
                                         )}
 
                                         {/* Preview and download for signed documents */}
-                                        {doc.type !== "invoice" && doc.status === "signed" && (
+                                        {doc.type !== "invoice" && doc.type !== "subscription_invoice" && doc.status === "signed" && (
                                           <div className="flex items-center gap-2">
                                             <Button
                                               size="sm"
@@ -2307,7 +2307,7 @@ export default function Dashboard() {
                                         )}
 
                                         {/* Download button for invoices */}
-                                        {doc.type === "invoice" && (
+                                        {(doc.type === "invoice" || doc.type === "subscription_invoice") && (
                                           <Button
                                             size="sm"
                                             variant="default"
@@ -2316,7 +2316,7 @@ export default function Dashboard() {
                                             data-testid={`button-download-invoice-${doc.id}`}
                                           >
                                             <Download className="h-4 w-4 mr-1" />
-                                            Télécharger la facture
+                                            Télécharger
                                           </Button>
                                         )}
                                       </div>

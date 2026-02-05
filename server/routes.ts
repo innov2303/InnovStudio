@@ -1325,7 +1325,7 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Document non trouvé" });
       }
 
-      if (document.type !== "invoice") {
+      if (document.type !== "invoice" && document.type !== "subscription_invoice") {
         return res.status(400).json({ message: "Ce document n'est pas une facture" });
       }
 
