@@ -10,6 +10,7 @@ import { getStripeSync } from './stripeClient';
 import { WebhookHandlers } from './webhookHandlers';
 
 const app = express();
+
 const httpServer = createServer(app);
 
 declare module "http" {

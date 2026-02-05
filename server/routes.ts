@@ -113,8 +113,11 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
-  // Trust proxy pour Nginx (requis pour les cookies sécurisés derrière un reverse proxy)
-  if (process.env.NODE_ENV === "production") {
+  // Trust proxy pour Replit/Nginx (requis pour les cookies sécurisés derrière un reverse proxy)
+  // En production: toujours activer
+  // Sur Replit: activer car Replit utilise aussi un reverse proxy
+  const isReplit = !!process.env.REPLIT_CONNECTORS_HOSTNAME || !!process.env.REPLIT_DOMAINS;
+  if (process.env.NODE_ENV === "production" || isReplit) {
     app.set("trust proxy", 1);
   }
   
