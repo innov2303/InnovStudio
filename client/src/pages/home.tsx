@@ -119,7 +119,7 @@ export default function Home() {
     },
     {
       icon: Headphones,
-      title: "Support & Maintenance 5/7J",
+      title: "Support & Maintenance 7/7J",
       description: "Mises à jour régulières, corrections de bugs et support technique réactif pour garantir la pérennité de votre projet."
     },
     {
