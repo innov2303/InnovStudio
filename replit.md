@@ -10,7 +10,7 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - **Inscription utilisateurs** : Prénom, Nom, Entreprise, Adresse, Adresse de facturation (checkbox "identique")
 - **Dashboard** : Profil utilisateur, panneau admin pour voir tous les utilisateurs
 - **Mode sombre/clair** : Toggle disponible uniquement après connexion (dashboard), pages publiques toujours en mode sombre
-- **Système de projets** : Demandes de projet avec suivi d'état visuel (graphique de progression avec 5 étapes)
+- **Système de projets** : Demandes de projet avec suivi d'état visuel (graphique de progression avec 8 étapes : Déposé → Étude → Signature → Validé → Phase 1 → Phase 2 → Règlement → Terminé)
 - **Suivi des fonctionnalités** : Les clients déposent des fonctionnalités, l'admin gère les statuts (pending, in_progress, completed, blocked)
 - **Gestion des fonctionnalités** : Les clients peuvent modifier ou supprimer leurs fonctionnalités tant qu'elles sont en attente
 - **Gestion des documents** : Système de devis avec workflow de signature
@@ -36,6 +36,11 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Redirection vers Stripe Checkout pour paiement sécurisé
   - Montant calculé automatiquement depuis le pourcentage d'acompte du devis
   - Webhook Stripe pour mise à jour automatique du statut projet après paiement réussi
+- **Paiement final Stripe** :
+  - Après Phase 2, l'admin passe le projet en statut "awaiting_final_payment" (Règlement total)
+  - Bouton de paiement vert visible pour le client sur le dashboard
+  - Montant = total du devis moins l'acompte déjà payé
+  - Webhook Stripe pour passage automatique en statut "completed" après paiement
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
 - **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires

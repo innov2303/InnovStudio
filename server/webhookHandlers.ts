@@ -33,19 +33,30 @@ export class WebhookHandlers {
     const projectId = session.metadata?.projectId;
     const type = session.metadata?.type;
     
-    if (!projectId || type !== 'deposit') {
-      console.log('Checkout session not a deposit payment');
+    if (!projectId || (type !== 'deposit' && type !== 'final')) {
+      console.log('Checkout session not a deposit or final payment');
       return;
     }
 
     if (session.payment_status === 'paid') {
-      // Verify the project exists and is in correct status before updating
       const project = await storage.getProject(projectId);
-      if (project && project.status === 'awaiting_deposit') {
-        await storage.updateProjectStatus(projectId, 'approved');
-        console.log(`Project ${projectId} status updated to approved after deposit payment`);
-      } else {
-        console.log(`Project ${projectId} not in awaiting_deposit status, skipping update`);
+      
+      if (type === 'deposit') {
+        // Handle deposit payment
+        if (project && project.status === 'awaiting_deposit') {
+          await storage.updateProjectStatus(projectId, 'approved');
+          console.log(`Project ${projectId} status updated to approved after deposit payment`);
+        } else {
+          console.log(`Project ${projectId} not in awaiting_deposit status, skipping update`);
+        }
+      } else if (type === 'final') {
+        // Handle final payment
+        if (project && project.status === 'awaiting_final_payment') {
+          await storage.updateProjectStatus(projectId, 'completed');
+          console.log(`Project ${projectId} status updated to completed after final payment`);
+        } else {
+          console.log(`Project ${projectId} not in awaiting_final_payment status, skipping update`);
+        }
       }
     }
   }

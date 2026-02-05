@@ -241,6 +241,26 @@ export default function Dashboard() {
     },
   });
 
+  // Final payment mutation
+  const payFinalMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const response = await apiRequest("POST", `/api/projects/${projectId}/pay-final`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'initialisation du paiement",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Features query - fetch when a project is expanded
   const { data: features, isLoading: featuresLoading, refetch: refetchFeatures } = useQuery<ProjectFeature[]>({
     queryKey: ["/api/projects", expandedProject, "features"],
@@ -1099,13 +1119,14 @@ export default function Dashboard() {
                                       className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
                                       style={{ 
                                         width: project.status === "pending" ? "0%" :
-                                               project.status === "in_review" ? "16%" :
-                                               project.status === "awaiting_signature" ? "33%" :
-                                               project.status === "awaiting_deposit" ? "41%" :
-                                               project.status === "approved" ? "50%" :
-                                               project.status === "in_progress_1" ? "66%" :
-                                               project.status === "in_progress_2" ? "83%" :
-                                               project.status === "in_progress" ? "83%" : "100%"
+                                               project.status === "in_review" ? "14%" :
+                                               project.status === "awaiting_signature" ? "28%" :
+                                               project.status === "awaiting_deposit" ? "35%" :
+                                               project.status === "approved" ? "42%" :
+                                               project.status === "in_progress_1" ? "57%" :
+                                               project.status === "in_progress_2" ? "71%" :
+                                               project.status === "awaiting_final_payment" ? "85%" :
+                                               project.status === "in_progress" ? "71%" : "100%"
                                       }}
                                     />
                                   </div>
@@ -1118,6 +1139,7 @@ export default function Dashboard() {
                                   {project.status === "approved" && "Validé"}
                                   {project.status === "in_progress_1" && "Phase 1"}
                                   {project.status === "in_progress_2" && "Phase 2"}
+                                  {project.status === "awaiting_final_payment" && "Règlement"}
                                   {project.status === "in_progress" && "En cours"}
                                   {project.status === "completed" && "Terminé"}
                                 </span>
@@ -1148,6 +1170,7 @@ export default function Dashboard() {
                                 <SelectItem value="approved">Validé</SelectItem>
                                 <SelectItem value="in_progress_1">En cours - Phase 1</SelectItem>
                                 <SelectItem value="in_progress_2">En cours - Phase 2</SelectItem>
+                                <SelectItem value="awaiting_final_payment">Règlement total</SelectItem>
                                 <SelectItem value="completed">Terminé</SelectItem>
                                 <SelectItem value="cancelled">Annulé</SelectItem>
                               </SelectContent>
@@ -1160,6 +1183,7 @@ export default function Dashboard() {
                                 project.status === "awaiting_deposit" ? "default" :
                                 project.status === "in_progress_1" ? "default" :
                                 project.status === "in_progress_2" ? "default" :
+                                project.status === "awaiting_final_payment" ? "default" :
                                 project.status === "completed" ? "outline" : "secondary"
                               }>
                                 {project.status === "pending" && "En attente"}
@@ -1169,6 +1193,7 @@ export default function Dashboard() {
                                 {project.status === "approved" && "Acompte reçu"}
                                 {project.status === "in_progress_1" && "En cours - Phase 1"}
                                 {project.status === "in_progress_2" && "En cours - Phase 2"}
+                                {project.status === "awaiting_final_payment" && "Règlement total"}
                                 {project.status === "completed" && "Terminé"}
                                 {project.status === "cancelled" && "Annulé"}
                               </Badge>
@@ -1224,13 +1249,14 @@ export default function Dashboard() {
                               <span className="text-xs font-medium">Progression</span>
                               <span className="text-xs text-muted-foreground">
                                 {project.status === "pending" && "0%"}
-                                {project.status === "in_review" && "16%"}
-                                {project.status === "awaiting_signature" && "33%"}
-                                {project.status === "awaiting_deposit" && "41%"}
-                                {project.status === "approved" && "50%"}
-                                {project.status === "in_progress_1" && "66%"}
-                                {project.status === "in_progress_2" && "83%"}
-                                {project.status === "in_progress" && "83%"}
+                                {project.status === "in_review" && "14%"}
+                                {project.status === "awaiting_signature" && "28%"}
+                                {project.status === "awaiting_deposit" && "35%"}
+                                {project.status === "approved" && "42%"}
+                                {project.status === "in_progress_1" && "57%"}
+                                {project.status === "in_progress_2" && "71%"}
+                                {project.status === "awaiting_final_payment" && "85%"}
+                                {project.status === "in_progress" && "71%"}
                                 {project.status === "completed" && "100%"}
                               </span>
                             </div>
@@ -1241,13 +1267,14 @@ export default function Dashboard() {
                                   className="h-full bg-gradient-to-r from-primary via-cyan-400 to-primary transition-all duration-500 ease-out"
                                   style={{ 
                                     width: project.status === "pending" ? "0%" :
-                                           project.status === "in_review" ? "16%" :
-                                           project.status === "awaiting_signature" ? "33%" :
-                                           project.status === "awaiting_deposit" ? "41%" :
-                                           project.status === "approved" ? "50%" :
-                                           project.status === "in_progress_1" ? "66%" :
-                                           project.status === "in_progress_2" ? "83%" :
-                                           project.status === "in_progress" ? "83%" : "100%"
+                                           project.status === "in_review" ? "14%" :
+                                           project.status === "awaiting_signature" ? "28%" :
+                                           project.status === "awaiting_deposit" ? "35%" :
+                                           project.status === "approved" ? "42%" :
+                                           project.status === "in_progress_1" ? "57%" :
+                                           project.status === "in_progress_2" ? "71%" :
+                                           project.status === "awaiting_final_payment" ? "85%" :
+                                           project.status === "in_progress" ? "71%" : "100%"
                                   }}
                                 />
                               </div>
@@ -1260,11 +1287,12 @@ export default function Dashboard() {
                                   { key: "approved", label: "Validé" },
                                   { key: "in_progress_1", label: "Phase 1" },
                                   { key: "in_progress_2", label: "Phase 2" },
+                                  { key: "awaiting_final_payment", label: "Règlement" },
                                   { key: "completed", label: "Terminé" }
                                 ].map((step, index) => {
-                                  const visualSteps = ["pending", "in_review", "awaiting_signature", "approved", "in_progress_1", "in_progress_2", "completed"];
+                                  const visualSteps = ["pending", "in_review", "awaiting_signature", "approved", "in_progress_1", "in_progress_2", "awaiting_final_payment", "completed"];
                                   const stepIndex = visualSteps.indexOf(step.key);
-                                  const statusOrder = ["pending", "in_review", "awaiting_signature", "awaiting_deposit", "approved", "in_progress_1", "in_progress_2", "completed"];
+                                  const statusOrder = ["pending", "in_review", "awaiting_signature", "awaiting_deposit", "approved", "in_progress_1", "in_progress_2", "awaiting_final_payment", "completed"];
                                   const currentStatusIndex = statusOrder.indexOf(project.status);
                                   const stepStatusIndex = statusOrder.indexOf(step.key);
                                   const isCompleted = stepStatusIndex < currentStatusIndex;
@@ -1328,6 +1356,36 @@ export default function Dashboard() {
                                     <CreditCard className="h-4 w-4 mr-2" />
                                   )}
                                   Payer l'acompte
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Final payment button for users */}
+                        {project.status === "awaiting_final_payment" && user.role !== "admin" && (
+                          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                            <div className="flex items-start gap-3">
+                              <div className="p-2 rounded-full bg-green-500/20">
+                                <CreditCard className="h-5 w-5 text-green-600" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-sm font-semibold text-green-600">Règlement total du projet</h4>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Votre projet est terminé. Veuillez procéder au paiement du solde restant pour finaliser votre commande.
+                                </p>
+                                <Button
+                                  className="mt-3 bg-green-600 hover:bg-green-700"
+                                  onClick={() => payFinalMutation.mutate(project.id)}
+                                  disabled={payFinalMutation.isPending}
+                                  data-testid={`button-pay-final-${project.id}`}
+                                >
+                                  {payFinalMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  ) : (
+                                    <CreditCard className="h-4 w-4 mr-2" />
+                                  )}
+                                  Payer le solde
                                 </Button>
                               </div>
                             </div>

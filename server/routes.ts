@@ -1356,6 +1356,88 @@ export async function registerRoutes(
     }
   });
 
+  // Create checkout session for final payment (remaining balance)
+  app.post("/api/projects/:projectId/pay-final", requireAuth, async (req, res) => {
+    try {
+      const projectId = req.params.projectId as string;
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Only project owner can pay final
+      if (project.userId !== currentUser.id) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Check project is in awaiting_final_payment status
+      if (project.status !== "awaiting_final_payment") {
+        return res.status(400).json({ message: "Ce projet n'est pas en attente du règlement final" });
+      }
+
+      // Get signed quote document to find remaining amount
+      const documents = await storage.getDocumentsByProject(projectId);
+      const signedQuote = documents.find(d => d.type === "quote" && d.status === "signed");
+      
+      if (!signedQuote) {
+        return res.status(400).json({ message: "Aucun devis signé trouvé" });
+      }
+
+      // Calculate remaining amount (total - deposit)
+      const quoteAmount = parseFloat(signedQuote.quoteAmount || "0");
+      const depositPercent = parseFloat(signedQuote.quoteDepositPercent || "30");
+      const remainingPercent = 100 - depositPercent;
+      const remainingAmount = Math.round((quoteAmount * remainingPercent / 100) * 100); // Convert to cents
+
+      if (remainingAmount <= 0) {
+        return res.status(400).json({ message: "Montant du solde invalide" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+
+      // Get domain from request
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['host'];
+      const baseUrl = `${protocol}://${host}`;
+
+      // Create Stripe Checkout session
+      const session = await stripe.checkout.sessions.create({
+        line_items: [{
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: `Solde - ${project.title}`,
+              description: `Règlement final (${remainingPercent}%) pour le projet "${project.title}"`,
+            },
+            unit_amount: remainingAmount,
+          },
+          quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: `${baseUrl}/dashboard?payment=final_success&project=${projectId}`,
+        cancel_url: `${baseUrl}/dashboard?payment=cancelled&project=${projectId}`,
+        metadata: {
+          projectId: projectId,
+          documentId: signedQuote.id,
+          userId: currentUser.id,
+          type: 'final',
+        },
+        customer_email: currentUser.email || undefined,
+      });
+
+      res.json({ url: session.url });
+    } catch (error) {
+      console.error("Create final checkout error:", error);
+      res.status(500).json({ message: "Erreur lors de la création de la session de paiement" });
+    }
+  });
+
   // Handle successful payment (called from webhook or verified manually)
   app.post("/api/projects/:projectId/confirm-payment", requireAuth, async (req, res) => {
     try {
