@@ -15,7 +15,11 @@ export const users = pgTable("users", {
   lastName: text("last_name").notNull(),
   company: text("company").notNull(),
   address: text("address").notNull(),
+  postalCode: text("postal_code").notNull().default(""),
+  city: text("city").notNull().default(""),
   billingAddress: text("billing_address").notNull(),
+  billingPostalCode: text("billing_postal_code").notNull().default(""),
+  billingCity: text("billing_city").notNull().default(""),
   sameAsBilling: boolean("same_as_billing").default(false),
   role: text("role").notNull().default("user"),
   mustChangePassword: boolean("must_change_password").default(false),
@@ -38,7 +42,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   lastName: true,
   company: true,
   address: true,
+  postalCode: true,
+  city: true,
   billingAddress: true,
+  billingPostalCode: true,
+  billingCity: true,
   sameAsBilling: true,
 });
 
@@ -54,7 +62,11 @@ export const registerSchema = insertUserSchema.extend({
   lastName: z.string().min(1, "Nom requis"),
   company: z.string().min(1, "Entreprise requise"),
   address: z.string().min(1, "Adresse requise"),
+  postalCode: z.string().min(1, "Code postal requis"),
+  city: z.string().min(1, "Ville requise"),
   billingAddress: z.string().optional(),
+  billingPostalCode: z.string().optional(),
+  billingCity: z.string().optional(),
   sameAsBilling: z.boolean().optional(),
 }).omit({ username: true });
 
@@ -83,7 +95,11 @@ export const resetPasswordSchema = z.object({
 export const updateProfileSchema = z.object({
   company: z.string().min(1, "Entreprise requise"),
   address: z.string().min(1, "Adresse requise"),
+  postalCode: z.string().min(1, "Code postal requis"),
+  city: z.string().min(1, "Ville requise"),
   billingAddress: z.string().optional(),
+  billingPostalCode: z.string().optional(),
+  billingCity: z.string().optional(),
   sameAsBilling: z.boolean().optional(),
 });
 

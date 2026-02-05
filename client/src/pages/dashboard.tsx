@@ -110,7 +110,11 @@ export default function Dashboard() {
   const [editProfileData, setEditProfileData] = useState({
     company: "",
     address: "",
+    postalCode: "",
+    city: "",
     billingAddress: "",
+    billingPostalCode: "",
+    billingCity: "",
     sameAsBilling: false,
   });
   const [showEmailChangeDialog, setShowEmailChangeDialog] = useState(false);
@@ -598,7 +602,7 @@ export default function Dashboard() {
   });
 
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: { company: string; address: string; billingAddress?: string; sameAsBilling?: boolean }) => {
+    mutationFn: async (data: { company: string; address: string; postalCode: string; city: string; billingAddress?: string; billingPostalCode?: string; billingCity?: string; sameAsBilling?: boolean }) => {
       const response = await fetch("/api/auth/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -1242,7 +1246,11 @@ export default function Dashboard() {
                       setEditProfileData({
                         company: user.company,
                         address: user.address,
+                        postalCode: user.postalCode || "",
+                        city: user.city || "",
                         billingAddress: user.billingAddress || "",
+                        billingPostalCode: user.billingPostalCode || "",
+                        billingCity: user.billingCity || "",
                         sameAsBilling: user.sameAsBilling || false,
                       });
                       setShowEditProfile(true);
@@ -1261,11 +1269,19 @@ export default function Dashboard() {
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Adresse principale</p>
                     <p className="text-sm" data-testid="text-address">{user.address}</p>
+                    <p className="text-sm" data-testid="text-postal-city">
+                      {user.postalCode} {user.city}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Adresse de facturation</p>
                     <p className="text-sm" data-testid="text-billing-address">
                       {user.sameAsBilling ? user.address : user.billingAddress}
+                    </p>
+                    <p className="text-sm" data-testid="text-billing-postal-city">
+                      {user.sameAsBilling 
+                        ? `${user.postalCode} ${user.city}` 
+                        : `${user.billingPostalCode} ${user.billingCity}`}
                     </p>
                     {user.sameAsBilling && (
                       <Badge variant="secondary" className="mt-2">
@@ -1364,14 +1380,35 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-address">Adresse principale</Label>
-                  <Textarea
+                  <Input
                     id="edit-address"
                     value={editProfileData.address}
                     onChange={(e) => setEditProfileData({ ...editProfileData, address: e.target.value })}
-                    placeholder="Adresse complète"
-                    rows={3}
+                    placeholder="Adresse"
                     data-testid="input-edit-address"
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-postal-code">Code postal</Label>
+                    <Input
+                      id="edit-postal-code"
+                      value={editProfileData.postalCode}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, postalCode: e.target.value })}
+                      placeholder="75001"
+                      data-testid="input-edit-postal-code"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-city">Ville</Label>
+                    <Input
+                      id="edit-city"
+                      value={editProfileData.city}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, city: e.target.value })}
+                      placeholder="Paris"
+                      data-testid="input-edit-city"
+                    />
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
@@ -1387,17 +1424,40 @@ export default function Dashboard() {
                   </Label>
                 </div>
                 {!editProfileData.sameAsBilling && (
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-billing-address">Adresse de facturation</Label>
-                    <Textarea
-                      id="edit-billing-address"
-                      value={editProfileData.billingAddress}
-                      onChange={(e) => setEditProfileData({ ...editProfileData, billingAddress: e.target.value })}
-                      placeholder="Adresse de facturation"
-                      rows={3}
-                      data-testid="input-edit-billing-address"
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-billing-address">Adresse de facturation</Label>
+                      <Input
+                        id="edit-billing-address"
+                        value={editProfileData.billingAddress}
+                        onChange={(e) => setEditProfileData({ ...editProfileData, billingAddress: e.target.value })}
+                        placeholder="Adresse de facturation"
+                        data-testid="input-edit-billing-address"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-billing-postal-code">Code postal</Label>
+                        <Input
+                          id="edit-billing-postal-code"
+                          value={editProfileData.billingPostalCode}
+                          onChange={(e) => setEditProfileData({ ...editProfileData, billingPostalCode: e.target.value })}
+                          placeholder="75001"
+                          data-testid="input-edit-billing-postal-code"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-billing-city">Ville</Label>
+                        <Input
+                          id="edit-billing-city"
+                          value={editProfileData.billingCity}
+                          onChange={(e) => setEditProfileData({ ...editProfileData, billingCity: e.target.value })}
+                          placeholder="Paris"
+                          data-testid="input-edit-billing-city"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
                 <div className="flex justify-end gap-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setShowEditProfile(false)}>

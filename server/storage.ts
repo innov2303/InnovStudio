@@ -16,7 +16,7 @@ export interface IStorage {
   setPasswordResetToken(userId: string, token: string, expires: Date): Promise<void>;
   clearPasswordResetToken(userId: string): Promise<void>;
   updateUserSignature(userId: string, signature: string): Promise<void>;
-  updateUserProfile(userId: string, data: { company: string; address: string; billingAddress?: string; sameAsBilling?: boolean }): Promise<User | undefined>;
+  updateUserProfile(userId: string, data: { company: string; address: string; postalCode: string; city: string; billingAddress?: string; billingPostalCode?: string; billingCity?: string; sameAsBilling?: boolean }): Promise<User | undefined>;
   setEmailChangeRequest(userId: string, newEmail: string, token: string, expires: Date): Promise<void>;
   getUserByEmailChangeToken(token: string): Promise<User | undefined>;
   confirmEmailChange(userId: string): Promise<User | undefined>;
@@ -152,13 +152,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId));
   }
 
-  async updateUserProfile(userId: string, data: { company: string; address: string; billingAddress?: string; sameAsBilling?: boolean }): Promise<User | undefined> {
+  async updateUserProfile(userId: string, data: { company: string; address: string; postalCode: string; city: string; billingAddress?: string; billingPostalCode?: string; billingCity?: string; sameAsBilling?: boolean }): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set({
         company: data.company,
         address: data.address,
+        postalCode: data.postalCode,
+        city: data.city,
         billingAddress: data.sameAsBilling ? data.address : (data.billingAddress || data.address),
+        billingPostalCode: data.sameAsBilling ? data.postalCode : (data.billingPostalCode || data.postalCode),
+        billingCity: data.sameAsBilling ? data.city : (data.billingCity || data.city),
         sameAsBilling: data.sameAsBilling || false,
       })
       .where(eq(users.id, userId))

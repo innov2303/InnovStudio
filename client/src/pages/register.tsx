@@ -33,7 +33,11 @@ export default function Register() {
       lastName: "",
       company: "",
       address: "",
+      postalCode: "",
+      city: "",
       billingAddress: "",
+      billingPostalCode: "",
+      billingCity: "",
       sameAsBilling: false,
     },
   });
@@ -46,6 +50,8 @@ export default function Register() {
       const submitData = {
         ...data,
         billingAddress: data.sameAsBilling ? data.address : data.billingAddress,
+        billingPostalCode: data.sameAsBilling ? data.postalCode : data.billingPostalCode,
+        billingCity: data.sameAsBilling ? data.city : data.billingCity,
       };
       const response = await apiRequest("POST", "/api/auth/register", submitData);
       return { ...await response.json(), email: data.email };
@@ -296,7 +302,7 @@ export default function Register() {
                         <FormLabel>Adresse</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="123 Rue de la Paix, 75001 Paris"
+                            placeholder="123 Rue de la Paix"
                             data-testid="input-address"
                             {...field}
                           />
@@ -305,6 +311,43 @@ export default function Register() {
                       </FormItem>
                     )}
                   />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="postalCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Code postal</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="75001"
+                              data-testid="input-postal-code"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ville</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Paris"
+                              data-testid="input-city"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
@@ -328,23 +371,61 @@ export default function Register() {
                   />
 
                   {!sameAsBilling && (
-                    <FormField
-                      control={form.control}
-                      name="billingAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Adresse de facturation</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="456 Avenue des Champs-Élysées, 75008 Paris"
-                              data-testid="input-billing-address"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="billingAddress"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Adresse de facturation</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="456 Avenue des Champs-Élysées"
+                                data-testid="input-billing-address"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="billingPostalCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Code postal</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="75008"
+                                  data-testid="input-billing-postal-code"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="billingCity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Ville</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Paris"
+                                  data-testid="input-billing-city"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </>
                   )}
 
                   <Button
