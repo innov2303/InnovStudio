@@ -1147,12 +1147,12 @@ export async function registerRoutes(
     }
   });
 
-  // Delete document (admin only, only when draft)
+  // Delete document (admin or project owner, only when draft/not yet sent for signature)
   app.delete("/api/documents/:id", requireAuth, async (req, res) => {
     try {
       const currentUser = await storage.getUser(req.session.userId!);
-      if (!currentUser || currentUser.role !== "admin") {
-        return res.status(403).json({ message: "Accès refusé" });
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
       }
 
       const documentId = req.params.id as string;
@@ -1161,8 +1161,23 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Document non trouvé" });
       }
 
+      // Get the project to check ownership
+      const project = await storage.getProject(document.projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      // Allow admin or project owner to delete
+      const isAdmin = currentUser.role === "admin";
+      const isOwner = project.userId === currentUser.id;
+      
+      if (!isAdmin && !isOwner) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Can only delete if document is still in draft (not yet sent for signature)
       if (document.status !== "draft") {
-        return res.status(400).json({ message: "Seuls les devis en brouillon peuvent être supprimés" });
+        return res.status(400).json({ message: "Le devis ne peut plus être supprimé une fois envoyé pour signature" });
       }
 
       await storage.deleteDocument(documentId);
