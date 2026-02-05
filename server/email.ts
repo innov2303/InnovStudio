@@ -305,7 +305,7 @@ export async function sendEmailChangeConfirmation(to: string, firstName: string,
   }
 }
 
-export async function sendContactEmail(senderName: string, senderEmail: string, subject: string, message: string): Promise<boolean> {
+export async function sendContactEmail(senderName: string, senderEmail: string, senderPhone: string, subject: string, message: string): Promise<boolean> {
   try {
     const { client, fromEmail } = await getResendClient();
     
@@ -337,6 +337,7 @@ export async function sendContactEmail(senderName: string, senderEmail: string, 
               <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
                 <p style="margin: 0 0 8px 0;"><strong>De:</strong> ${senderName}</p>
                 <p style="margin: 0 0 8px 0;"><strong>Email:</strong> <a href="mailto:${senderEmail}" style="color: #0ea5e9;">${senderEmail}</a></p>
+                ${senderPhone ? `<p style="margin: 0 0 8px 0;"><strong>Téléphone:</strong> <a href="tel:${senderPhone}" style="color: #0ea5e9;">${senderPhone}</a></p>` : ''}
                 <p style="margin: 0;"><strong>Sujet:</strong> ${subject}</p>
               </div>
               <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px;">

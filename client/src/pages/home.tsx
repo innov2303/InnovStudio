@@ -49,6 +49,7 @@ export default function Home() {
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: ""
   });
@@ -78,7 +79,7 @@ export default function Home() {
           title: "Message envoyé",
           description: "Merci pour votre message ! Je vous répondrai dans les plus brefs délais."
         });
-        setContactForm({ name: "", email: "", subject: "", message: "" });
+        setContactForm({ name: "", email: "", phone: "", subject: "", message: "" });
         setContactOpen(false);
       } else {
         const data = await response.json();
@@ -420,6 +421,17 @@ export default function Home() {
                           value={contactForm.email}
                           onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                           data-testid="input-contact-email"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="contact-phone">Téléphone</Label>
+                        <Input
+                          id="contact-phone"
+                          type="tel"
+                          placeholder="06 12 34 56 78"
+                          value={contactForm.phone}
+                          onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                          data-testid="input-contact-phone"
                         />
                       </div>
                       <div className="space-y-2">
