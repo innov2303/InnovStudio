@@ -497,6 +497,12 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
+      // Check if project is approved or beyond - cannot be deleted
+      const nonDeletableStatuses = ["approved", "in_progress_1", "in_progress_2", "awaiting_final_payment", "completed"];
+      if (nonDeletableStatuses.includes(project.status)) {
+        return res.status(400).json({ message: "Impossible de supprimer un projet validé ou en cours" });
+      }
+
       // Check if any document is signed
       const docs = await storage.getDocumentsByProject(projectId);
       const hasSignedDocument = docs.some(doc => doc.status === "signed");

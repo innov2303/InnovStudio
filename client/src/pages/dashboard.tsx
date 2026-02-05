@@ -1197,23 +1197,25 @@ export default function Dashboard() {
                                 {project.status === "completed" && "Terminé"}
                                 {project.status === "cancelled" && "Annulé"}
                               </Badge>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDeleteConfirm({ type: "project", id: project.id, title: project.title });
-                                }}
-                                disabled={deleteProjectMutation.isPending}
-                                data-testid={`button-delete-project-${project.id}`}
-                              >
-                                {deleteProjectMutation.isPending ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4" />
-                                )}
-                              </Button>
+                              {!["approved", "in_progress_1", "in_progress_2", "awaiting_final_payment", "completed"].includes(project.status) && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteConfirm({ type: "project", id: project.id, title: project.title });
+                                  }}
+                                  disabled={deleteProjectMutation.isPending}
+                                  data-testid={`button-delete-project-${project.id}`}
+                                >
+                                  {deleteProjectMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           )}
                         </div>
