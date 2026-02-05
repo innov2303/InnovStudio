@@ -1,0 +1,30 @@
+11|innov-s |     at node:internal/main/run_main_module:28:49
+11|innov-s |
+11|innov-s | Node.js v20.20.0
+11|innov-s | Failed to initialize Stripe: Error: X_REPLIT_TOKEN not found for repl/depl
+11|innov-s |     at _b (/var/www/innov-studio/dist/index.cjs:233:23464)
+11|innov-s |     at bY (/var/www/innov-studio/dist/index.cjs:233:24256)
+11|innov-s |     at id (/var/www/innov-studio/dist/index.cjs:233:24371)
+11|innov-s |     at async EY (/var/www/innov-studio/dist/index.cjs:241:10359)
+11|innov-s |     at async /var/www/innov-studio/dist/index.cjs:241:12060
+11|innov-s | Failed to initialize Stripe: Error: X_REPLIT_TOKEN not found for repl/depl
+11|innov-s |     at _b (/var/www/innov-studio/dist/index.cjs:233:23464)
+11|innov-s |     at bY (/var/www/innov-studio/dist/index.cjs:233:24256)
+11|innov-s |     at id (/var/www/innov-studio/dist/index.cjs:233:24371)
+11|innov-s |     at async EY (/var/www/innov-studio/dist/index.cjs:241:10359)
+11|innov-s |     at async /var/www/innov-studio/dist/index.cjs:241:12060
+11|innov-s | Internal Server Error: Error: ENOENT: no such file or directory, open '/var/www/innov-studio/dist/table.sql'
+11|innov-s |     at async open (node:internal/fs/promises:634:25)
+11|innov-s |     at async Object.readFile (node:internal/fs/promises:1236:14)
+11|innov-s |     at async i._rawEnsureSessionStoreTable (/var/www/innov-studio/dist/index.cjs:80:28765)
+11|innov-s |     at async i._asyncQuery (/var/www/innov-studio/dist/index.cjs:80:29850) {
+11|innov-s |   errno: -2,
+11|innov-s |   code: 'ENOENT',
+11|innov-s |   syscall: 'open',
+11|innov-s |   path: '/var/www/innov-studio/dist/table.sql'
+11|innov-s | }
+11|innov-s | Error: ENOENT: no such file or directory, open '/var/www/innov-studio/dist/table.sql'
+11|innov-s |     at async open (node:internal/fs/promises:634:25)
+11|innov-s |     at async Object.readFile (node:internal/fs/promises:1236:14)
+11|innov-s |     at async i._rawEnsureSessionStoreTable (/var/www/innov-studio/dist/index.cjs:80:28765)
+11|innov-s |     at async i._asyncQuery (/var/www/innov-studio/dist/index.cjs:80:29850)
