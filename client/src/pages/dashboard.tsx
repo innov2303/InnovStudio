@@ -66,7 +66,7 @@ import {
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
@@ -114,6 +114,31 @@ export default function Dashboard() {
       setLocation("/change-password");
     }
   }, [user, setLocation]);
+
+  // Handle payment success/cancel from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const projectId = urlParams.get('project');
+    
+    if (paymentStatus) {
+      if (paymentStatus === 'success') {
+        toast({
+          title: "Paiement réussi",
+          description: "Votre acompte a bien été reçu. Votre projet va démarrer prochainement.",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      } else if (paymentStatus === 'cancelled') {
+        toast({
+          title: "Paiement annulé",
+          description: "Le paiement a été annulé. Vous pouvez réessayer à tout moment.",
+          variant: "destructive",
+        });
+      }
+      // Remove query params from URL without reloading
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, [toast]);
 
   // Collapse all projects by default when they load
   const [initialCollapseApplied, setInitialCollapseApplied] = useState(false);
@@ -191,6 +216,26 @@ export default function Dashboard() {
       toast({
         title: "Erreur",
         description: error.message || "Erreur lors de la mise à jour",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Deposit payment mutation
+  const payDepositMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const response = await apiRequest("POST", `/api/projects/${projectId}/pay-deposit`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'initialisation du paiement",
         variant: "destructive",
       });
     },
@@ -1197,6 +1242,36 @@ export default function Dashboard() {
                           <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive">
                             <XCircle className="h-4 w-4" />
                             <span className="text-sm font-medium">Projet annulé</span>
+                          </div>
+                        )}
+
+                        {/* Deposit payment button for users */}
+                        {project.status === "awaiting_deposit" && user.role !== "admin" && (
+                          <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+                            <div className="flex items-start gap-3">
+                              <div className="p-2 rounded-full bg-primary/20">
+                                <CreditCard className="h-5 w-5 text-primary" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-sm font-semibold text-primary">Paiement de l'acompte requis</h4>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Votre devis a été signé. Veuillez procéder au paiement de l'acompte pour démarrer votre projet.
+                                </p>
+                                <Button
+                                  className="mt-3"
+                                  onClick={() => payDepositMutation.mutate(project.id)}
+                                  disabled={payDepositMutation.isPending}
+                                  data-testid={`button-pay-deposit-${project.id}`}
+                                >
+                                  {payDepositMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  ) : (
+                                    <CreditCard className="h-4 w-4 mr-2" />
+                                  )}
+                                  Payer l'acompte
+                                </Button>
+                              </div>
+                            </div>
                           </div>
                         )}
 

@@ -1268,13 +1268,12 @@ export async function registerRoutes(
 
       // Create Stripe Checkout session
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
         line_items: [{
           price_data: {
             currency: 'eur',
             product_data: {
-              name: `Acompte - ${project.name}`,
-              description: `Acompte de ${depositPercent}% pour le projet "${project.name}"`,
+              name: `Acompte - ${project.title}`,
+              description: `Acompte de ${depositPercent}% pour le projet "${project.title}"`,
             },
             unit_amount: depositAmount,
           },
@@ -1289,7 +1288,7 @@ export async function registerRoutes(
           userId: currentUser.id,
           type: 'deposit',
         },
-        customer_email: currentUser.email,
+        customer_email: currentUser.email || undefined,
       });
 
       res.json({ url: session.url });
