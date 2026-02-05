@@ -15,7 +15,9 @@ import {
   Bot,
   ChevronRight,
   Briefcase,
-  LogOut
+  LogOut,
+  Headphones,
+  Server
 } from "lucide-react";
 
 import heroBg from "@/assets/images/hero-bg.jpg";
@@ -46,6 +48,16 @@ export default function Home() {
       icon: Palette,
       title: "Design UI/UX",
       description: "Interfaces modernes et intuitives conçues pour offrir une expérience utilisateur exceptionnelle."
+    },
+    {
+      icon: Headphones,
+      title: "Support & Maintenance 5/7J",
+      description: "Mises à jour régulières, corrections de bugs et support technique réactif pour garantir la pérennité de votre projet."
+    },
+    {
+      icon: Server,
+      title: "Hébergement",
+      description: "Hébergement sécurisé avec certificat SSL, sauvegardes automatiques et disponibilité optimale."
     },
   ];
 
@@ -185,7 +197,7 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map((service, index) => (
                 <Card key={index} className="group hover-elevate border-0 bg-card">
                   <CardContent className="p-6">
