@@ -209,6 +209,24 @@ export type UpdateQuoteData = z.infer<typeof updateQuoteSchema>;
 export const subscriptionOfferEnum = ["maintenance", "hosting", "pack"] as const;
 export const subscriptionStatusEnum = ["active", "cancelled", "expired"] as const;
 
+// Subscription offers table (configurable prices)
+export const subscriptionOffers = pgTable("subscription_offers", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: text("name").notNull(),
+  price: text("price").notNull(),
+  description: text("description").notNull(),
+  stripeProductId: text("stripe_product_id"),
+  stripePriceId: text("stripe_price_id"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const updateSubscriptionOfferSchema = z.object({
+  price: z.string().min(1, "Prix requis"),
+});
+
+export type SubscriptionOffer = typeof subscriptionOffers.$inferSelect;
+export type UpdateSubscriptionOfferData = z.infer<typeof updateSubscriptionOfferSchema>;
+
 // Subscriptions table
 export const subscriptions = pgTable("subscriptions", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),

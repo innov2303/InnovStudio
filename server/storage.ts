@@ -1,4 +1,4 @@
-import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -55,6 +55,11 @@ export interface IStorage {
   getAllSubscriptions(): Promise<Subscription[]>;
   updateSubscriptionStatus(id: string, status: string): Promise<Subscription | undefined>;
   deleteSubscription(id: string): Promise<boolean>;
+  
+  // Subscription Offers
+  getSubscriptionOffers(): Promise<SubscriptionOffer[]>;
+  getSubscriptionOffer(id: string): Promise<SubscriptionOffer | undefined>;
+  updateSubscriptionOffer(id: string, price: string): Promise<SubscriptionOffer | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -444,6 +449,25 @@ export class DatabaseStorage implements IStorage {
   async deleteSubscription(id: string): Promise<boolean> {
     await db.delete(subscriptions).where(eq(subscriptions.id, id));
     return true;
+  }
+
+  // Subscription Offers
+  async getSubscriptionOffers(): Promise<SubscriptionOffer[]> {
+    return db.select().from(subscriptionOffers);
+  }
+
+  async getSubscriptionOffer(id: string): Promise<SubscriptionOffer | undefined> {
+    const [offer] = await db.select().from(subscriptionOffers).where(eq(subscriptionOffers.id, id));
+    return offer;
+  }
+
+  async updateSubscriptionOffer(id: string, price: string): Promise<SubscriptionOffer | undefined> {
+    const [offer] = await db
+      .update(subscriptionOffers)
+      .set({ price, updatedAt: new Date() })
+      .where(eq(subscriptionOffers.id, id))
+      .returning();
+    return offer;
   }
 }
 

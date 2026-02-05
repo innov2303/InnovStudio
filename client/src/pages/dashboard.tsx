@@ -70,10 +70,10 @@ type SubscriptionOffer = {
   price: string;
   description: string;
 };
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
-type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users";
+type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "subscription_settings" | "users";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -181,6 +181,43 @@ export default function Dashboard() {
   const [selectedOffer, setSelectedOffer] = useState<string | null>(null);
   const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
   const [selectedProjectForSubscription, setSelectedProjectForSubscription] = useState<string>("");
+  
+  // Admin subscription management
+  type SubscriptionOfferFull = { id: string; name: string; price: string; description: string; stripeProductId: string | null; stripePriceId: string | null };
+  const { data: subscriptionOffersList, refetch: refetchOffers } = useQuery<SubscriptionOfferFull[]>({
+    queryKey: ["/api/subscriptions/offers/list"],
+    enabled: !!user && user.role === "admin",
+  });
+  const [editingOfferPrices, setEditingOfferPrices] = useState<Record<string, string>>({});
+
+  const updateOfferPriceMutation = useMutation({
+    mutationFn: async ({ id, price }: { id: string; price: string }) => {
+      const response = await apiRequest("PATCH", `/api/subscriptions/offers/${id}`, { price });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Prix mis à jour", description: "Le prix de l'offre a été modifié" });
+      refetchOffers();
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/offers"] });
+    },
+    onError: () => {
+      toast({ title: "Erreur", description: "Impossible de mettre à jour le prix", variant: "destructive" });
+    },
+  });
+
+  const syncStripeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/subscriptions/offers/sync-stripe");
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: "Synchronisation terminée", description: "Les offres ont été synchronisées avec Stripe" });
+      refetchOffers();
+    },
+    onError: () => {
+      toast({ title: "Erreur", description: "Impossible de synchroniser avec Stripe", variant: "destructive" });
+    },
+  });
 
   // Collapse all projects by default when data first loads
   useEffect(() => {
@@ -818,7 +855,8 @@ export default function Dashboard() {
     ...(user.role !== "admin" ? [{ id: "projects" as MenuSection, label: "Mes Projets", icon: FolderKanban }] : []),
     ...(user.role === "admin" ? [{ id: "projects" as MenuSection, label: "Gestion des projets", icon: FolderKanban }] : []),
     ...(user.role !== "admin" ? [{ id: "documents" as MenuSection, label: "Mes abonnements", icon: FileText }] : []),
-    ...(user.role === "admin" ? [{ id: "documents" as MenuSection, label: "Abonnements actifs", icon: FileText }] : []),
+    ...(user.role === "admin" ? [{ id: "documents" as MenuSection, label: "Abonnements", icon: FileText }] : []),
+    ...(user.role === "admin" ? [{ id: "subscription_settings" as MenuSection, label: "Gérer les abonnements", icon: Settings }] : []),
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
   ];
 
@@ -2651,7 +2689,7 @@ export default function Dashboard() {
                       <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <CardTitle>Abonnements actifs</CardTitle>
+                      <CardTitle>Abonnements</CardTitle>
                       <CardDescription>Liste de tous les projets avec abonnements actifs</CardDescription>
                     </div>
                   </CardHeader>
@@ -3013,6 +3051,97 @@ export default function Dashboard() {
               </div>
             </DialogContent>
           </Dialog>
+
+          {/* Subscription Settings Section (Admin only) */}
+          {activeSection === "subscription_settings" && user.role === "admin" && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Settings className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle>Gérer les abonnements</CardTitle>
+                    <CardDescription>Modifier les prix et synchroniser avec Stripe</CardDescription>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => syncStripeMutation.mutate()}
+                  disabled={syncStripeMutation.isPending}
+                  data-testid="button-sync-stripe"
+                >
+                  {syncStripeMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <CreditCard className="h-4 w-4 mr-2" />
+                  )}
+                  Synchroniser avec Stripe
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {subscriptionOffersList ? (
+                  <div className="space-y-4">
+                    {subscriptionOffersList.map(offer => (
+                      <div key={offer.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                            offer.id === "maintenance" ? "bg-blue-500/10" :
+                            offer.id === "hosting" ? "bg-purple-500/10" :
+                            "bg-primary/10"
+                          }`}>
+                            {offer.id === "maintenance" && <Zap className="h-5 w-5 text-blue-500" />}
+                            {offer.id === "hosting" && <Building2 className="h-5 w-5 text-purple-500" />}
+                            {offer.id === "pack" && <Shield className="h-5 w-5 text-primary" />}
+                          </div>
+                          <div>
+                            <p className="font-medium">{offer.name}</p>
+                            <p className="text-sm text-muted-foreground">{offer.description}</p>
+                            {offer.stripeProductId && (
+                              <Badge variant="outline" className="mt-1 text-xs bg-green-500/10 text-green-600 border-green-500/20">
+                                Synchro Stripe
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              className="w-24 text-right"
+                              value={editingOfferPrices[offer.id] ?? offer.price}
+                              onChange={(e) => setEditingOfferPrices(prev => ({ ...prev, [offer.id]: e.target.value }))}
+                              data-testid={`input-price-${offer.id}`}
+                            />
+                            <span className="text-muted-foreground">€/mois</span>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              const newPrice = editingOfferPrices[offer.id] ?? offer.price;
+                              updateOfferPriceMutation.mutate({ id: offer.id, price: newPrice });
+                            }}
+                            disabled={updateOfferPriceMutation.isPending || (editingOfferPrices[offer.id] ?? offer.price) === offer.price}
+                            data-testid={`button-save-price-${offer.id}`}
+                          >
+                            {updateOfferPriceMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Save className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Users Section (Admin only) */}
           {activeSection === "users" && user.role === "admin" && (

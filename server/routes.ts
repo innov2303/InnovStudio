@@ -5,7 +5,8 @@ import crypto from "crypto";
 import { storage } from "./storage";
 import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema, createFeatureSchema, forgotPasswordSchema, resetPasswordSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
-import { pool } from "./db";
+import { pool, db } from "./db";
+import { sql } from "drizzle-orm";
 import connectPgSimple from "connect-pg-simple";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./email";
 import multer from "multer";
@@ -1791,17 +1792,121 @@ export async function registerRoutes(
   });
 
   // ===================== SUBSCRIPTIONS =====================
-  
-  // Subscription offer prices (monthly)
-  const subscriptionOffers = {
-    maintenance: { name: "Maintenance du site", price: "99.00", description: "Mises à jour, corrections de bugs, support technique" },
-    hosting: { name: "Hébergement du site", price: "49.00", description: "Hébergement sécurisé, SSL, sauvegrades automatiques" },
-    pack: { name: "Pack Complet", price: "129.00", description: "Maintenance + Hébergement avec réduction" },
-  };
 
-  // Get available subscription offers
+  // Get available subscription offers from database
   app.get("/api/subscriptions/offers", requireAuth, async (req, res) => {
-    res.json(subscriptionOffers);
+    try {
+      const offers = await storage.getSubscriptionOffers();
+      // Convert to object format for frontend compatibility
+      const offersMap: Record<string, { name: string; price: string; description: string }> = {};
+      offers.forEach(offer => {
+        offersMap[offer.id] = { name: offer.name, price: offer.price, description: offer.description };
+      });
+      res.json(offersMap);
+    } catch (error) {
+      console.error("Get subscription offers error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Get subscription offers list (admin only)
+  app.get("/api/subscriptions/offers/list", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+      const offers = await storage.getSubscriptionOffers();
+      res.json(offers);
+    } catch (error) {
+      console.error("Get subscription offers list error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Update subscription offer price (admin only)
+  app.patch("/api/subscriptions/offers/:id", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const offerId = req.params.id as string;
+      const { price } = req.body;
+
+      if (!price || typeof price !== "string") {
+        return res.status(400).json({ message: "Prix invalide" });
+      }
+
+      const offer = await storage.updateSubscriptionOffer(offerId, price);
+      if (!offer) {
+        return res.status(404).json({ message: "Offre non trouvée" });
+      }
+
+      res.json(offer);
+    } catch (error) {
+      console.error("Update subscription offer error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  // Sync subscription offers with Stripe (admin only)
+  app.post("/api/subscriptions/offers/sync-stripe", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const offers = await storage.getSubscriptionOffers();
+      const results = [];
+
+      const stripeClient = await getUncachableStripeClient();
+      for (const offer of offers) {
+        try {
+          // Create or update Stripe product
+          let product;
+          if (offer.stripeProductId) {
+            product = await stripeClient.products.update(offer.stripeProductId, {
+              name: `Abonnement ${offer.name}`,
+              description: offer.description,
+            });
+          } else {
+            product = await stripeClient.products.create({
+              name: `Abonnement ${offer.name}`,
+              description: offer.description,
+            });
+          }
+
+          // Create new price (Stripe prices are immutable)
+          const priceInCents = Math.round(parseFloat(offer.price) * 100);
+          const stripePrice = await stripeClient.prices.create({
+            product: product.id,
+            unit_amount: priceInCents,
+            currency: "eur",
+            recurring: { interval: "month" },
+          });
+
+          // Update offer with Stripe IDs (direct SQL update for now)
+          await db.execute(sql`
+            UPDATE subscription_offers 
+            SET stripe_product_id = ${product.id}, stripe_price_id = ${stripePrice.id}
+            WHERE id = ${offer.id}
+          `);
+
+          results.push({ id: offer.id, success: true, productId: product.id, priceId: stripePrice.id });
+        } catch (stripeError: any) {
+          console.error(`Stripe sync error for ${offer.id}:`, stripeError);
+          results.push({ id: offer.id, success: false, error: stripeError.message });
+        }
+      }
+
+      res.json({ message: "Synchronisation terminée", results });
+    } catch (error) {
+      console.error("Sync Stripe error:", error);
+      res.status(500).json({ message: "Erreur lors de la synchronisation avec Stripe" });
+    }
   });
 
   // Get user subscriptions
@@ -1865,8 +1970,11 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Ce projet a déjà un abonnement de ce type actif" });
       }
 
-      // Get the price for this offer type
-      const offer = subscriptionOffers[offerType as keyof typeof subscriptionOffers];
+      // Get the price for this offer type from database
+      const offer = await storage.getSubscriptionOffer(offerType);
+      if (!offer) {
+        return res.status(400).json({ message: "Type d'offre invalide" });
+      }
       const monthlyPrice = offer.price;
 
       const subscription = await storage.createSubscription(
