@@ -1,5 +1,9 @@
-import { getStripeSync } from './stripeClient';
+import { getStripeSync, getUncachableStripeClient } from './stripeClient';
 import { storage } from './storage';
+import Stripe from 'stripe';
+
+// Check if running on Replit or self-hosted
+const isReplit = !!process.env.REPLIT_CONNECTORS_HOSTNAME;
 
 export class WebhookHandlers {
   static async processWebhook(payload: Buffer, signature: string): Promise<void> {
@@ -10,14 +14,27 @@ export class WebhookHandlers {
       );
     }
 
-    const sync = await getStripeSync();
+    let eventPayload: any;
 
-    // Process the webhook using stripe-replit-sync which handles signature verification
-    await sync.processWebhook(payload, signature);
+    if (isReplit) {
+      // Replit mode: use stripe-replit-sync
+      const sync = await getStripeSync();
+      await sync.processWebhook(payload, signature);
+      eventPayload = JSON.parse(payload.toString());
+    } else {
+      // Self-hosted mode: verify signature manually
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      if (!webhookSecret) {
+        throw new Error('STRIPE_WEBHOOK_SECRET is not set');
+      }
+      
+      const stripe = await getUncachableStripeClient();
+      const event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      eventPayload = event;
+    }
     
-    // Parse the event payload to handle custom logic
+    // Handle custom logic
     try {
-      const eventPayload = JSON.parse(payload.toString());
       
       if (eventPayload.type === 'checkout.session.completed') {
         await WebhookHandlers.handleCheckoutComplete(eventPayload.data?.object);
