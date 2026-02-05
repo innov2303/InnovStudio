@@ -3,7 +3,7 @@ import { pgTable, text, varchar, boolean, timestamp } from "drizzle-orm/pg-core"
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const projectStatusEnum = ["pending", "in_review", "approved", "in_progress", "awaiting_final_payment", "completed", "cancelled"] as const;
+export const projectStatusEnum = ["pending", "in_review", "awaiting_signature", "awaiting_deposit", "approved", "in_progress", "in_progress_1", "in_progress_2", "awaiting_final_payment", "completed", "cancelled"] as const;
 export const featureStatusEnum = ["pending", "in_progress", "completed", "blocked"] as const;
 
 export const users = pgTable("users", {
