@@ -742,7 +742,7 @@ export default function Dashboard() {
     { id: "profile" as MenuSection, label: "Mon Profil", icon: User },
     ...(user.role !== "admin" ? [{ id: "projects" as MenuSection, label: "Mes Projets", icon: FolderKanban }] : []),
     ...(user.role === "admin" ? [{ id: "projects" as MenuSection, label: "Gestion des projets", icon: FolderKanban }] : []),
-    { id: "documents" as MenuSection, label: "Documents", icon: FileText },
+    { id: "documents" as MenuSection, label: "Mes abonnements", icon: FileText },
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
   ];
 
