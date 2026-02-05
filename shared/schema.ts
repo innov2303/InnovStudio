@@ -204,3 +204,35 @@ export type QuoteLineItem = {
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type ProjectDocument = typeof projectDocuments.$inferSelect;
 export type UpdateQuoteData = z.infer<typeof updateQuoteSchema>;
+
+// Subscription offer types
+export const subscriptionOfferEnum = ["maintenance", "hosting", "pack"] as const;
+export const subscriptionStatusEnum = ["active", "cancelled", "expired"] as const;
+
+// Subscriptions table
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  projectId: varchar("project_id", { length: 36 }).notNull(),
+  offerType: text("offer_type").notNull(), // maintenance, hosting, pack
+  status: text("status").notNull().default("active"),
+  monthlyPrice: text("monthly_price").notNull(),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).pick({
+  projectId: true,
+  offerType: true,
+});
+
+export const createSubscriptionSchema = insertSubscriptionSchema.extend({
+  projectId: z.string().min(1, "Projet requis"),
+  offerType: z.enum(subscriptionOfferEnum, { errorMap: () => ({ message: "Type d'offre invalide" }) }),
+});
+
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type CreateSubscriptionData = z.infer<typeof createSubscriptionSchema>;
