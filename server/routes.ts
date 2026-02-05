@@ -65,6 +65,11 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
+  // Trust proxy pour Nginx (requis pour les cookies sécurisés derrière un reverse proxy)
+  if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
+  
   app.use(
     session({
       store: new PgSession({
