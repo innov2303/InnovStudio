@@ -66,6 +66,12 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Factures d'abonnement automatiques : titre "Facture - Abonnement '[Nom offre]'"
   - Historique des abonnements annulés/expirés
   - Synchronisation des prix avec Stripe
+- **Sécurité** :
+  - Helmet pour les headers de sécurité (CSP, X-Frame-Options, etc.)
+  - Rate limiting: 10 tentatives par 15 min sur auth, 100 req/min général
+  - Logs de sécurité: connexions, échecs, inscriptions, rate limits
+  - Interface admin pour visualiser les logs de sécurité
+  - Trust proxy configuré pour Replit et production
 
 ## Tech Stack
 - **Frontend** : React + Vite + TypeScript + Tailwind CSS + shadcn/ui
