@@ -1660,24 +1660,21 @@ export default function Dashboard() {
                                           </Button>
                                         )}
 
-                                        {/* Client can delete draft documents */}
-                                        {user.role !== "admin" && doc.status === "draft" && (
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-xs text-muted-foreground">Brouillon en cours d'édition</span>
-                                            <Button
-                                              size="sm"
-                                              variant="destructive"
-                                              onClick={() => setDeleteConfirm({ type: "document", id: doc.id, title: doc.quoteTitle || "ce devis" })}
-                                              disabled={deleteDocumentMutation.isPending}
-                                              data-testid={`button-client-delete-quote-${doc.id}`}
-                                            >
-                                              {deleteDocumentMutation.isPending ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                              ) : (
-                                                <Trash2 className="h-4 w-4" />
-                                              )}
-                                            </Button>
-                                          </div>
+                                        {/* Client can delete documents that are not yet signed */}
+                                        {user.role !== "admin" && doc.status !== "signed" && (
+                                          <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={() => setDeleteConfirm({ type: "document", id: doc.id, title: doc.quoteTitle || "ce devis" })}
+                                            disabled={deleteDocumentMutation.isPending}
+                                            data-testid={`button-client-delete-quote-${doc.id}`}
+                                          >
+                                            {deleteDocumentMutation.isPending ? (
+                                              <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                              <Trash2 className="h-4 w-4" />
+                                            )}
+                                          </Button>
                                         )}
 
                                         {/* Client preview and download quote */}

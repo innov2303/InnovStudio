@@ -1175,9 +1175,9 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
-      // Can only delete if document is still in draft (not yet sent for signature)
-      if (document.status !== "draft") {
-        return res.status(400).json({ message: "Le devis ne peut plus être supprimé une fois envoyé pour signature" });
+      // Can only delete if document is not yet signed
+      if (document.status === "signed") {
+        return res.status(400).json({ message: "Le devis ne peut plus être supprimé une fois signé" });
       }
 
       await storage.deleteDocument(documentId);
