@@ -1770,8 +1770,8 @@ export default function Dashboard() {
                                           </Button>
                                         )}
 
-                                        {/* Client can delete documents that are not yet signed */}
-                                        {user.role !== "admin" && doc.status !== "signed" && (
+                                        {/* Client can delete documents that are not yet signed (not invoices) */}
+                                        {user.role !== "admin" && doc.status !== "signed" && doc.type !== "invoice" && (
                                           <Button
                                             size="sm"
                                             variant="destructive"
