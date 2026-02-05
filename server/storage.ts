@@ -42,6 +42,7 @@ export interface IStorage {
   updateDocumentClientSignature(id: string, clientSignature: string): Promise<ProjectDocument | undefined>;
   updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteLineItems?: string; quoteAmount?: string; quoteDepositPercent?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined>;
   deleteDocument(id: string): Promise<boolean>;
+  createInvoiceFromQuote(quoteId: string): Promise<ProjectDocument | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -315,6 +316,33 @@ export class DatabaseStorage implements IStorage {
   async deleteDocument(id: string): Promise<boolean> {
     await db.delete(projectDocuments).where(eq(projectDocuments.id, id));
     return true;
+  }
+
+  async createInvoiceFromQuote(quoteId: string): Promise<ProjectDocument | undefined> {
+    // Get the original quote
+    const quote = await this.getDocument(quoteId);
+    if (!quote || quote.type !== "quote") {
+      return undefined;
+    }
+
+    // Create invoice with same details as quote but as "invoice" type and "paid" status
+    const [invoice] = await db
+      .insert(projectDocuments)
+      .values({
+        projectId: quote.projectId,
+        type: "invoice",
+        status: "paid",
+        quoteTitle: quote.quoteTitle,
+        quoteDescription: quote.quoteDescription,
+        quoteLineItems: quote.quoteLineItems,
+        quoteAmount: quote.quoteAmount,
+        quoteDepositPercent: quote.quoteDepositPercent,
+        quoteValidityDays: quote.quoteValidityDays,
+        quoteNotes: quote.quoteNotes,
+        clientSignature: quote.clientSignature,
+      })
+      .returning();
+    return invoice;
   }
 }
 

@@ -41,6 +41,14 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Bouton de paiement vert visible pour le client sur le dashboard
   - Montant = total du devis moins l'acompte déjà payé
   - Webhook Stripe pour passage automatique en statut "completed" après paiement
+- **Génération automatique de facture** :
+  - À la fin du paiement final, une facture est automatiquement générée
+  - Basée sur le devis initial mais avec le statut "payée"
+  - PDF de facture professionnelle avec badge "PAYÉE" vert
+  - Affiche le détail des paiements (acompte + solde)
+  - Visible dans les documents du projet avec icône verte
+- **Projets terminés** :
+  - Impossible d'ajouter de nouvelles fonctionnalités sur un projet terminé
 - **Vérification email** : Les nouveaux utilisateurs doivent vérifier leur email avant de pouvoir se connecter
 - **Mot de passe oublié** : Réinitialisation par lien envoyé par email (valide 1 heure)
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires

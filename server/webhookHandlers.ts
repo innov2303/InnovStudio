@@ -54,6 +54,16 @@ export class WebhookHandlers {
         if (project && project.status === 'awaiting_final_payment') {
           await storage.updateProjectStatus(projectId, 'completed');
           console.log(`Project ${projectId} status updated to completed after final payment`);
+          
+          // Generate invoice from signed quote
+          const documents = await storage.getDocumentsByProject(projectId);
+          const signedQuote = documents.find(d => d.type === 'quote' && d.status === 'signed');
+          if (signedQuote) {
+            const invoice = await storage.createInvoiceFromQuote(signedQuote.id);
+            if (invoice) {
+              console.log(`Invoice ${invoice.id} created for project ${projectId}`);
+            }
+          }
         } else {
           console.log(`Project ${projectId} not in awaiting_final_payment status, skipping update`);
         }

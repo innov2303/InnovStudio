@@ -146,7 +146,7 @@ export type ProjectFeature = typeof projectFeatures.$inferSelect;
 export type CreateFeatureData = z.infer<typeof createFeatureSchema>;
 
 // Document status enum
-export const documentStatusEnum = ["draft", "awaiting_signature", "signed"] as const;
+export const documentStatusEnum = ["draft", "awaiting_signature", "signed", "paid"] as const;
 export const documentTypeEnum = ["quote", "invoice"] as const;
 
 // Project Documents table

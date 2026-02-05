@@ -1186,6 +1186,201 @@ export async function registerRoutes(
     }
   });
 
+  // Generate invoice PDF (for invoices)
+  app.get("/api/documents/:id/generate-invoice-pdf", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const documentId = req.params.id as string;
+      const document = await storage.getDocument(documentId);
+      if (!document) {
+        return res.status(404).json({ message: "Document non trouvé" });
+      }
+
+      if (document.type !== "invoice") {
+        return res.status(400).json({ message: "Ce document n'est pas une facture" });
+      }
+
+      const project = await storage.getProject(document.projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      // Allow admin OR project owner
+      const isAdmin = currentUser.role === "admin";
+      const isOwner = project.userId === currentUser.id;
+      
+      if (!isAdmin && !isOwner) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      if (!document.quoteTitle || !document.quoteAmount) {
+        return res.status(400).json({ message: "Données de facture incomplètes" });
+      }
+
+      // Fetch project owner for client info
+      const projectOwner = await storage.getUser(project.userId);
+      
+      // Fetch admin user for company info and signature
+      const adminUser = await storage.getUserByUsername("admin");
+      const admin = adminUser || currentUser;
+
+      // Create PDF
+      const doc = new PDFDocument({ margin: 50, size: "A4" });
+      
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename=Facture_${document.quoteTitle.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+      
+      doc.pipe(res);
+
+      // Header with company info
+      doc.fontSize(24).fillColor("#6366f1").text("INNOV STUDIO", 50, 50);
+      doc.fontSize(10).fillColor("#666666").text("Studio de Production Web", 50, 80);
+      
+      // Company address
+      doc.fontSize(9).fillColor("#333333");
+      doc.text(admin.company || "Innov Studio", 50, 100);
+      if (admin.address) {
+        const addressLines = admin.address.split("\n");
+        let yPos = 112;
+        addressLines.forEach(line => {
+          doc.text(line.trim(), 50, yPos);
+          yPos += 12;
+        });
+      }
+      if (admin.email) {
+        doc.text(admin.email, 50, doc.y + 5);
+      }
+
+      // FACTURE title with PAYÉ badge
+      doc.fontSize(28).fillColor("#1a1a1a").text("FACTURE", 400, 50, { align: "right" });
+      
+      // PAYÉ badge
+      doc.rect(435, 85, 70, 22).fillColor("#22c55e").fill();
+      doc.fontSize(11).fillColor("#ffffff").text("PAYÉE", 440, 90, { align: "center", width: 60 });
+      
+      // Invoice number and date
+      doc.fontSize(10).fillColor("#666666");
+      doc.text(`N° FAC-${documentId.substring(0, 8).toUpperCase()}`, 350, 115, { align: "right" });
+      doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 350, 130, { align: "right" });
+
+      // Separator line
+      doc.moveTo(50, 170).lineTo(545, 170).strokeColor("#e5e7eb").stroke();
+
+      // Client section
+      doc.fontSize(11).fillColor("#6366f1").text("FACTURÉ À", 350, 190);
+      doc.fontSize(10).fillColor("#333333");
+      
+      if (projectOwner) {
+        doc.text(projectOwner.company || `${projectOwner.firstName} ${projectOwner.lastName}`, 350, 205);
+        doc.text(`${projectOwner.firstName} ${projectOwner.lastName}`, 350, 220);
+        if (projectOwner.billingAddress || projectOwner.address) {
+          const clientAddress = (projectOwner.billingAddress || projectOwner.address || "").split("\n");
+          let yPos = 235;
+          clientAddress.forEach(line => {
+            doc.text(line.trim(), 350, yPos);
+            yPos += 12;
+          });
+        }
+      }
+
+      // Project info
+      doc.fontSize(11).fillColor("#6366f1").text("PROJET", 50, 190);
+      doc.fontSize(10).fillColor("#333333").text(project.title, 50, 205);
+
+      // Invoice title
+      doc.fontSize(14).fillColor("#1a1a1a").text(document.quoteTitle, 50, 290);
+
+      // Separator
+      doc.moveTo(50, 315).lineTo(545, 315).strokeColor("#e5e7eb").stroke();
+
+      // Prestations table
+      let currentY = 330;
+      
+      // Parse line items
+      let lineItems: Array<{ description: string; amount: string }> = [];
+      if (document.quoteLineItems) {
+        try {
+          lineItems = JSON.parse(document.quoteLineItems);
+        } catch (e) {
+          console.error("Error parsing line items:", e);
+        }
+      }
+      
+      if (lineItems.length > 0) {
+        doc.fontSize(11).fillColor("#6366f1").text("PRESTATIONS", 50, currentY);
+        currentY += 20;
+        
+        // Table header
+        doc.rect(50, currentY, 425, 25).fillColor("#f1f5f9").fill();
+        doc.rect(475, currentY, 70, 25).fillColor("#f1f5f9").fill();
+        doc.fontSize(9).fillColor("#64748b").text("Description", 60, currentY + 8);
+        doc.text("Montant", 480, currentY + 8);
+        currentY += 25;
+        
+        // Table rows
+        lineItems.forEach((item, index) => {
+          const isEven = index % 2 === 0;
+          if (isEven) {
+            doc.rect(50, currentY, 495, 22).fillColor("#fafafa").fill();
+          }
+          doc.fontSize(10).fillColor("#333333").text(item.description, 60, currentY + 6, { width: 400 });
+          doc.text(`${item.amount} €`, 480, currentY + 6);
+          currentY += 22;
+        });
+        
+        // Total line
+        doc.rect(50, currentY, 495, 28).fillColor("#e2e8f0").fill();
+        doc.fontSize(11).fillColor("#1a1a1a").text("Total HT", 60, currentY + 8);
+        doc.fontSize(12).fillColor("#6366f1").text(`${document.quoteAmount} €`, 475, currentY + 7);
+        currentY += 28;
+        
+        // Deposit paid line if specified
+        if (document.quoteDepositPercent) {
+          const depositAmount = (parseFloat(document.quoteAmount) * parseFloat(document.quoteDepositPercent) / 100).toFixed(2);
+          doc.rect(50, currentY, 495, 24).fillColor("#dcfce7").fill();
+          doc.fontSize(10).fillColor("#166534").text(`Acompte versé (${document.quoteDepositPercent}%)`, 60, currentY + 6);
+          doc.fontSize(11).fillColor("#166534").text(`- ${depositAmount} €`, 475, currentY + 5);
+          currentY += 24;
+          
+          // Final payment
+          const finalAmount = (parseFloat(document.quoteAmount) - parseFloat(depositAmount)).toFixed(2);
+          doc.rect(50, currentY, 495, 24).fillColor("#dcfce7").fill();
+          doc.fontSize(10).fillColor("#166534").text("Solde réglé", 60, currentY + 6);
+          doc.fontSize(11).fillColor("#166534").text(`- ${finalAmount} €`, 475, currentY + 5);
+          currentY += 24;
+        }
+        
+        // PAID total
+        doc.rect(50, currentY, 495, 28).fillColor("#22c55e").fill();
+        doc.fontSize(11).fillColor("#ffffff").text("SOLDE DÛ", 60, currentY + 8);
+        doc.fontSize(12).fillColor("#ffffff").text("0,00 €", 475, currentY + 7);
+        currentY += 28;
+        
+        currentY += 15;
+      }
+
+      // Features section
+      if (document.quoteDescription) {
+        doc.fontSize(11).fillColor("#6366f1").text("DÉTAILS DU PROJET", 50, currentY);
+        doc.fontSize(10).fillColor("#333333").text(document.quoteDescription, 50, currentY + 15, { width: 495 });
+        currentY = doc.y + 30;
+      }
+
+      // Thank you message
+      const thankYouY = Math.max(currentY + 20, 650);
+      doc.fontSize(11).fillColor("#6366f1").text("Merci pour votre confiance !", 50, thankYouY, { align: "center", width: 495 });
+
+      doc.end();
+    } catch (error) {
+      console.error("Generate invoice PDF error:", error);
+      res.status(500).json({ message: "Erreur lors de la génération du PDF de facture" });
+    }
+  });
+
   // Delete document (admin or project owner, only when draft/not yet sent for signature)
   app.delete("/api/documents/:id", requireAuth, async (req, res) => {
     try {
