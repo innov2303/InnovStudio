@@ -1984,10 +1984,10 @@ export async function registerRoutes(
       const protocol = req.headers['x-forwarded-proto'] || 'http';
       const baseUrl = `${protocol}://${host}`;
 
-      // Create Stripe Checkout Session for subscription
+      // Create Stripe Checkout Session for recurring subscription
       const session = await stripeClient.checkout.sessions.create({
         payment_method_types: ['card'],
-        mode: 'payment', // One-time payment for first month
+        mode: 'subscription', // Recurring subscription mode
         customer_email: currentUser.email || undefined,
         line_items: [
           {
@@ -1995,9 +1995,12 @@ export async function registerRoutes(
               currency: 'eur',
               product_data: {
                 name: `Abonnement ${offer.name}`,
-                description: `${offer.description} - Premier mois`,
+                description: offer.description,
               },
               unit_amount: priceInCents,
+              recurring: {
+                interval: 'month',
+              },
             },
             quantity: 1,
           },
@@ -2008,6 +2011,15 @@ export async function registerRoutes(
           offerType,
           userId: currentUser.id,
           monthlyPrice: offer.price,
+        },
+        subscription_data: {
+          metadata: {
+            type: 'subscription',
+            projectId,
+            offerType,
+            userId: currentUser.id,
+            monthlyPrice: offer.price,
+          },
         },
         success_url: `${baseUrl}/dashboard?subscription_success=true&project=${projectId}`,
         cancel_url: `${baseUrl}/dashboard?subscription_cancelled=true`,
@@ -2080,7 +2092,7 @@ export async function registerRoutes(
     }
   });
 
-  // Cancel a subscription
+  // Cancel a subscription (effective at end of current period)
   app.patch("/api/subscriptions/:id/cancel", requireAuth, async (req, res) => {
     try {
       const currentUser = await storage.getUser(req.session.userId!);
@@ -2099,8 +2111,31 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
-      const updated = await storage.updateSubscriptionStatus(subscriptionId, "cancelled");
-      res.json(updated);
+      // If subscription has Stripe ID, cancel in Stripe (at period end)
+      if (subscription.stripeSubscriptionId) {
+        try {
+          const stripeClient = await getUncachableStripeClient();
+          await stripeClient.subscriptions.update(subscription.stripeSubscriptionId, {
+            cancel_at_period_end: true,
+          });
+          // Update local data to reflect cancellation pending
+          const updated = await storage.updateSubscriptionStripeData(
+            subscriptionId,
+            subscription.currentPeriodEnd,
+            true
+          );
+          res.json(updated);
+        } catch (stripeError) {
+          console.error("Stripe cancel error:", stripeError);
+          // Still update locally if Stripe fails
+          const updated = await storage.updateSubscriptionStripeData(subscriptionId, subscription.currentPeriodEnd, true);
+          res.json(updated);
+        }
+      } else {
+        // No Stripe subscription, cancel immediately
+        const updated = await storage.updateSubscriptionStatus(subscriptionId, "cancelled");
+        res.json(updated);
+      }
     } catch (error) {
       console.error("Cancel subscription error:", error);
       res.status(500).json({ message: "Erreur serveur" });

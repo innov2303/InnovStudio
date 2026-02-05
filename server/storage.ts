@@ -50,11 +50,14 @@ export interface IStorage {
   createSubscriptionInvoice(projectId: string, subscriptionId: string, offerName: string, amount: string): Promise<ProjectDocument | undefined>;
   // Subscriptions
   createSubscription(userId: string, projectId: string, offerType: string, monthlyPrice: string): Promise<Subscription>;
+  createSubscriptionWithStripe(userId: string, projectId: string, offerType: string, monthlyPrice: string, stripeSubscriptionId: string, currentPeriodEnd: Date | null): Promise<Subscription>;
   getSubscription(id: string): Promise<Subscription | undefined>;
+  getSubscriptionByStripeId(stripeSubscriptionId: string): Promise<Subscription | undefined>;
   getSubscriptionsByUser(userId: string): Promise<Subscription[]>;
   getSubscriptionsByProject(projectId: string): Promise<Subscription[]>;
   getAllSubscriptions(): Promise<Subscription[]>;
   updateSubscriptionStatus(id: string, status: string): Promise<Subscription | undefined>;
+  updateSubscriptionStripeData(id: string, currentPeriodEnd: Date | null, cancelAtPeriodEnd: boolean): Promise<Subscription | undefined>;
   deleteSubscription(id: string): Promise<boolean>;
   
   // Subscription Offers
@@ -440,8 +443,29 @@ export class DatabaseStorage implements IStorage {
     return subscription;
   }
 
+  async createSubscriptionWithStripe(userId: string, projectId: string, offerType: string, monthlyPrice: string, stripeSubscriptionId: string, currentPeriodEnd: Date | null): Promise<Subscription> {
+    const [subscription] = await db
+      .insert(subscriptions)
+      .values({
+        userId,
+        projectId,
+        offerType,
+        monthlyPrice,
+        status: "active",
+        stripeSubscriptionId,
+        currentPeriodEnd,
+      })
+      .returning();
+    return subscription;
+  }
+
   async getSubscription(id: string): Promise<Subscription | undefined> {
     const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+    return subscription;
+  }
+
+  async getSubscriptionByStripeId(stripeSubscriptionId: string): Promise<Subscription | undefined> {
+    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId));
     return subscription;
   }
 
@@ -461,6 +485,15 @@ export class DatabaseStorage implements IStorage {
     const [subscription] = await db
       .update(subscriptions)
       .set({ status, updatedAt: new Date() })
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return subscription;
+  }
+
+  async updateSubscriptionStripeData(id: string, currentPeriodEnd: Date | null, cancelAtPeriodEnd: boolean): Promise<Subscription | undefined> {
+    const [subscription] = await db
+      .update(subscriptions)
+      .set({ currentPeriodEnd, cancelAtPeriodEnd, updatedAt: new Date() })
       .where(eq(subscriptions.id, id))
       .returning();
     return subscription;

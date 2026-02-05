@@ -747,10 +747,15 @@ export default function Dashboard() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const endDate = (data as any)?.currentPeriodEnd 
+        ? new Date((data as any).currentPeriodEnd).toLocaleDateString('fr-FR')
+        : null;
       toast({
-        title: "Abonnement annulé",
-        description: "L'abonnement a été annulé.",
+        title: "Résiliation programmée",
+        description: endDate 
+          ? `Votre abonnement sera résilié le ${endDate}.`
+          : "L'abonnement a été annulé.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/subscriptions"] });
     },
@@ -2922,24 +2927,39 @@ export default function Dashboard() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right">
-                                <p className="font-semibold">{subscription.monthlyPrice}/mois</p>
-                                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
-                                  Actif
-                                </Badge>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => cancelSubscriptionMutation.mutate(subscription.id)}
-                                disabled={cancelSubscriptionMutation.isPending}
-                                data-testid={`button-cancel-subscription-${subscription.id}`}
-                              >
-                                {cancelSubscriptionMutation.isPending ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                <p className="font-semibold">{subscription.monthlyPrice}€/mois</p>
+                                {(subscription as any).cancelAtPeriodEnd ? (
+                                  <div>
+                                    <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">
+                                      Résiliation en cours
+                                    </Badge>
+                                    {(subscription as any).currentPeriodEnd && (
+                                      <p className="text-xs text-muted-foreground mt-1">
+                                        Fin le {new Date((subscription as any).currentPeriodEnd).toLocaleDateString('fr-FR')}
+                                      </p>
+                                    )}
+                                  </div>
                                 ) : (
-                                  <XCircle className="h-4 w-4 text-destructive" />
+                                  <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+                                    Actif
+                                  </Badge>
                                 )}
-                              </Button>
+                              </div>
+                              {!(subscription as any).cancelAtPeriodEnd && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => cancelSubscriptionMutation.mutate(subscription.id)}
+                                  disabled={cancelSubscriptionMutation.isPending}
+                                  data-testid={`button-cancel-subscription-${subscription.id}`}
+                                >
+                                  {cancelSubscriptionMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <XCircle className="h-4 w-4 text-destructive" />
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           </div>
                         );

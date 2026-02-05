@@ -235,6 +235,9 @@ export const subscriptions = pgTable("subscriptions", {
   offerType: text("offer_type").notNull(), // maintenance, hosting, pack
   status: text("status").notNull().default("active"),
   monthlyPrice: text("monthly_price").notNull(),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
   startDate: timestamp("start_date").defaultNow(),
   endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow(),
