@@ -460,7 +460,7 @@ export async function registerRoutes(
       }
 
       const { status } = req.body;
-      const validStatuses = ["pending", "in_review", "approved", "in_progress", "completed", "cancelled"];
+      const validStatuses = ["pending", "in_review", "awaiting_signature", "awaiting_deposit", "approved", "in_progress", "in_progress_1", "in_progress_2", "completed", "cancelled"];
       if (!status || !validStatuses.includes(status)) {
         return res.status(400).json({ message: "Statut invalide" });
       }
