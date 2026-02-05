@@ -70,7 +70,7 @@ export async function registerRoutes(
       store: new PgSession({
         pool: pool,
         tableName: "session",
-        createTableIfMissing: true,
+        createTableIfMissing: false,
       }),
       secret: process.env.SESSION_SECRET || "webstudio-secret-key",
       resave: false,
