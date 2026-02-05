@@ -1,0 +1,44 @@
+11|innov-studio  | Internal Server Error: error: permission denied for table session
+11|innov-studio  |     at /var/www/innov-studio/dist/index.cjs:80:13330
+11|innov-studio  |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|innov-studio  |     at async i._asyncQuery (/var/www/innov-studio/dist/index.cjs:80:30025) {
+11|innov-studio  |   length: 95,
+11|innov-studio  |   severity: 'ERROR',
+11|innov-studio  |   code: '42501',
+11|innov-studio  |   detail: undefined,
+11|innov-studio  |   hint: undefined,
+11|innov-studio  |   position: undefined,
+11|innov-studio  |   internalPosition: undefined,
+11|innov-studio  |   internalQuery: undefined,
+11|innov-studio  |   where: undefined,
+11|innov-studio  |   schema: undefined,
+11|innov-studio  |   table: undefined,
+11|innov-studio  |   column: undefined,
+11|innov-studio  |   dataType: undefined,
+11|innov-studio  |   constraint: undefined,
+11|innov-studio  |   file: 'aclchk.c',
+11|innov-studio  |   line: '2843',
+11|innov-studio  |   routine: 'aclcheck_error'
+11|innov-studio  | }
+11|innov-studio  | Internal Server Error: error: permission denied for table session
+11|innov-studio  |     at /var/www/innov-studio/dist/index.cjs:80:13330
+11|innov-studio  |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|innov-studio  |     at async i._asyncQuery (/var/www/innov-studio/dist/index.cjs:80:30025) {
+11|innov-studio  |   length: 95,
+11|innov-studio  |   severity: 'ERROR',
+11|innov-studio  |   code: '42501',
+11|innov-studio  |   detail: undefined,
+11|innov-studio  |   hint: undefined,
+11|innov-studio  |   position: undefined,
+11|innov-studio  |   internalPosition: undefined,
+11|innov-studio  |   internalQuery: undefined,
+11|innov-studio  |   where: undefined,
+11|innov-studio  |   schema: undefined,
+11|innov-studio  |   table: undefined,
+11|innov-studio  |   column: undefined,
+11|innov-studio  |   dataType: undefined,
+11|innov-studio  |   constraint: undefined,
+11|innov-studio  |   file: 'aclchk.c',
+11|innov-studio  |   line: '2843',
+11|innov-studio  |   routine: 'aclcheck_error'
+11|innov-studio  | }
