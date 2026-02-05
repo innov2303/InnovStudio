@@ -1,4 +1,4 @@
-import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -47,6 +47,14 @@ export interface IStorage {
   updateQuoteDetails(id: string, details: { quoteTitle?: string; quoteDescription?: string; quoteLineItems?: string; quoteAmount?: string; quoteDepositPercent?: string; quoteValidityDays?: string; quoteNotes?: string }): Promise<ProjectDocument | undefined>;
   deleteDocument(id: string): Promise<boolean>;
   createInvoiceFromQuote(quoteId: string): Promise<ProjectDocument | undefined>;
+  // Subscriptions
+  createSubscription(userId: string, projectId: string, offerType: string, monthlyPrice: string): Promise<Subscription>;
+  getSubscription(id: string): Promise<Subscription | undefined>;
+  getSubscriptionsByUser(userId: string): Promise<Subscription[]>;
+  getSubscriptionsByProject(projectId: string): Promise<Subscription[]>;
+  getAllSubscriptions(): Promise<Subscription[]>;
+  updateSubscriptionStatus(id: string, status: string): Promise<Subscription | undefined>;
+  deleteSubscription(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -390,6 +398,52 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return invoice;
+  }
+
+  // Subscription operations
+  async createSubscription(userId: string, projectId: string, offerType: string, monthlyPrice: string): Promise<Subscription> {
+    const [subscription] = await db
+      .insert(subscriptions)
+      .values({
+        userId,
+        projectId,
+        offerType,
+        monthlyPrice,
+        status: "active",
+      })
+      .returning();
+    return subscription;
+  }
+
+  async getSubscription(id: string): Promise<Subscription | undefined> {
+    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+    return subscription;
+  }
+
+  async getSubscriptionsByUser(userId: string): Promise<Subscription[]> {
+    return db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).orderBy(desc(subscriptions.createdAt));
+  }
+
+  async getSubscriptionsByProject(projectId: string): Promise<Subscription[]> {
+    return db.select().from(subscriptions).where(eq(subscriptions.projectId, projectId)).orderBy(desc(subscriptions.createdAt));
+  }
+
+  async getAllSubscriptions(): Promise<Subscription[]> {
+    return db.select().from(subscriptions).orderBy(desc(subscriptions.createdAt));
+  }
+
+  async updateSubscriptionStatus(id: string, status: string): Promise<Subscription | undefined> {
+    const [subscription] = await db
+      .update(subscriptions)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return subscription;
+  }
+
+  async deleteSubscription(id: string): Promise<boolean> {
+    await db.delete(subscriptions).where(eq(subscriptions.id, id));
+    return true;
   }
 }
 
