@@ -351,6 +351,31 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/auth/save-signature", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Seul l'admin peut enregistrer une signature" });
+      }
+
+      const { signature } = req.body;
+      if (!signature || typeof signature !== 'string') {
+        return res.status(400).json({ message: "Signature invalide" });
+      }
+
+      if (!signature.startsWith('data:image/png;base64,')) {
+        return res.status(400).json({ message: "Format de signature invalide" });
+      }
+
+      await storage.updateUserSignature(currentUser.id, signature);
+
+      res.json({ message: "Signature enregistrée avec succès" });
+    } catch (error) {
+      console.error("Save signature error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   app.get("/api/users", requireAuth, async (req, res) => {
     try {
       const currentUser = await storage.getUser(req.session.userId!);

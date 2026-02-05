@@ -15,6 +15,7 @@ export interface IStorage {
   updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
   setPasswordResetToken(userId: string, token: string, expires: Date): Promise<void>;
   clearPasswordResetToken(userId: string): Promise<void>;
+  updateUserSignature(userId: string, signature: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
   initializeAdmin(): Promise<void>;
   // Projects
@@ -117,6 +118,13 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(users)
       .set({ passwordResetToken: null, passwordResetExpires: null })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserSignature(userId: string, signature: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ signature })
       .where(eq(users.id, userId));
   }
 
