@@ -2576,7 +2576,7 @@ export default function Dashboard() {
                                             data-testid={`button-download-pdf-${doc.id}`}
                                           >
                                             <Download className="h-4 w-4 mr-2" />
-                                            Télécharger PDF
+                                            Télécharger
                                           </Button>
                                         </div>
                                       </form>
