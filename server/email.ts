@@ -45,7 +45,7 @@ export async function sendVerificationEmail(to: string, firstName: string, verif
     const verificationUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/verify-email?token=${verificationToken}`;
     
     const { error } = await client.emails.send({
-      from: fromEmail || 'Innov Studio <noreply@resend.dev>',
+      from: fromEmail || 'Innov Studio <noreply@innov-studio.fr>',
       to: [to],
       subject: 'Vérifiez votre adresse email - Innov Studio',
       html: `
@@ -106,7 +106,7 @@ export async function sendPasswordResetEmail(to: string, firstName: string, rese
     const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/reset-password?token=${resetToken}`;
     
     const { error } = await client.emails.send({
-      from: fromEmail || 'Innov Studio <noreply@resend.dev>',
+      from: fromEmail || 'Innov Studio <noreply@innov-studio.fr>',
       to: [to],
       subject: 'Réinitialisation de votre mot de passe - Innov Studio',
       html: `
@@ -167,7 +167,7 @@ export async function sendPasswordChangeEmail(to: string, firstName: string, res
     const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/reset-password?token=${resetToken}`;
     
     const { error } = await client.emails.send({
-      from: fromEmail || 'Innov Studio <noreply@resend.dev>',
+      from: fromEmail || 'Innov Studio <noreply@innov-studio.fr>',
       to: [to],
       subject: 'Modification de votre mot de passe - Innov Studio',
       html: `
@@ -225,7 +225,7 @@ export async function sendEmailChangeConfirmation(to: string, firstName: string,
     const confirmUrl = `${process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000'}/confirm-email-change?token=${confirmToken}`;
     
     const { error } = await client.emails.send({
-      from: fromEmail || 'Innov Studio <noreply@resend.dev>',
+      from: fromEmail || 'Innov Studio <noreply@innov-studio.fr>',
       to: [to],
       subject: 'Confirmez le changement d\'email - Innov Studio',
       html: `
