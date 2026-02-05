@@ -24,6 +24,7 @@ export interface IStorage {
   getAllProjects(): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
   updateProjectStatus(id: string, status: string): Promise<Project | undefined>;
+  deleteProject(id: string): Promise<boolean>;
   // Features
   createFeature(projectId: string, feature: InsertFeature): Promise<ProjectFeature>;
   getFeature(id: string): Promise<ProjectFeature | undefined>;
@@ -188,6 +189,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(projects.id, id))
       .returning();
     return project;
+  }
+
+  async deleteProject(id: string): Promise<boolean> {
+    // Delete related features first
+    await db.delete(projectFeatures).where(eq(projectFeatures.projectId, id));
+    // Delete related documents
+    await db.delete(projectDocuments).where(eq(projectDocuments.projectId, id));
+    // Delete the project
+    await db.delete(projects).where(eq(projects.id, id));
+    return true;
   }
 
   async createFeature(projectId: string, feature: InsertFeature): Promise<ProjectFeature> {

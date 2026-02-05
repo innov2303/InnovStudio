@@ -478,6 +478,40 @@ export async function registerRoutes(
     }
   });
 
+  // Delete project (owner only, only if no signed documents)
+  app.delete("/api/projects/:id", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const projectId = req.params.id as string;
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Projet non trouvé" });
+      }
+
+      // Only project owner can delete their project
+      if (project.userId !== currentUser.id) {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Check if any document is signed
+      const docs = await storage.getDocumentsByProject(projectId);
+      const hasSignedDocument = docs.some(doc => doc.status === "signed");
+      if (hasSignedDocument) {
+        return res.status(400).json({ message: "Impossible de supprimer un projet avec un devis signé" });
+      }
+
+      await storage.deleteProject(projectId);
+      res.json({ message: "Projet supprimé" });
+    } catch (error) {
+      console.error("Delete project error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Feature routes
   app.post("/api/projects/:projectId/features", requireAuth, async (req, res) => {
     try {

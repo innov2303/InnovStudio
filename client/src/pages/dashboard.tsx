@@ -351,7 +351,7 @@ export default function Dashboard() {
   };
 
   // Delete confirmation state
-  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "feature" | "document"; id: string; title: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "feature" | "document" | "project"; id: string; title: string } | null>(null);
 
   // Documents state and queries
   const [expandedDocuments, setExpandedDocuments] = useState<string | null>(null);
@@ -480,6 +480,34 @@ export default function Dashboard() {
         description: "Le devis a été supprimé.",
       });
       refetchDocuments();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la suppression",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur lors de la suppression");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Projet supprimé",
+        description: "Le projet a été supprimé.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
     onError: (error: Error) => {
       toast({
@@ -1125,24 +1153,43 @@ export default function Dashboard() {
                               </SelectContent>
                             </Select>
                           ) : (
-                            <Badge variant={
-                              project.status === "pending" ? "secondary" :
-                              project.status === "awaiting_signature" ? "default" :
-                              project.status === "awaiting_deposit" ? "default" :
-                              project.status === "in_progress_1" ? "default" :
-                              project.status === "in_progress_2" ? "default" :
-                              project.status === "completed" ? "outline" : "secondary"
-                            }>
-                              {project.status === "pending" && "En attente"}
-                              {project.status === "in_review" && "En cours d'étude"}
-                              {project.status === "awaiting_signature" && "En attente de signature"}
-                              {project.status === "awaiting_deposit" && "Attente de l'acompte"}
-                              {project.status === "approved" && "Acompte reçu"}
-                              {project.status === "in_progress_1" && "En cours - Phase 1"}
-                              {project.status === "in_progress_2" && "En cours - Phase 2"}
-                              {project.status === "completed" && "Terminé"}
-                              {project.status === "cancelled" && "Annulé"}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={
+                                project.status === "pending" ? "secondary" :
+                                project.status === "awaiting_signature" ? "default" :
+                                project.status === "awaiting_deposit" ? "default" :
+                                project.status === "in_progress_1" ? "default" :
+                                project.status === "in_progress_2" ? "default" :
+                                project.status === "completed" ? "outline" : "secondary"
+                              }>
+                                {project.status === "pending" && "En attente"}
+                                {project.status === "in_review" && "En cours d'étude"}
+                                {project.status === "awaiting_signature" && "En attente de signature"}
+                                {project.status === "awaiting_deposit" && "Attente de l'acompte"}
+                                {project.status === "approved" && "Acompte reçu"}
+                                {project.status === "in_progress_1" && "En cours - Phase 1"}
+                                {project.status === "in_progress_2" && "En cours - Phase 2"}
+                                {project.status === "completed" && "Terminé"}
+                                {project.status === "cancelled" && "Annulé"}
+                              </Badge>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteConfirm({ type: "project", id: project.id, title: project.title });
+                                }}
+                                disabled={deleteProjectMutation.isPending}
+                                data-testid={`button-delete-project-${project.id}`}
+                              >
+                                {deleteProjectMutation.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
                           )}
                         </div>
                       </CardHeader>
@@ -2376,8 +2423,10 @@ export default function Dashboard() {
                 if (deleteConfirm) {
                   if (deleteConfirm.type === "feature") {
                     deleteFeatureMutation.mutate(deleteConfirm.id);
-                  } else {
+                  } else if (deleteConfirm.type === "document") {
                     deleteDocumentMutation.mutate(deleteConfirm.id);
+                  } else if (deleteConfirm.type === "project") {
+                    deleteProjectMutation.mutate(deleteConfirm.id);
                   }
                   setDeleteConfirm(null);
                 }
