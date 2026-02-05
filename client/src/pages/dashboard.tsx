@@ -2778,7 +2778,7 @@ export default function Dashboard() {
                       <CardDescription>Mises à jour, corrections de bugs, support technique</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold mb-4">99<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                      <div className="text-3xl font-bold mb-4">{subscriptionOffers?.maintenance?.price || "99"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
                       <ul className="space-y-2 text-sm text-muted-foreground mb-6">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Mises à jour de sécurité</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Correction de bugs</li>
@@ -2808,7 +2808,7 @@ export default function Dashboard() {
                       <CardDescription>Hébergement sécurisé, SSL, sauvegardes automatiques</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold mb-4">49<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                      <div className="text-3xl font-bold mb-4">{subscriptionOffers?.hosting?.price || "49"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
                       <ul className="space-y-2 text-sm text-muted-foreground mb-6">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute disponibilité</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Certificat SSL inclus</li>
@@ -2841,8 +2841,8 @@ export default function Dashboard() {
                       <CardDescription>Maintenance + Hébergement avec réduction</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold mb-1">129<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                      <p className="text-sm text-green-600 mb-4">Économisez 19/mois</p>
+                      <div className="text-3xl font-bold mb-1">{subscriptionOffers?.pack?.price || "129"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                      <p className="text-sm text-green-600 mb-4">Économisez {Math.round((parseFloat(subscriptionOffers?.maintenance?.price || "99") + parseFloat(subscriptionOffers?.hosting?.price || "49")) - parseFloat(subscriptionOffers?.pack?.price || "129"))}€/mois</p>
                       <ul className="space-y-2 text-sm text-muted-foreground mb-6">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tout de Maintenance</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tout de Hébergement</li>
