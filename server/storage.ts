@@ -389,6 +389,10 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
 
+    // Get project to use its title
+    const project = await this.getProject(quote.projectId);
+    const invoiceTitle = project ? `Facture - ${project.title}` : quote.quoteTitle;
+
     // Create invoice with same details as quote but as "invoice" type and "paid" status
     const [invoice] = await db
       .insert(projectDocuments)
@@ -396,7 +400,7 @@ export class DatabaseStorage implements IStorage {
         projectId: quote.projectId,
         type: "invoice",
         status: "paid",
-        quoteTitle: quote.quoteTitle,
+        quoteTitle: invoiceTitle,
         quoteDescription: quote.quoteDescription,
         quoteLineItems: quote.quoteLineItems,
         quoteAmount: quote.quoteAmount,
