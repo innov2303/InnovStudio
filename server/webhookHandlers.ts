@@ -76,38 +76,9 @@ export class WebhookHandlers {
           console.log(`Project ${projectId} not in awaiting_final_payment status, skipping update`);
         }
       } else if (type === 'subscription') {
-        // Handle subscription payment
-        const userId = session.metadata?.userId;
-        const offerType = session.metadata?.offerType;
-        const monthlyPrice = session.metadata?.monthlyPrice;
-        
-        if (!userId || !offerType || !monthlyPrice) {
-          console.log('Subscription checkout missing required metadata');
-          return;
-        }
-        
-        // Create the subscription
-        const subscription = await storage.createSubscription(
-          userId,
-          projectId,
-          offerType,
-          monthlyPrice
-        );
-        console.log(`Subscription ${subscription.id} created for project ${projectId}`);
-        
-        // Create subscription invoice document
-        const offer = await storage.getSubscriptionOffer(offerType);
-        if (offer && project) {
-          const subscriptionInvoice = await storage.createSubscriptionInvoice(
-            projectId,
-            subscription.id,
-            offer.name,
-            monthlyPrice
-          );
-          if (subscriptionInvoice) {
-            console.log(`Subscription invoice ${subscriptionInvoice.id} created for project ${projectId}`);
-          }
-        }
+        // Subscription creation is handled by customer.subscription.created webhook
+        // This avoids duplicate subscription creation
+        console.log('Subscription checkout completed - subscription will be created by subscription.created webhook');
       } else {
         console.log('Checkout session type not recognized:', type);
       }
