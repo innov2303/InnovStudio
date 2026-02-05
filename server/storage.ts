@@ -419,9 +419,9 @@ export class DatabaseStorage implements IStorage {
         status: "paid",
         quoteTitle: `Facture - Abonnement '${offerName}'`,
         quoteDescription: `Abonnement mensuel ${offerName}`,
-        quoteLineItems: JSON.stringify([{ description: `Abonnement ${offerName} - Premier mois`, amount }]),
+        quoteLineItems: JSON.stringify([{ description: `Abonnement ${offerName}`, amount }]),
         quoteAmount: amount,
-        quoteDepositPercent: "100",
+        quoteDepositPercent: null,
         quoteNotes: `Abonnement ID: ${subscriptionId}`,
       })
       .returning();
