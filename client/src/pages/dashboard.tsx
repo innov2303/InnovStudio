@@ -70,7 +70,7 @@ type SubscriptionOffer = {
   price: string;
   description: string;
 };
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "subscription_settings" | "users";
@@ -763,6 +763,31 @@ export default function Dashboard() {
       toast({
         title: "Erreur",
         description: error.message || "Erreur lors de l'annulation",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const reactivateSubscriptionMutation = useMutation({
+    mutationFn: async (subscriptionId: string) => {
+      const response = await apiRequest("PATCH", `/api/subscriptions/${subscriptionId}/reactivate`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erreur lors de la réactivation");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Abonnement réactivé",
+        description: "La résiliation a été annulée. Votre abonnement continue normalement.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la réactivation",
         variant: "destructive",
       });
     },
@@ -2945,7 +2970,7 @@ export default function Dashboard() {
                                   </Badge>
                                 )}
                               </div>
-                              {!(subscription as any).cancelAtPeriodEnd && (
+                              {!(subscription as any).cancelAtPeriodEnd ? (
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -2958,6 +2983,21 @@ export default function Dashboard() {
                                   ) : (
                                     <XCircle className="h-4 w-4 text-destructive" />
                                   )}
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => reactivateSubscriptionMutation.mutate(subscription.id)}
+                                  disabled={reactivateSubscriptionMutation.isPending}
+                                  data-testid={`button-reactivate-subscription-${subscription.id}`}
+                                >
+                                  {reactivateSubscriptionMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                                  ) : (
+                                    <RotateCcw className="h-4 w-4 mr-1" />
+                                  )}
+                                  Annuler résiliation
                                 </Button>
                               )}
                             </div>

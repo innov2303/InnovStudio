@@ -2142,6 +2142,57 @@ export async function registerRoutes(
     }
   });
 
+  // Reactivate a subscription (cancel the cancellation)
+  app.patch("/api/subscriptions/:id/reactivate", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      const subscriptionId = req.params.id as string;
+      const subscription = await storage.getSubscription(subscriptionId);
+      if (!subscription) {
+        return res.status(404).json({ message: "Abonnement non trouvé" });
+      }
+
+      // Only owner or admin can reactivate
+      if (subscription.userId !== currentUser.id && currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Check if subscription is pending cancellation
+      if (!subscription.cancelAtPeriodEnd) {
+        return res.status(400).json({ message: "Cet abonnement n'est pas en cours de résiliation" });
+      }
+
+      // If subscription has Stripe ID, reactivate in Stripe
+      if (subscription.stripeSubscriptionId) {
+        try {
+          const stripeClient = await getUncachableStripeClient();
+          await stripeClient.subscriptions.update(subscription.stripeSubscriptionId, {
+            cancel_at_period_end: false,
+          });
+          // Update local data
+          const updated = await storage.updateSubscriptionStripeData(
+            subscriptionId,
+            subscription.currentPeriodEnd,
+            false
+          );
+          res.json(updated);
+        } catch (stripeError) {
+          console.error("Stripe reactivate error:", stripeError);
+          res.status(500).json({ message: "Erreur lors de la réactivation" });
+        }
+      } else {
+        res.status(400).json({ message: "Abonnement sans ID Stripe" });
+      }
+    } catch (error) {
+      console.error("Reactivate subscription error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Delete a subscription (admin only)
   app.delete("/api/subscriptions/:id", requireAuth, async (req, res) => {
     try {
