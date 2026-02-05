@@ -1,0 +1,39 @@
+11|innov-s |     at node:internal/main/run_main_module:28:49
+11|innov-s |
+11|innov-s | Node.js v20.20.0
+11|innov-s | Failed to initialize Stripe: Error: X_REPLIT_TOKEN not found for repl/depl
+11|innov-s |     at _b (/var/www/innov-studio/dist/index.cjs:233:23464)
+11|innov-s |     at bY (/var/www/innov-studio/dist/index.cjs:233:24256)
+11|innov-s |     at id (/var/www/innov-studio/dist/index.cjs:233:24371)
+11|innov-s |     at async EY (/var/www/innov-studio/dist/index.cjs:241:10359)
+11|innov-s |     at async /var/www/innov-studio/dist/index.cjs:241:12060
+11|innov-s | Failed to initialize Stripe: Error: X_REPLIT_TOKEN not found for repl/depl
+11|innov-s |     at _b (/var/www/innov-studio/dist/index.cjs:233:23464)
+11|innov-s |     at bY (/var/www/innov-studio/dist/index.cjs:233:24256)
+11|innov-s |     at id (/var/www/innov-studio/dist/index.cjs:233:24371)
+11|innov-s |     at async EY (/var/www/innov-studio/dist/index.cjs:241:10359)
+11|innov-s |     at async /var/www/innov-studio/dist/index.cjs:241:12060
+
+/root/.pm2/logs/innov-studio-out.log last 15 lines:
+11|innov-s | > rest-express@1.0.0 start
+11|innov-s | > NODE_ENV=production node dist/index.cjs
+11|innov-s |
+11|innov-s | [dotenv@17.2.3] injecting env (7) from .env -- tip: ⚙️  override existing env vars with { override: true }
+11|innov-s | [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+11|innov-s | Stripe initialized in self-hosted mode
+11|innov-s | 5:49:06 PM [express] serving on port 5001
+11|innov-s |
+11|innov-s | > rest-express@1.0.0 start
+11|innov-s | > NODE_ENV=production node dist/index.cjs
+11|innov-s |
+11|innov-s | [dotenv@17.2.3] injecting env (7) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+11|innov-s | [dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+11|innov-s | Stripe initialized in self-hosted mode
+11|innov-s | 5:50:49 PM [express] serving on port 5001
+
+11|innov-studio  | > rest-express@1.0.0 start
+11|innov-studio  | > NODE_ENV=production node dist/index.cjs
+11|innov-studio  | [dotenv@17.2.3] injecting env (7) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+11|innov-studio  | [dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+11|innov-studio  | Stripe initialized in self-hosted mode
+11|innov-studio  | 5:53:40 PM [express] serving on port 5001
