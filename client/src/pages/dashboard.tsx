@@ -39,13 +39,11 @@ import {
   MapPin, 
   Receipt,
   Users,
-  Settings,
   Shield,
   Loader2,
   LayoutDashboard,
   FolderKanban,
   FileText,
-  HelpCircle,
   ChevronLeft,
   ChevronRight,
   Home,
@@ -69,7 +67,7 @@ import { createProjectSchema, createFeatureSchema } from "@shared/schema";
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
-type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users" | "settings";
+type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "users";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -475,10 +473,10 @@ export default function Dashboard() {
       if (error.message.startsWith("REQUIRES_SIGNATURE:")) {
         toast({
           title: "Signature requise",
-          description: "Veuillez enregistrer votre signature dans les Paramètres avant d'envoyer un devis.",
+          description: "Veuillez enregistrer votre signature dans Mon Profil avant d'envoyer un devis.",
           variant: "destructive",
         });
-        setActiveSection("settings");
+        setActiveSection("profile");
       } else {
         toast({
           title: "Erreur",
@@ -686,7 +684,6 @@ export default function Dashboard() {
     ...(user.role === "admin" ? [{ id: "projects" as MenuSection, label: "Gestion des projets", icon: FolderKanban }] : []),
     { id: "documents" as MenuSection, label: "Documents", icon: FileText },
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
-    { id: "settings" as MenuSection, label: "Paramètres", icon: Settings },
   ];
 
   return (
@@ -925,6 +922,46 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Shield className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Sécurité</CardTitle>
+                    <CardDescription>Gérer votre mot de passe</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Link href="/change-password">
+                    <Button variant="outline" className="w-full" data-testid="button-change-password">
+                      Changer le mot de passe
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              {user?.role === "admin" && (
+                <Card className="md:col-span-2">
+                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Pencil className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Signature électronique</CardTitle>
+                      <CardDescription>Votre signature sera intégrée dans les devis générés</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <SignaturePad 
+                      existingSignature={user?.signature}
+                      onSave={(signature) => saveSignatureMutation.mutate(signature)}
+                      isPending={saveSignatureMutation.isPending}
+                    />
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 
@@ -2478,68 +2515,6 @@ export default function Dashboard() {
             </Card>
           )}
 
-          {/* Settings Section */}
-          {activeSection === "settings" && (
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Settings className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">Sécurité</CardTitle>
-                    <CardDescription>Gérer votre mot de passe</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Link href="/change-password">
-                    <Button variant="outline" className="w-full" data-testid="button-change-password">
-                      Changer le mot de passe
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <HelpCircle className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">Aide</CardTitle>
-                    <CardDescription>Besoin d'assistance ?</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Contactez-nous pour toute question concernant votre compte ou vos projets.
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Admin Signature Card - Only visible for admin */}
-              {user?.role === "admin" && (
-                <Card className="md:col-span-2">
-                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Pencil className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">Signature électronique</CardTitle>
-                      <CardDescription>Votre signature sera intégrée dans les devis générés</CardDescription>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <SignaturePad 
-                      existingSignature={user?.signature}
-                      onSave={(signature) => saveSignatureMutation.mutate(signature)}
-                      isPending={saveSignatureMutation.isPending}
-                    />
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
         </main>
       </div>
 
