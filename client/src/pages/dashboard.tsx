@@ -1612,17 +1612,39 @@ export default function Dashboard() {
                                           </div>
                                         )}
 
-                                        {/* Download signed document */}
-                                        {doc.signedFileName && (
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => window.open(`/api/documents/${doc.id}/download?type=signed`, '_blank')}
-                                            data-testid={`button-download-signed-${doc.id}`}
-                                          >
-                                            <FileCheck className="h-4 w-4 mr-2" />
-                                            Signé
-                                          </Button>
+                                        {/* Preview and download for signed documents */}
+                                        {doc.status === "signed" && (
+                                          <div className="flex items-center gap-2">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() => setPreviewQuote(previewQuote === doc.id ? null : doc.id)}
+                                              data-testid={`button-preview-signed-${doc.id}`}
+                                            >
+                                              <Eye className="h-4 w-4 mr-1" />
+                                              Prévisualiser
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() => window.open(`/api/documents/${doc.id}/generate-pdf`, '_blank')}
+                                              data-testid={`button-download-pdf-signed-${doc.id}`}
+                                            >
+                                              <Download className="h-4 w-4 mr-1" />
+                                              PDF
+                                            </Button>
+                                            {doc.signedFileName && (
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => window.open(`/api/documents/${doc.id}/download?type=signed`, '_blank')}
+                                                data-testid={`button-download-signed-${doc.id}`}
+                                              >
+                                                <FileCheck className="h-4 w-4 mr-1" />
+                                                Fichier signé
+                                              </Button>
+                                            )}
+                                          </div>
                                         )}
                                       </div>
                                     </div>
