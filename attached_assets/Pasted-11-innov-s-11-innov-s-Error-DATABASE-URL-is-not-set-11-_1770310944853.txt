@@ -1,0 +1,55 @@
+11|innov-s |
+11|innov-s | Error: DATABASE_URL is not set
+11|innov-s |     at Object.<anonymous> (/var/www/innov-studio/dist/index.cjs:223:77807)
+11|innov-s |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+11|innov-s |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+11|innov-s |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+11|innov-s |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+11|innov-s |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+11|innov-s |     at node:internal/main/run_main_module:28:49
+11|innov-s |
+11|innov-s | Node.js v20.20.0
+11|innov-s | Failed to initialize Stripe: Error: X_REPLIT_TOKEN not found for repl/depl
+11|innov-s |     at _b (/var/www/innov-studio/dist/index.cjs:233:23464)
+11|innov-s |     at bY (/var/www/innov-studio/dist/index.cjs:233:24256)
+11|innov-s |     at id (/var/www/innov-studio/dist/index.cjs:233:24371)
+11|innov-s |     at async EY (/var/www/innov-studio/dist/index.cjs:241:10359)
+11|innov-s |     at async /var/www/innov-studio/dist/index.cjs:241:12060
+11|innov-s | Failed to initialize Stripe: Error: X_REPLIT_TOKEN not found for repl/depl
+11|innov-s |     at _b (/var/www/innov-studio/dist/index.cjs:233:23464)
+11|innov-s |     at bY (/var/www/innov-studio/dist/index.cjs:233:24256)
+11|innov-s |     at id (/var/www/innov-studio/dist/index.cjs:233:24371)
+11|innov-s |     at async EY (/var/www/innov-studio/dist/index.cjs:241:10359)
+11|innov-s |     at async /var/www/innov-studio/dist/index.cjs:241:12060
+
+/root/.pm2/logs/innov-studio-out.log last 30 lines:
+11|innov-s | > NODE_ENV=production node dist/index.cjs
+11|innov-s |
+11|innov-s | [dotenv@17.2.3] injecting env (7) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+11|innov-s | [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+11|innov-s | Stripe initialized in self-hosted mode
+11|innov-s | 5:56:31 PM [express] serving on port 5001
+11|innov-s |
+11|innov-s | > rest-express@1.0.0 start
+11|innov-s | > NODE_ENV=production node dist/index.cjs
+11|innov-s |
+11|innov-s | [dotenv@17.2.3] injecting env (7) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+11|innov-s | [dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+11|innov-s | Stripe initialized in self-hosted mode
+11|innov-s | 5:58:50 PM [express] serving on port 5001
+11|innov-s |
+11|innov-s | > rest-express@1.0.0 start
+11|innov-s | > NODE_ENV=production node dist/index.cjs
+11|innov-s |
+11|innov-s | [dotenv@17.2.3] injecting env (7) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+11|innov-s | [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+11|innov-s | Stripe initialized in self-hosted mode
+11|innov-s | 6:01:28 PM [express] serving on port 5001
+11|innov-s |
+11|innov-s | > rest-express@1.0.0 start
+11|innov-s | > NODE_ENV=production node dist/index.cjs
+11|innov-s |
+11|innov-s | [dotenv@17.2.3] injecting env (7) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+11|innov-s | [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+11|innov-s | Stripe initialized in self-hosted mode
+11|innov-s | 6:01:48 PM [express] serving on port 5001
