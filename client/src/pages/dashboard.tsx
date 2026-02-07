@@ -2472,22 +2472,6 @@ export default function Dashboard() {
                                           </Button>
                                         )}
 
-                                        {/* Client can delete documents that are not yet signed (not invoices) */}
-                                        {user.role !== "admin" && doc.status !== "signed" && doc.type !== "invoice" && doc.type !== "subscription_invoice" && (
-                                          <Button
-                                            size="sm"
-                                            variant="destructive"
-                                            onClick={() => setDeleteConfirm({ type: "document", id: doc.id, title: doc.quoteTitle || "ce devis" })}
-                                            disabled={deleteDocumentMutation.isPending}
-                                            data-testid={`button-client-delete-quote-${doc.id}`}
-                                          >
-                                            {deleteDocumentMutation.isPending ? (
-                                              <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                              <Trash2 className="h-4 w-4" />
-                                            )}
-                                          </Button>
-                                        )}
 
                                         {/* Client preview and download quote */}
                                         {user.role !== "admin" && doc.status === "awaiting_signature" && (
