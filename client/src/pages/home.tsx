@@ -228,7 +228,7 @@ export default function Home() {
               </h2>
               
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-                Créons votre{" "}
+                Créons ensemble votre{" "}
                 <span className="text-primary">projet Web</span> de demain
               </h1>
               
