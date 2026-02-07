@@ -364,7 +364,7 @@ export class DatabaseStorage implements IStorage {
   async updateDocumentSignedFile(id: string, signedFileName: string): Promise<ProjectDocument | undefined> {
     const [doc] = await db
       .update(projectDocuments)
-      .set({ signedFileName, status: "signed", updatedAt: new Date() })
+      .set({ signedFileName, status: "signed", signedAt: new Date(), updatedAt: new Date() })
       .where(eq(projectDocuments.id, id))
       .returning();
     return doc;
@@ -373,7 +373,7 @@ export class DatabaseStorage implements IStorage {
   async updateDocumentClientSignature(id: string, clientSignature: string): Promise<ProjectDocument | undefined> {
     const [doc] = await db
       .update(projectDocuments)
-      .set({ clientSignature, status: "signed", updatedAt: new Date() })
+      .set({ clientSignature, status: "signed", signedAt: new Date(), updatedAt: new Date() })
       .where(eq(projectDocuments.id, id))
       .returning();
     return doc;

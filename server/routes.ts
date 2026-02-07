@@ -1368,9 +1368,19 @@ export async function registerRoutes(
         // Labels inside boxes
         doc.fontSize(8).fillColor("#9ca3af");
         doc.text("Pour Innov Studio", 55, newPageY + 65);
-        doc.text("Date et signature :", 55, newPageY + 120);
         doc.text("Le Client", 300, newPageY + 65);
-        doc.text("Date, signature et mention \"Bon pour accord\" :", 300, newPageY + 120);
+        
+        // Admin date (document creation date)
+        const adminDate = document.createdAt ? new Date(document.createdAt).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
+        doc.fontSize(8).fillColor("#333333").text(`Le ${adminDate}`, 55, newPageY + 120);
+        
+        // Client signature date
+        if (document.signedAt) {
+          const clientDate = new Date(document.signedAt).toLocaleDateString("fr-FR");
+          doc.fontSize(8).fillColor("#333333").text(`Le ${clientDate}`, 300, newPageY + 120);
+        } else {
+          doc.fontSize(8).fillColor("#9ca3af").text("Date, signature et mention \"Bon pour accord\" :", 300, newPageY + 120);
+        }
         
         // Add admin signature if available
         if (admin.signature && admin.signature.startsWith("data:image/png;base64,")) {
@@ -1409,9 +1419,19 @@ export async function registerRoutes(
         // Labels inside boxes
         doc.fontSize(8).fillColor("#9ca3af");
         doc.text("Pour Innov Studio", 55, signatureY + 60);
-        doc.text("Date et signature :", 55, signatureY + 115);
         doc.text("Le Client", 300, signatureY + 60);
-        doc.text("Date, signature et mention \"Bon pour accord\" :", 300, signatureY + 115);
+        
+        // Admin date (document creation date)
+        const adminDateSamePage = document.createdAt ? new Date(document.createdAt).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
+        doc.fontSize(8).fillColor("#333333").text(`Le ${adminDateSamePage}`, 55, signatureY + 115);
+        
+        // Client signature date
+        if (document.signedAt) {
+          const clientDateSamePage = new Date(document.signedAt).toLocaleDateString("fr-FR");
+          doc.fontSize(8).fillColor("#333333").text(`Le ${clientDateSamePage}`, 300, signatureY + 115);
+        } else {
+          doc.fontSize(8).fillColor("#9ca3af").text("Date, signature et mention \"Bon pour accord\" :", 300, signatureY + 115);
+        }
         
         // Add admin signature if available
         if (admin.signature && admin.signature.startsWith("data:image/png;base64,")) {
