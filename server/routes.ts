@@ -1362,8 +1362,8 @@ export async function registerRoutes(
         doc.text("Merci de retourner ce document signé avec la mention \"Bon pour accord\".", 50, newPageY + 35);
         
         // Signature boxes
-        doc.rect(50, newPageY + 60, 220, 80).strokeColor("#d1d5db").lineWidth(1).stroke();
-        doc.rect(295, newPageY + 60, 220, 80).strokeColor("#d1d5db").lineWidth(1).stroke();
+        doc.rect(50, newPageY + 60, 220, 110).strokeColor("#d1d5db").lineWidth(1).stroke();
+        doc.rect(295, newPageY + 60, 220, 110).strokeColor("#d1d5db").lineWidth(1).stroke();
         
         // Labels inside boxes
         doc.fontSize(8).fillColor("#9ca3af");
@@ -1371,24 +1371,12 @@ export async function registerRoutes(
         const clientLabel = projectOwner ? `${projectOwner.company ? projectOwner.company + " - " : ""}${projectOwner.firstName} ${projectOwner.lastName}` : "Le Client";
         doc.text(clientLabel, 300, newPageY + 65);
         
-        // Admin date (document creation date)
-        const adminDate = document.createdAt ? new Date(document.createdAt).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
-        doc.fontSize(8).fillColor("#333333").text(`Le ${adminDate}`, 55, newPageY + 120);
-        
-        // Client signature date
-        if (document.signedAt) {
-          const clientDate = new Date(document.signedAt).toLocaleDateString("fr-FR");
-          doc.fontSize(8).fillColor("#333333").text(`Le ${clientDate}`, 300, newPageY + 120);
-        } else {
-          doc.fontSize(8).fillColor("#9ca3af").text("Date, signature et mention \"Bon pour accord\" :", 300, newPageY + 120);
-        }
-        
         // Add admin signature if available
         if (admin.signature && admin.signature.startsWith("data:image/png;base64,")) {
           try {
             const signatureBase64 = admin.signature.replace("data:image/png;base64,", "");
             const signatureBuffer = Buffer.from(signatureBase64, "base64");
-            doc.image(signatureBuffer, 70, newPageY + 75, { width: 160, height: 40 });
+            doc.image(signatureBuffer, 70, newPageY + 80, { width: 160, height: 40 });
           } catch (sigError) {
             console.error("Error embedding admin signature:", sigError);
           }
@@ -1397,13 +1385,25 @@ export async function registerRoutes(
         // Add client signature if available
         if (document.clientSignature && document.clientSignature.startsWith("data:image/png;base64,")) {
           try {
-            doc.fontSize(9).fillColor("#1a1a1a").text("Bon pour accord", 300, newPageY + 75);
+            doc.fontSize(9).fillColor("#1a1a1a").text("Bon pour accord", 300, newPageY + 80);
             const clientSigBase64 = document.clientSignature.replace("data:image/png;base64,", "");
             const clientSigBuffer = Buffer.from(clientSigBase64, "base64");
-            doc.image(clientSigBuffer, 315, newPageY + 87, { width: 160, height: 35 });
+            doc.image(clientSigBuffer, 315, newPageY + 92, { width: 160, height: 35 });
           } catch (sigError) {
             console.error("Error embedding client signature:", sigError);
           }
+        }
+        
+        // Admin date (document creation date) - below the box
+        const adminDate = document.createdAt ? new Date(document.createdAt).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
+        doc.fontSize(8).fillColor("#333333").text(`Le ${adminDate}`, 55, newPageY + 150);
+        
+        // Client signature date - below the box
+        if (document.signedAt) {
+          const clientDate = new Date(document.signedAt).toLocaleDateString("fr-FR");
+          doc.fontSize(8).fillColor("#333333").text(`Le ${clientDate}`, 300, newPageY + 150);
+        } else {
+          doc.fontSize(8).fillColor("#9ca3af").text("Date, signature et mention \"Bon pour accord\" :", 300, newPageY + 150);
         }
       } else {
         // Signature section on same page
@@ -1415,8 +1415,8 @@ export async function registerRoutes(
         doc.text("Merci de retourner ce document signé avec la mention \"Bon pour accord\".", 50, signatureY + 35);
         
         // Signature boxes
-        doc.rect(50, signatureY + 55, 220, 80).strokeColor("#d1d5db").lineWidth(1).stroke();
-        doc.rect(295, signatureY + 55, 220, 80).strokeColor("#d1d5db").lineWidth(1).stroke();
+        doc.rect(50, signatureY + 55, 220, 110).strokeColor("#d1d5db").lineWidth(1).stroke();
+        doc.rect(295, signatureY + 55, 220, 110).strokeColor("#d1d5db").lineWidth(1).stroke();
         
         // Labels inside boxes
         doc.fontSize(8).fillColor("#9ca3af");
@@ -1424,24 +1424,12 @@ export async function registerRoutes(
         const clientLabelSamePage = projectOwner ? `${projectOwner.company ? projectOwner.company + " - " : ""}${projectOwner.firstName} ${projectOwner.lastName}` : "Le Client";
         doc.text(clientLabelSamePage, 300, signatureY + 60);
         
-        // Admin date (document creation date)
-        const adminDateSamePage = document.createdAt ? new Date(document.createdAt).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
-        doc.fontSize(8).fillColor("#333333").text(`Le ${adminDateSamePage}`, 55, signatureY + 115);
-        
-        // Client signature date
-        if (document.signedAt) {
-          const clientDateSamePage = new Date(document.signedAt).toLocaleDateString("fr-FR");
-          doc.fontSize(8).fillColor("#333333").text(`Le ${clientDateSamePage}`, 300, signatureY + 115);
-        } else {
-          doc.fontSize(8).fillColor("#9ca3af").text("Date, signature et mention \"Bon pour accord\" :", 300, signatureY + 115);
-        }
-        
         // Add admin signature if available
         if (admin.signature && admin.signature.startsWith("data:image/png;base64,")) {
           try {
             const signatureBase64 = admin.signature.replace("data:image/png;base64,", "");
             const signatureBuffer = Buffer.from(signatureBase64, "base64");
-            doc.image(signatureBuffer, 70, signatureY + 70, { width: 160, height: 40 });
+            doc.image(signatureBuffer, 70, signatureY + 75, { width: 160, height: 40 });
           } catch (sigError) {
             console.error("Error embedding admin signature:", sigError);
           }
@@ -1450,13 +1438,25 @@ export async function registerRoutes(
         // Add client signature if available
         if (document.clientSignature && document.clientSignature.startsWith("data:image/png;base64,")) {
           try {
-            doc.fontSize(9).fillColor("#1a1a1a").text("Bon pour accord", 300, signatureY + 70);
+            doc.fontSize(9).fillColor("#1a1a1a").text("Bon pour accord", 300, signatureY + 75);
             const clientSigBase64 = document.clientSignature.replace("data:image/png;base64,", "");
             const clientSigBuffer = Buffer.from(clientSigBase64, "base64");
-            doc.image(clientSigBuffer, 315, signatureY + 82, { width: 160, height: 35 });
+            doc.image(clientSigBuffer, 315, signatureY + 87, { width: 160, height: 35 });
           } catch (sigError) {
             console.error("Error embedding client signature:", sigError);
           }
+        }
+        
+        // Admin date (document creation date) - below the box
+        const adminDateSamePage = document.createdAt ? new Date(document.createdAt).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
+        doc.fontSize(8).fillColor("#333333").text(`Le ${adminDateSamePage}`, 55, signatureY + 145);
+        
+        // Client signature date - below the box
+        if (document.signedAt) {
+          const clientDateSamePage = new Date(document.signedAt).toLocaleDateString("fr-FR");
+          doc.fontSize(8).fillColor("#333333").text(`Le ${clientDateSamePage}`, 300, signatureY + 145);
+        } else {
+          doc.fontSize(8).fillColor("#9ca3af").text("Date, signature et mention \"Bon pour accord\" :", 300, signatureY + 145);
         }
       }
 
