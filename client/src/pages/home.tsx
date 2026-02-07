@@ -428,7 +428,7 @@ export default function Home() {
                         <Input
                           id="contact-phone"
                           type="tel"
-                          placeholder="06 12 34 56 78"
+                          placeholder=""
                           value={contactForm.phone}
                           onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                           data-testid="input-contact-phone"
