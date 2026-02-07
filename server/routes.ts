@@ -1396,9 +1396,10 @@ export async function registerRoutes(
         // Add client signature if available
         if (document.clientSignature && document.clientSignature.startsWith("data:image/png;base64,")) {
           try {
+            doc.fontSize(9).fillColor("#1a1a1a").text("Bon pour accord", 300, newPageY + 75);
             const clientSigBase64 = document.clientSignature.replace("data:image/png;base64,", "");
             const clientSigBuffer = Buffer.from(clientSigBase64, "base64");
-            doc.image(clientSigBuffer, 315, newPageY + 75, { width: 160, height: 40 });
+            doc.image(clientSigBuffer, 315, newPageY + 87, { width: 160, height: 35 });
           } catch (sigError) {
             console.error("Error embedding client signature:", sigError);
           }
@@ -1447,9 +1448,10 @@ export async function registerRoutes(
         // Add client signature if available
         if (document.clientSignature && document.clientSignature.startsWith("data:image/png;base64,")) {
           try {
+            doc.fontSize(9).fillColor("#1a1a1a").text("Bon pour accord", 300, signatureY + 70);
             const clientSigBase64 = document.clientSignature.replace("data:image/png;base64,", "");
             const clientSigBuffer = Buffer.from(clientSigBase64, "base64");
-            doc.image(clientSigBuffer, 315, signatureY + 70, { width: 160, height: 40 });
+            doc.image(clientSigBuffer, 315, signatureY + 82, { width: 160, height: 35 });
           } catch (sigError) {
             console.error("Error embedding client signature:", sigError);
           }

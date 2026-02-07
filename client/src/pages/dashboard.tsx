@@ -109,6 +109,7 @@ export default function Dashboard() {
   const [newFeatureDescription, setNewFeatureDescription] = useState("");
   const [signDocumentId, setSignDocumentId] = useState<string | null>(null);
   const [clientSignature, setClientSignature] = useState<string | null>(null);
+  const [bonPourAccord, setBonPourAccord] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editProfileData, setEditProfileData] = useState({
     company: "",
@@ -3808,6 +3809,7 @@ export default function Dashboard() {
         if (!open) {
           setSignDocumentId(null);
           setClientSignature(null);
+          setBonPourAccord(false);
         }
       }}>
         <DialogContent className="max-w-md" data-testid="dialog-sign-electronic">
@@ -3825,30 +3827,44 @@ export default function Dashboard() {
               saveButtonText="Valider ma signature"
             />
             {clientSignature && (
-              <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => setClientSignature(null)}
-                  data-testid="button-reset-signature"
-                >
-                  Recommencer
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (signDocumentId && clientSignature) {
-                      signElectronicMutation.mutate({ documentId: signDocumentId, signature: clientSignature });
-                    }
-                  }}
-                  disabled={signElectronicMutation.isPending}
-                  data-testid="button-confirm-signature"
-                >
-                  {signElectronicMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Check className="h-4 w-4 mr-2" />
-                  )}
-                  Confirmer la signature
-                </Button>
+              <div className="space-y-4 pt-4 border-t">
+                <label className="flex items-start gap-3 cursor-pointer" data-testid="label-bon-pour-accord">
+                  <input
+                    type="checkbox"
+                    checked={bonPourAccord}
+                    onChange={(e) => setBonPourAccord(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-border"
+                    data-testid="checkbox-bon-pour-accord"
+                  />
+                  <span className="text-sm">
+                    J'ajoute la mention <strong>&laquo; Bon pour accord &raquo;</strong> et je confirme accepter les termes de ce devis.
+                  </span>
+                </label>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => { setClientSignature(null); setBonPourAccord(false); }}
+                    data-testid="button-reset-signature"
+                  >
+                    Recommencer
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (signDocumentId && clientSignature) {
+                        signElectronicMutation.mutate({ documentId: signDocumentId, signature: clientSignature });
+                      }
+                    }}
+                    disabled={signElectronicMutation.isPending || !bonPourAccord}
+                    data-testid="button-confirm-signature"
+                  >
+                    {signElectronicMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Check className="h-4 w-4 mr-2" />
+                    )}
+                    Confirmer la signature
+                  </Button>
+                </div>
               </div>
             )}
           </div>
