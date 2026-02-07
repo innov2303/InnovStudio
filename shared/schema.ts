@@ -309,3 +309,17 @@ export const insertSecurityLogSchema = createInsertSchema(securityLogs).pick({
 
 export type InsertSecurityLog = z.infer<typeof insertSecurityLogSchema>;
 export type SecurityLog = typeof securityLogs.$inferSelect;
+
+// Page Visits (Analytics)
+export const pageVisits = pgTable("page_visits", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  path: text("path").notNull(),
+  referrer: text("referrer"),
+  source: text("source"),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  country: text("country"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type PageVisit = typeof pageVisits.$inferSelect;

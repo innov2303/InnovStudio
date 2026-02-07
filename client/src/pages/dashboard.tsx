@@ -63,7 +63,9 @@ import {
   Check,
   Globe,
   Server,
-  Package
+  Package,
+  BarChart3,
+  TrendingUp
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument, Subscription } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
@@ -76,7 +78,41 @@ type SubscriptionOffer = {
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
-type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "security_logs";
+type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "security_logs" | "analytics";
+
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+
+function AnalyticsLineChart({ data }: { data: { date: string; count: number }[] }) {
+  const formatted = data.map(d => ({
+    date: new Date(d.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+    Visites: d.count,
+  }));
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart data={formatted}>
+        <defs>
+          <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+        <YAxis allowDecimals={false} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: "6px",
+            color: "hsl(var(--foreground))",
+          }}
+        />
+        <Area type="monotone" dataKey="Visites" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorVisits)" strokeWidth={2} />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -204,6 +240,26 @@ export default function Dashboard() {
   const { data: securityLogs, isLoading: securityLogsLoading } = useQuery<SecurityLog[]>({
     queryKey: ["/api/admin/security-logs"],
     enabled: user?.role === "admin" && activeSection === "security_logs",
+  });
+
+  const [analyticsDays, setAnalyticsDays] = useState(30);
+
+  type AnalyticsData = {
+    visitsPerDay: { date: string; count: number }[];
+    trafficSources: { source: string; count: number }[];
+    topPages: { path: string; count: number }[];
+    totalVisits: number;
+    days: number;
+  };
+
+  const { data: analyticsData, isLoading: analyticsLoading } = useQuery<AnalyticsData>({
+    queryKey: ["/api/analytics/stats", analyticsDays],
+    queryFn: async () => {
+      const res = await fetch(`/api/analytics/stats?days=${analyticsDays}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      return res.json();
+    },
+    enabled: user?.role === "admin" && activeSection === "analytics",
   });
 
   const { data: projects, isLoading: projectsLoading, refetch: refetchProjects } = useQuery<Project[]>({
@@ -950,6 +1006,7 @@ export default function Dashboard() {
     ...(user.role === "admin" ? [{ id: "subscription_settings" as MenuSection, label: "Gérer les abonnements", icon: Settings }] : []),
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
     ...(user.role === "admin" ? [{ id: "security_logs" as MenuSection, label: "Logs de sécurité", icon: Shield }] : []),
+    ...(user.role === "admin" ? [{ id: "analytics" as MenuSection, label: "Analytics", icon: BarChart3 }] : []),
   ];
 
   return (
@@ -3709,6 +3766,166 @@ export default function Dashboard() {
           )}
 
           {/* Security Logs Section (Admin only) */}
+          {activeSection === "analytics" && user.role === "admin" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Analytics</h2>
+                    <p className="text-sm text-muted-foreground">Statistiques de fréquentation de votre site</p>
+                  </div>
+                </div>
+                <Select value={String(analyticsDays)} onValueChange={(v) => setAnalyticsDays(Number(v))}>
+                  <SelectTrigger className="w-[160px]" data-testid="select-analytics-period">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 derniers jours</SelectItem>
+                    <SelectItem value="30">30 derniers jours</SelectItem>
+                    <SelectItem value="90">90 derniers jours</SelectItem>
+                    <SelectItem value="365">12 derniers mois</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {analyticsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : analyticsData ? (
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Visites totales</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold" data-testid="stat-total-visits">{analyticsData.totalVisits}</div>
+                        <p className="text-xs text-muted-foreground">sur {analyticsDays} jour(s)</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Moyenne/jour</CardTitle>
+                        <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold" data-testid="stat-avg-visits">
+                          {analyticsDays > 0 ? (analyticsData.totalVisits / analyticsDays).toFixed(1) : 0}
+                        </div>
+                        <p className="text-xs text-muted-foreground">visites par jour</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Sources de trafic</CardTitle>
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold" data-testid="stat-sources-count">{analyticsData.trafficSources.length}</div>
+                        <p className="text-xs text-muted-foreground">sources différentes</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Visites par jour</CardTitle>
+                      <CardDescription>Nombre de visites quotidiennes sur votre site</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {analyticsData.visitsPerDay.length > 0 ? (
+                        <div className="h-[300px]" data-testid="chart-visits-per-day">
+                          <AnalyticsLineChart data={analyticsData.visitsPerDay} />
+                        </div>
+                      ) : (
+                        <p className="text-center text-muted-foreground py-8">Aucune donnée pour cette période</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Sources de trafic</CardTitle>
+                        <CardDescription>D'o&ugrave; viennent vos visiteurs</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {analyticsData.trafficSources.length > 0 ? (
+                          <div className="space-y-3" data-testid="list-traffic-sources">
+                            {analyticsData.trafficSources.map((s, i) => {
+                              const maxCount = analyticsData.trafficSources[0]?.count || 1;
+                              const percentage = analyticsData.totalVisits > 0 ? ((s.count / analyticsData.totalVisits) * 100).toFixed(1) : "0";
+                              const isSearchEngine = ["Google", "Bing", "Yahoo", "DuckDuckGo"].includes(s.source);
+                              return (
+                                <div key={i} className="space-y-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm flex items-center gap-2">
+                                      {isSearchEngine && <Globe className="h-3 w-3 text-primary" />}
+                                      {s.source}
+                                    </span>
+                                    <span className="text-sm text-muted-foreground">{s.count} ({percentage}%)</span>
+                                  </div>
+                                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full ${isSearchEngine ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                                      style={{ width: `${(s.count / maxCount) * 100}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-center text-muted-foreground py-4">Aucune source de trafic</p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Pages les plus visitées</CardTitle>
+                        <CardDescription>Top 10 des pages par nombre de visites</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {analyticsData.topPages.length > 0 ? (
+                          <div className="space-y-3" data-testid="list-top-pages">
+                            {analyticsData.topPages.map((p, i) => {
+                              const maxCount = analyticsData.topPages[0]?.count || 1;
+                              const pageName = p.path === "/" ? "Accueil" : p.path === "/login" ? "Connexion" : p.path === "/register" ? "Inscription" : p.path === "/dashboard" ? "Dashboard" : p.path;
+                              return (
+                                <div key={i} className="space-y-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-mono text-xs">{pageName}</span>
+                                    <span className="text-sm text-muted-foreground">{p.count}</span>
+                                  </div>
+                                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full bg-primary/60"
+                                      style={{ width: `${(p.count / maxCount) * 100}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-center text-muted-foreground py-4">Aucune page visitée</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Aucune donnée analytics disponible</p>
+              )}
+            </div>
+          )}
+
           {activeSection === "security_logs" && user.role === "admin" && (
             <Card>
               <CardHeader className="flex flex-row items-center gap-4 space-y-0">

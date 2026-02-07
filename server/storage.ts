@@ -1,6 +1,6 @@
-import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers, securityLogs, type SecurityLog } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers, securityLogs, type SecurityLog, pageVisits, type PageVisit } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql, gte, count } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -69,6 +69,13 @@ export interface IStorage {
   // Security Logs
   createSecurityLog(log: { type: string; userId?: string; email?: string; ipAddress?: string; userAgent?: string; details?: string }): Promise<void>;
   getSecurityLogs(limit?: number): Promise<any[]>;
+  
+  // Analytics
+  trackPageVisit(visit: { path: string; referrer?: string; source?: string; userAgent?: string; ipAddress?: string }): Promise<void>;
+  getVisitsPerDay(days: number): Promise<{ date: string; count: number }[]>;
+  getTrafficSources(days: number): Promise<{ source: string; count: number }[]>;
+  getTopPages(days: number): Promise<{ path: string; count: number }[]>;
+  getTotalVisits(days: number): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -554,6 +561,60 @@ export class DatabaseStorage implements IStorage {
 
   async getSecurityLogs(limit: number = 100): Promise<SecurityLog[]> {
     return db.select().from(securityLogs).orderBy(desc(securityLogs.createdAt)).limit(limit);
+  }
+
+  // Analytics
+  async trackPageVisit(visit: { path: string; referrer?: string; source?: string; userAgent?: string; ipAddress?: string }): Promise<void> {
+    await db.insert(pageVisits).values(visit);
+  }
+
+  async getVisitsPerDay(days: number): Promise<{ date: string; count: number }[]> {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    const result = await db.execute(sql`
+      SELECT DATE(created_at) as date, COUNT(*)::int as count
+      FROM page_visits
+      WHERE created_at >= ${since}
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `);
+    return (result.rows as any[]).map(r => ({ date: r.date, count: Number(r.count) }));
+  }
+
+  async getTrafficSources(days: number): Promise<{ source: string; count: number }[]> {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    const result = await db.execute(sql`
+      SELECT COALESCE(source, 'Direct') as source, COUNT(*)::int as count
+      FROM page_visits
+      WHERE created_at >= ${since}
+      GROUP BY source
+      ORDER BY count DESC
+    `);
+    return (result.rows as any[]).map(r => ({ source: r.source, count: Number(r.count) }));
+  }
+
+  async getTopPages(days: number): Promise<{ path: string; count: number }[]> {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    const result = await db.execute(sql`
+      SELECT path, COUNT(*)::int as count
+      FROM page_visits
+      WHERE created_at >= ${since}
+      GROUP BY path
+      ORDER BY count DESC
+      LIMIT 10
+    `);
+    return (result.rows as any[]).map(r => ({ path: r.path, count: Number(r.count) }));
+  }
+
+  async getTotalVisits(days: number): Promise<number> {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    const result = await db.execute(sql`
+      SELECT COUNT(*)::int as count FROM page_visits WHERE created_at >= ${since}
+    `);
+    return Number((result.rows as any[])[0]?.count || 0);
   }
 }
 

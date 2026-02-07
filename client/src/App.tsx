@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { useEffect, useRef } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,6 +15,27 @@ import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import ConfirmEmailChange from "@/pages/confirm-email-change";
 import NotFound from "@/pages/not-found";
+
+function PageTracker() {
+  const [location] = useLocation();
+  const lastTracked = useRef("");
+
+  useEffect(() => {
+    if (location !== lastTracked.current) {
+      lastTracked.current = location;
+      fetch("/api/analytics/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: location,
+          referrer: document.referrer || "",
+        }),
+      }).catch(() => {});
+    }
+  }, [location]);
+
+  return null;
+}
 
 function Router() {
   return (
@@ -37,6 +59,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
+          <PageTracker />
           <Toaster />
           <Router />
         </AuthProvider>

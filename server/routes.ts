@@ -1743,6 +1743,80 @@ export async function registerRoutes(
     }
   });
 
+  // Analytics - track page visit (public endpoint, no auth required)
+  app.post("/api/analytics/track", async (req, res) => {
+    try {
+      const { path: pagePath, referrer } = req.body;
+      if (!pagePath || typeof pagePath !== 'string') {
+        return res.status(400).json({ message: "Path requis" });
+      }
+
+      // Determine source from referrer
+      let source = "Direct";
+      if (referrer && typeof referrer === 'string' && referrer.length > 0) {
+        try {
+          const refUrl = new URL(referrer);
+          const host = refUrl.hostname.toLowerCase();
+          if (host.includes("google")) source = "Google";
+          else if (host.includes("bing")) source = "Bing";
+          else if (host.includes("yahoo")) source = "Yahoo";
+          else if (host.includes("duckduckgo")) source = "DuckDuckGo";
+          else if (host.includes("facebook") || host.includes("fb.com")) source = "Facebook";
+          else if (host.includes("instagram")) source = "Instagram";
+          else if (host.includes("linkedin")) source = "LinkedIn";
+          else if (host.includes("twitter") || host.includes("x.com")) source = "Twitter/X";
+          else if (host.includes("youtube")) source = "YouTube";
+          else if (host.includes("tiktok")) source = "TikTok";
+          else if (host.includes("reddit")) source = "Reddit";
+          else if (host.includes("innov-studio") || host.includes("localhost")) source = "Direct";
+          else source = refUrl.hostname;
+        } catch {
+          source = "Direct";
+        }
+      }
+
+      const ipAddress = getClientIp(req);
+      const userAgent = req.headers['user-agent'] || '';
+
+      await storage.trackPageVisit({
+        path: pagePath,
+        referrer: referrer || null,
+        source,
+        userAgent,
+        ipAddress,
+      });
+
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Track visit error:", error);
+      res.status(500).json({ message: "Erreur" });
+    }
+  });
+
+  // Analytics API (admin only)
+  app.get("/api/analytics/stats", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const days = parseInt(req.query.days as string) || 30;
+
+      const [visitsPerDay, trafficSources, topPages, totalVisits] = await Promise.all([
+        storage.getVisitsPerDay(days),
+        storage.getTrafficSources(days),
+        storage.getTopPages(days),
+        storage.getTotalVisits(days),
+      ]);
+
+      res.json({ visitsPerDay, trafficSources, topPages, totalVisits, days });
+    } catch (error) {
+      console.error("Analytics error:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération des analytics" });
+    }
+  });
+
   // Stripe payment routes
   
   // Get Stripe publishable key
