@@ -227,25 +227,27 @@ export default function Dashboard() {
   const [selectedProjectForSubscription, setSelectedProjectForSubscription] = useState<string>("");
   
   // Admin subscription management
-  type SubscriptionOfferFull = { id: string; name: string; price: string; description: string; stripeProductId: string | null; stripePriceId: string | null };
+  type SubscriptionOfferFull = { id: string; name: string; price: string; description: string; discountPercent: string | null; stripeProductId: string | null; stripePriceId: string | null };
   const { data: subscriptionOffersList, refetch: refetchOffers } = useQuery<SubscriptionOfferFull[]>({
     queryKey: ["/api/subscriptions/offers/list"],
     enabled: !!user && user.role === "admin",
   });
   const [editingOfferPrices, setEditingOfferPrices] = useState<Record<string, string>>({});
+  const [editingDiscountPercent, setEditingDiscountPercent] = useState<Record<string, string>>({});
 
   const updateOfferPriceMutation = useMutation({
-    mutationFn: async ({ id, price }: { id: string; price: string }) => {
-      const response = await apiRequest("PATCH", `/api/subscriptions/offers/${id}`, { price });
+    mutationFn: async ({ id, price, discountPercent }: { id: string; price?: string; discountPercent?: string }) => {
+      const body = id.startsWith("pack_") ? { discountPercent } : { price };
+      const response = await apiRequest("PATCH", `/api/subscriptions/offers/${id}`, body);
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Prix mis à jour", description: "Le prix de l'offre a été modifié" });
+      toast({ title: "Offre mise à jour", description: "L'offre a été modifiée avec succès" });
       refetchOffers();
       queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/offers"] });
     },
     onError: () => {
-      toast({ title: "Erreur", description: "Impossible de mettre à jour le prix", variant: "destructive" });
+      toast({ title: "Erreur", description: "Impossible de mettre à jour l'offre", variant: "destructive" });
     },
   });
 
@@ -3552,64 +3554,100 @@ export default function Dashboard() {
               <CardContent>
                 {subscriptionOffersList ? (
                   <div className="space-y-4">
-                    {subscriptionOffersList.map(offer => (
-                      <div key={offer.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                            offer.id.includes("vitrine") ? "bg-blue-500/10" : "bg-purple-500/10"
-                          }`}>
-                            {offer.id.includes("hosting") && <Server className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
-                            {offer.id.includes("maintenance") && <Zap className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
-                            {offer.id.includes("pack") && <Package className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                    {subscriptionOffersList.map(offer => {
+                      const isPack = offer.id.startsWith("pack_");
+                      const category = offer.id.replace("pack_", "").replace("hosting_", "").replace("maintenance_", "");
+                      const hostingOffer = subscriptionOffersList.find(o => o.id === `hosting_${category}`);
+                      const maintenanceOffer = subscriptionOffersList.find(o => o.id === `maintenance_${category}`);
+                      const currentDiscount = editingDiscountPercent[offer.id] ?? offer.discountPercent ?? "0";
+                      const baseTotal = hostingOffer && maintenanceOffer ? parseFloat(hostingOffer.price) + parseFloat(maintenanceOffer.price) : 0;
+                      const calculatedPackPrice = isPack ? (baseTotal * (1 - parseFloat(currentDiscount) / 100)).toFixed(2).replace(/\.00$/, "") : "";
+
+                      return (
+                        <div key={offer.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                              offer.id.includes("vitrine") ? "bg-blue-500/10" : "bg-purple-500/10"
+                            }`}>
+                              {offer.id.includes("hosting") && <Server className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                              {offer.id.includes("maintenance") && <Zap className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                              {offer.id.includes("pack") && <Package className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                            </div>
+                            <div>
+                              <p className="font-medium">{offer.name}</p>
+                              <p className="text-sm text-muted-foreground">{offer.description}</p>
+                              {isPack && (
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Base : {hostingOffer?.price || "?"}€ + {maintenanceOffer?.price || "?"}€ = {baseTotal}€
+                                  {" → "}<span className="font-medium text-green-600">{calculatedPackPrice}€/mois</span>
+                                </p>
+                              )}
+                              {offer.stripeProductId && (
+                                <Badge variant="outline" className="mt-1 text-xs bg-green-500/10 text-green-600 border-green-500/20">
+                                  Synchro Stripe
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">{offer.name}</p>
-                            <p className="text-sm text-muted-foreground">{offer.description}</p>
-                            {offer.stripeProductId && (
-                              <Badge variant="outline" className="mt-1 text-xs bg-green-500/10 text-green-600 border-green-500/20">
-                                Synchro Stripe
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
                           <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              className="w-24 text-right"
-                              value={editingOfferPrices[offer.id] ?? offer.price}
-                              onChange={(e) => setEditingOfferPrices(prev => ({ ...prev, [offer.id]: e.target.value }))}
-                              data-testid={`input-price-${offer.id}`}
-                            />
-                            <span className="text-muted-foreground">€/mois</span>
-                          </div>
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              const newPrice = editingOfferPrices[offer.id] ?? offer.price;
-                              updateOfferPriceMutation.mutate({ id: offer.id, price: newPrice });
-                            }}
-                            disabled={updateOfferPriceMutation.isPending || (editingOfferPrices[offer.id] ?? offer.price) === offer.price}
-                            data-testid={`button-save-price-${offer.id}`}
-                          >
-                            {updateOfferPriceMutation.isPending ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                            {isPack ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  step="1"
+                                  min="0"
+                                  max="100"
+                                  className="w-20 text-right"
+                                  value={currentDiscount}
+                                  onChange={(e) => setEditingDiscountPercent(prev => ({ ...prev, [offer.id]: e.target.value }))}
+                                  data-testid={`input-discount-${offer.id}`}
+                                />
+                                <span className="text-muted-foreground">%</span>
+                              </div>
                             ) : (
-                              <Save className="h-4 w-4" />
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  className="w-24 text-right"
+                                  value={editingOfferPrices[offer.id] ?? offer.price}
+                                  onChange={(e) => setEditingOfferPrices(prev => ({ ...prev, [offer.id]: e.target.value }))}
+                                  data-testid={`input-price-${offer.id}`}
+                                />
+                                <span className="text-muted-foreground">€/mois</span>
+                              </div>
                             )}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => setDeleteConfirm({ type: "offer", id: offer.id, title: offer.name })}
-                            data-testid={`button-delete-offer-${offer.id}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                if (isPack) {
+                                  updateOfferPriceMutation.mutate({ id: offer.id, discountPercent: currentDiscount });
+                                } else {
+                                  const newPrice = editingOfferPrices[offer.id] ?? offer.price;
+                                  updateOfferPriceMutation.mutate({ id: offer.id, price: newPrice });
+                                }
+                              }}
+                              disabled={updateOfferPriceMutation.isPending || (isPack ? (editingDiscountPercent[offer.id] ?? offer.discountPercent ?? "0") === (offer.discountPercent ?? "0") : (editingOfferPrices[offer.id] ?? offer.price) === offer.price)}
+                              data-testid={`button-save-price-${offer.id}`}
+                            >
+                              {updateOfferPriceMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Save className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setDeleteConfirm({ type: "offer", id: offer.id, title: offer.name })}
+                              data-testid={`button-delete-offer-${offer.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center py-8">

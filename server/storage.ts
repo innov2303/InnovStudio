@@ -63,7 +63,7 @@ export interface IStorage {
   // Subscription Offers
   getSubscriptionOffers(): Promise<SubscriptionOffer[]>;
   getSubscriptionOffer(id: string): Promise<SubscriptionOffer | undefined>;
-  updateSubscriptionOffer(id: string, price: string): Promise<SubscriptionOffer | undefined>;
+  updateSubscriptionOffer(id: string, price: string, discountPercent?: string | null): Promise<SubscriptionOffer | undefined>;
   deleteSubscriptionOffer(id: string): Promise<boolean>;
   
   // Security Logs
@@ -529,10 +529,14 @@ export class DatabaseStorage implements IStorage {
     return offer;
   }
 
-  async updateSubscriptionOffer(id: string, price: string): Promise<SubscriptionOffer | undefined> {
+  async updateSubscriptionOffer(id: string, price: string, discountPercent?: string | null): Promise<SubscriptionOffer | undefined> {
+    const updateData: any = { price, updatedAt: new Date() };
+    if (discountPercent !== undefined) {
+      updateData.discountPercent = discountPercent;
+    }
     const [offer] = await db
       .update(subscriptionOffers)
-      .set({ price, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(subscriptionOffers.id, id))
       .returning();
     return offer;

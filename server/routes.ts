@@ -1965,18 +1965,59 @@ export async function registerRoutes(
       }
 
       const offerId = req.params.id as string;
-      const { price } = req.body;
+      const isPack = offerId.startsWith("pack_");
 
-      if (!price || typeof price !== "string") {
-        return res.status(400).json({ message: "Prix invalide" });
+      if (isPack) {
+        const { discountPercent } = req.body;
+        if (!discountPercent || isNaN(parseFloat(discountPercent)) || parseFloat(discountPercent) < 0 || parseFloat(discountPercent) > 100) {
+          return res.status(400).json({ message: "Pourcentage de réduction invalide (0-100)" });
+        }
+
+        const category = offerId.replace("pack_", "");
+        const hostingOffer = await storage.getSubscriptionOffer(`hosting_${category}`);
+        const maintenanceOffer = await storage.getSubscriptionOffer(`maintenance_${category}`);
+
+        if (!hostingOffer || !maintenanceOffer) {
+          return res.status(400).json({ message: "Offres hébergement/maintenance introuvables pour calculer le prix du pack" });
+        }
+
+        const totalBase = parseFloat(hostingOffer.price) + parseFloat(maintenanceOffer.price);
+        const calculatedPrice = (totalBase * (1 - parseFloat(discountPercent) / 100)).toFixed(2);
+        const cleanPrice = calculatedPrice.endsWith('.00') ? calculatedPrice.slice(0, -3) : calculatedPrice;
+
+        const offer = await storage.updateSubscriptionOffer(offerId, cleanPrice, discountPercent);
+        if (!offer) {
+          return res.status(404).json({ message: "Offre non trouvée" });
+        }
+        res.json(offer);
+      } else {
+        const { price } = req.body;
+        if (!price || typeof price !== "string") {
+          return res.status(400).json({ message: "Prix invalide" });
+        }
+
+        const offer = await storage.updateSubscriptionOffer(offerId, price);
+        if (!offer) {
+          return res.status(404).json({ message: "Offre non trouvée" });
+        }
+
+        // Recalculate pack price if hosting or maintenance was updated
+        const category = offerId.replace("hosting_", "").replace("maintenance_", "");
+        const packOffer = await storage.getSubscriptionOffer(`pack_${category}`);
+        if (packOffer) {
+          const hostingOffer = await storage.getSubscriptionOffer(`hosting_${category}`);
+          const maintenanceOffer = await storage.getSubscriptionOffer(`maintenance_${category}`);
+          if (hostingOffer && maintenanceOffer) {
+            const discountPct = parseFloat(packOffer.discountPercent || "0");
+            const totalBase = parseFloat(hostingOffer.price) + parseFloat(maintenanceOffer.price);
+            const calculatedPrice = (totalBase * (1 - discountPct / 100)).toFixed(2);
+            const cleanPrice = calculatedPrice.endsWith('.00') ? calculatedPrice.slice(0, -3) : calculatedPrice;
+            await storage.updateSubscriptionOffer(`pack_${category}`, cleanPrice, packOffer.discountPercent || "0");
+          }
+        }
+
+        res.json(offer);
       }
-
-      const offer = await storage.updateSubscriptionOffer(offerId, price);
-      if (!offer) {
-        return res.status(404).json({ message: "Offre non trouvée" });
-      }
-
-      res.json(offer);
     } catch (error) {
       console.error("Update subscription offer error:", error);
       res.status(500).json({ message: "Erreur serveur" });
