@@ -222,7 +222,10 @@ export type ProjectDocument = typeof projectDocuments.$inferSelect;
 export type UpdateQuoteData = z.infer<typeof updateQuoteSchema>;
 
 // Subscription offer types
-export const subscriptionOfferEnum = ["maintenance", "hosting", "pack"] as const;
+export const subscriptionOfferEnum = [
+  "hosting_vitrine", "maintenance_vitrine", "pack_vitrine",
+  "hosting_enterprise", "maintenance_enterprise", "pack_enterprise"
+] as const;
 export const subscriptionStatusEnum = ["active", "cancelled", "expired"] as const;
 
 // Subscription offers table (configurable prices)
@@ -248,7 +251,7 @@ export const subscriptions = pgTable("subscriptions", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id", { length: 36 }).notNull(),
   projectId: varchar("project_id", { length: 36 }).notNull(),
-  offerType: text("offer_type").notNull(), // maintenance, hosting, pack
+  offerType: text("offer_type").notNull(),
   status: text("status").notNull().default("active"),
   monthlyPrice: text("monthly_price").notNull(),
   stripeSubscriptionId: text("stripe_subscription_id"),

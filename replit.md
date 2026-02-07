@@ -56,7 +56,10 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - **Modification email par confirmation** : Les utilisateurs peuvent changer leur adresse email via un lien de confirmation envoyé à leur email actuel
 - **Affichage mot de passe** : Bouton œil pour afficher/masquer les mots de passe sur tous les formulaires
 - **Système d'abonnements** : 
-  - 3 offres disponibles : Maintenance, Hébergement, Pack Complet (prix configurables par l'admin)
+  - 6 offres disponibles organisées en 2 catégories :
+    - **Site Vitrine** : Hébergement (39€), Support & Maintenance 7/7j (69€), Pack (89€)
+    - **Application Web Entreprise** : Hébergement (79€), Support & Maintenance 7/7j (129€), Pack (179€)
+  - Prix configurables par l'admin
   - Attribution des abonnements à un projet spécifique
   - Un seul abonnement actif par projet (impossible d'en prendre un autre tant que l'actif n'est pas résilié)
   - Paiement récurrent via Stripe avec renouvellement automatique mensuel
@@ -207,7 +210,7 @@ shared/
   id: string,
   userId: string,
   projectId: string,
-  offerType: "maintenance" | "hosting" | "pack",
+  offerType: "hosting_vitrine" | "maintenance_vitrine" | "pack_vitrine" | "hosting_enterprise" | "maintenance_enterprise" | "pack_enterprise",
   monthlyPrice: string,
   status: "active" | "cancelled" | "expired",
   stripeSubscriptionId: string,

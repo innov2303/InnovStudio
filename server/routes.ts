@@ -2096,11 +2096,6 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Projet et type d'offre requis" });
       }
 
-      // Validate offer type
-      if (!["maintenance", "hosting", "pack"].includes(offerType)) {
-        return res.status(400).json({ message: "Type d'offre invalide" });
-      }
-
       // Verify project exists and belongs to user (or user is admin)
       const project = await storage.getProject(projectId);
       if (!project) {
@@ -2195,11 +2190,6 @@ export async function registerRoutes(
 
       if (!projectId || !offerType) {
         return res.status(400).json({ message: "Projet et type d'offre requis" });
-      }
-
-      // Validate offer type
-      if (!["maintenance", "hosting", "pack"].includes(offerType)) {
-        return res.status(400).json({ message: "Type d'offre invalide" });
       }
 
       // Verify project exists and belongs to user (or user is admin)

@@ -60,7 +60,10 @@ import {
   Pencil,
   Trash2,
   X,
-  Check
+  Check,
+  Globe,
+  Server,
+  Package
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument, Subscription } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
@@ -3021,102 +3024,207 @@ export default function Dashboard() {
               ) : (
               <>
               {/* User View - Subscription Offers */}
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Nos offres d'abonnement</h2>
-                <div className="grid gap-4 md:grid-cols-3">
-                  {/* Maintenance Offer */}
-                  <Card className="relative overflow-hidden">
-                    <CardHeader>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 mb-2">
-                        <Zap className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <CardTitle className="text-lg">Maintenance du site</CardTitle>
-                      <CardDescription>Mises à jour, corrections de bugs, support technique</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold mb-4">{subscriptionOffers?.maintenance?.price || "99"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Mises à jour de sécurité</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Correction de bugs</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support technique 5j/7</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Rapport mensuel</li>
-                      </ul>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => {
-                          setSelectedOffer("maintenance");
-                          setShowSubscriptionDialog(true);
-                        }}
-                        data-testid="button-select-maintenance"
-                      >
-                        Souscrire
-                      </Button>
-                    </CardContent>
-                  </Card>
+              <div className="space-y-8">
+                <h2 className="text-xl font-semibold">Nos offres d'abonnement</h2>
 
-                  {/* Hosting Offer */}
-                  <Card className="relative overflow-hidden">
-                    <CardHeader>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 mb-2">
-                        <Building2 className="h-5 w-5 text-purple-500" />
-                      </div>
-                      <CardTitle className="text-lg">Hébergement du site</CardTitle>
-                      <CardDescription>Hébergement sécurisé, SSL, sauvegardes automatiques</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold mb-4">{subscriptionOffers?.hosting?.price || "49"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute disponibilité</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Certificat SSL inclus</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Sauvegardes quotidiennes</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Protection DDoS</li>
-                      </ul>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => {
-                          setSelectedOffer("hosting");
-                          setShowSubscriptionDialog(true);
-                        }}
-                        data-testid="button-select-hosting"
-                      >
-                        Souscrire
-                      </Button>
-                    </CardContent>
-                  </Card>
+                {/* Site Vitrine Category */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Globe className="h-5 w-5 text-blue-500" />
+                    <h3 className="text-lg font-semibold">Site Vitrine</h3>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 mb-2">
+                          <Server className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <CardTitle className="text-lg">{subscriptionOffers?.hosting_vitrine?.name || "Hébergement Site Vitrine"}</CardTitle>
+                        <CardDescription>{subscriptionOffers?.hosting_vitrine?.description || "Hébergement sécurisé pour votre site vitrine"}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold mb-4">{subscriptionOffers?.hosting_vitrine?.price || "39"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                        <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute disponibilité</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Certificat SSL inclus</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Sauvegardes quotidiennes</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Protection DDoS</li>
+                        </ul>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => {
+                            setSelectedOffer("hosting_vitrine");
+                            setShowSubscriptionDialog(true);
+                          }}
+                          data-testid="button-select-hosting-vitrine"
+                        >
+                          Souscrire
+                        </Button>
+                      </CardContent>
+                    </Card>
 
-                  {/* Pack Offer */}
-                  <Card className="relative overflow-hidden border-primary">
-                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
-                      Recommandé
-                    </div>
-                    <CardHeader>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 mb-2">
-                        <Shield className="h-5 w-5 text-primary" />
+                    <Card>
+                      <CardHeader>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 mb-2">
+                          <Zap className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <CardTitle className="text-lg">{subscriptionOffers?.maintenance_vitrine?.name || "Support & Maintenance 7/7j"}</CardTitle>
+                        <CardDescription>{subscriptionOffers?.maintenance_vitrine?.description || "Support technique 7j/7 pour votre site vitrine"}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold mb-4">{subscriptionOffers?.maintenance_vitrine?.price || "69"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                        <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Mises à jour de sécurité</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Correction de bugs</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support technique 7j/7</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Rapport mensuel</li>
+                        </ul>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => {
+                            setSelectedOffer("maintenance_vitrine");
+                            setShowSubscriptionDialog(true);
+                          }}
+                          data-testid="button-select-maintenance-vitrine"
+                        >
+                          Souscrire
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="relative border-blue-500/50">
+                      <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+                        Recommandé
                       </div>
-                      <CardTitle className="text-lg">Pack Complet</CardTitle>
-                      <CardDescription>Maintenance + Hébergement avec réduction</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold mb-1">{subscriptionOffers?.pack?.price || "129"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                      <p className="text-sm text-green-600 mb-4">Économisez {Math.round((parseFloat(subscriptionOffers?.maintenance?.price || "99") + parseFloat(subscriptionOffers?.hosting?.price || "49")) - parseFloat(subscriptionOffers?.pack?.price || "129"))}€/mois</p>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tout de Maintenance</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tout de Hébergement</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support prioritaire</li>
-                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tarif préférentiel</li>
-                      </ul>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => {
-                          setSelectedOffer("pack");
-                          setShowSubscriptionDialog(true);
-                        }}
-                        data-testid="button-select-pack"
-                      >
-                        Souscrire
-                      </Button>
-                    </CardContent>
-                  </Card>
+                      <CardHeader>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 mb-2">
+                          <Package className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <CardTitle className="text-lg">{subscriptionOffers?.pack_vitrine?.name || "Pack Site Vitrine"}</CardTitle>
+                        <CardDescription>{subscriptionOffers?.pack_vitrine?.description || "Hébergement + Support & Maintenance 7/7j"}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold mb-1">{subscriptionOffers?.pack_vitrine?.price || "89"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                        <p className="text-sm text-green-600 mb-4">Économisez {Math.round((parseFloat(subscriptionOffers?.hosting_vitrine?.price || "39") + parseFloat(subscriptionOffers?.maintenance_vitrine?.price || "69")) - parseFloat(subscriptionOffers?.pack_vitrine?.price || "89"))}€/mois</p>
+                        <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement inclus</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support & Maintenance 7/7j</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support prioritaire</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tarif préférentiel</li>
+                        </ul>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => {
+                            setSelectedOffer("pack_vitrine");
+                            setShowSubscriptionDialog(true);
+                          }}
+                          data-testid="button-select-pack-vitrine"
+                        >
+                          Souscrire
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                {/* Application Web Entreprise Category */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Building2 className="h-5 w-5 text-purple-500" />
+                    <h3 className="text-lg font-semibold">Application Web Entreprise</h3>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 mb-2">
+                          <Server className="h-5 w-5 text-purple-500" />
+                        </div>
+                        <CardTitle className="text-lg">{subscriptionOffers?.hosting_enterprise?.name || "Hébergement Application Web"}</CardTitle>
+                        <CardDescription>{subscriptionOffers?.hosting_enterprise?.description || "Hébergement haute performance pour votre application"}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold mb-4">{subscriptionOffers?.hosting_enterprise?.price || "79"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                        <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute performance</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Certificat SSL inclus</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Sauvegardes quotidiennes</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Protection DDoS avancée</li>
+                        </ul>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => {
+                            setSelectedOffer("hosting_enterprise");
+                            setShowSubscriptionDialog(true);
+                          }}
+                          data-testid="button-select-hosting-enterprise"
+                        >
+                          Souscrire
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 mb-2">
+                          <Zap className="h-5 w-5 text-purple-500" />
+                        </div>
+                        <CardTitle className="text-lg">{subscriptionOffers?.maintenance_enterprise?.name || "Support & Maintenance 7/7j"}</CardTitle>
+                        <CardDescription>{subscriptionOffers?.maintenance_enterprise?.description || "Support technique 7j/7 pour votre application"}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold mb-4">{subscriptionOffers?.maintenance_enterprise?.price || "129"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                        <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Mises à jour de sécurité</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Correction de bugs</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support technique 7j/7</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Monitoring continu</li>
+                        </ul>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => {
+                            setSelectedOffer("maintenance_enterprise");
+                            setShowSubscriptionDialog(true);
+                          }}
+                          data-testid="button-select-maintenance-enterprise"
+                        >
+                          Souscrire
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="relative border-purple-500/50">
+                      <div className="absolute top-0 right-0 bg-purple-500 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+                        Recommandé
+                      </div>
+                      <CardHeader>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 mb-2">
+                          <Package className="h-5 w-5 text-purple-500" />
+                        </div>
+                        <CardTitle className="text-lg">{subscriptionOffers?.pack_enterprise?.name || "Pack Application Web"}</CardTitle>
+                        <CardDescription>{subscriptionOffers?.pack_enterprise?.description || "Hébergement + Support & Maintenance 7/7j"}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold mb-1">{subscriptionOffers?.pack_enterprise?.price || "179"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
+                        <p className="text-sm text-green-600 mb-4">Économisez {Math.round((parseFloat(subscriptionOffers?.hosting_enterprise?.price || "79") + parseFloat(subscriptionOffers?.maintenance_enterprise?.price || "129")) - parseFloat(subscriptionOffers?.pack_enterprise?.price || "179"))}€/mois</p>
+                        <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute performance</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support & Maintenance 7/7j</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support prioritaire</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tarif préférentiel</li>
+                        </ul>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => {
+                            setSelectedOffer("pack_enterprise");
+                            setShowSubscriptionDialog(true);
+                          }}
+                          data-testid="button-select-pack-enterprise"
+                        >
+                          Souscrire
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
               </div>
 
@@ -3144,13 +3252,11 @@ export default function Dashboard() {
                           >
                             <div className="flex items-center gap-4">
                               <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                                subscription.offerType === "maintenance" ? "bg-blue-500/10" :
-                                subscription.offerType === "hosting" ? "bg-purple-500/10" :
-                                "bg-primary/10"
+                                subscription.offerType.includes("vitrine") ? "bg-blue-500/10" : "bg-purple-500/10"
                               }`}>
-                                {subscription.offerType === "maintenance" && <Zap className="h-5 w-5 text-blue-500" />}
-                                {subscription.offerType === "hosting" && <Building2 className="h-5 w-5 text-purple-500" />}
-                                {subscription.offerType === "pack" && <Shield className="h-5 w-5 text-primary" />}
+                                {subscription.offerType.includes("hosting") && <Server className={`h-5 w-5 ${subscription.offerType.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                                {subscription.offerType.includes("maintenance") && <Zap className={`h-5 w-5 ${subscription.offerType.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                                {subscription.offerType.includes("pack") && <Package className={`h-5 w-5 ${subscription.offerType.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
                               </div>
                               <div>
                                 <p className="font-medium">{offerInfo?.name || subscription.offerType}</p>
@@ -3242,9 +3348,9 @@ export default function Dashboard() {
                           >
                             <div className="flex items-center gap-3">
                               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                                {subscription.offerType === "maintenance" && <Zap className="h-4 w-4" />}
-                                {subscription.offerType === "hosting" && <Building2 className="h-4 w-4" />}
-                                {subscription.offerType === "pack" && <Shield className="h-4 w-4" />}
+                                {subscription.offerType.includes("hosting") && <Server className="h-4 w-4" />}
+                                {subscription.offerType.includes("maintenance") && <Zap className="h-4 w-4" />}
+                                {subscription.offerType.includes("pack") && <Package className="h-4 w-4" />}
                               </div>
                               <div>
                                 <p className="text-sm font-medium">{offerInfo?.name || subscription.offerType}</p>
@@ -3373,13 +3479,11 @@ export default function Dashboard() {
                       <div key={offer.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center gap-4">
                           <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                            offer.id === "maintenance" ? "bg-blue-500/10" :
-                            offer.id === "hosting" ? "bg-purple-500/10" :
-                            "bg-primary/10"
+                            offer.id.includes("vitrine") ? "bg-blue-500/10" : "bg-purple-500/10"
                           }`}>
-                            {offer.id === "maintenance" && <Zap className="h-5 w-5 text-blue-500" />}
-                            {offer.id === "hosting" && <Building2 className="h-5 w-5 text-purple-500" />}
-                            {offer.id === "pack" && <Shield className="h-5 w-5 text-primary" />}
+                            {offer.id.includes("hosting") && <Server className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                            {offer.id.includes("maintenance") && <Zap className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                            {offer.id.includes("pack") && <Package className={`h-5 w-5 ${offer.id.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
                           </div>
                           <div>
                             <p className="font-medium">{offer.name}</p>
