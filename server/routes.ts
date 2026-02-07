@@ -1831,8 +1831,9 @@ export async function registerRoutes(
       });
 
       res.json({ url: session.url });
-    } catch (error) {
-      console.error("Create deposit checkout error:", error);
+    } catch (error: any) {
+      console.error("Create deposit checkout error:", error?.message || error);
+      console.error("Stripe error details:", error?.type, error?.code, error?.statusCode);
       res.status(500).json({ message: "Erreur lors de la création de la session de paiement" });
     }
   });
