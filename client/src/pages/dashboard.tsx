@@ -249,6 +249,22 @@ export default function Dashboard() {
     },
   });
 
+  const deleteOfferMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest("DELETE", `/api/subscriptions/offers/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Offre supprimée", description: "L'offre a été supprimée avec succès" });
+      refetchOffers();
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/offers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscription-offers"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur", description: error.message || "Impossible de supprimer l'offre", variant: "destructive" });
+    },
+  });
+
   const syncStripeMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/subscriptions/offers/sync-stripe");
@@ -482,7 +498,7 @@ export default function Dashboard() {
   };
 
   // Delete confirmation state
-  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "feature" | "document" | "project"; id: string; title: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "feature" | "document" | "project" | "offer"; id: string; title: string } | null>(null);
 
   // Documents state and queries
   const [expandedDocuments, setExpandedDocuments] = useState<string | null>(null);
@@ -3583,6 +3599,14 @@ export default function Dashboard() {
                               <Save className="h-4 w-4" />
                             )}
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setDeleteConfirm({ type: "offer", id: offer.id, title: offer.name })}
+                            data-testid={`button-delete-offer-${offer.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -3801,6 +3825,8 @@ export default function Dashboard() {
             <AlertDialogDescription>
               {deleteConfirm?.type === "feature" 
                 ? `Êtes-vous sûr de vouloir supprimer la fonctionnalité "${deleteConfirm?.title}" ? Cette action est irréversible.`
+                : deleteConfirm?.type === "offer"
+                ? `Êtes-vous sûr de vouloir supprimer l'offre "${deleteConfirm?.title}" ? Cette action est irréversible.`
                 : `Êtes-vous sûr de vouloir supprimer le devis "${deleteConfirm?.title}" ? Cette action est irréversible.`
               }
             </AlertDialogDescription>
@@ -3817,6 +3843,8 @@ export default function Dashboard() {
                     deleteDocumentMutation.mutate(deleteConfirm.id);
                   } else if (deleteConfirm.type === "project") {
                     deleteProjectMutation.mutate(deleteConfirm.id);
+                  } else if (deleteConfirm.type === "offer") {
+                    deleteOfferMutation.mutate(deleteConfirm.id);
                   }
                   setDeleteConfirm(null);
                 }

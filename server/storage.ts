@@ -64,6 +64,7 @@ export interface IStorage {
   getSubscriptionOffers(): Promise<SubscriptionOffer[]>;
   getSubscriptionOffer(id: string): Promise<SubscriptionOffer | undefined>;
   updateSubscriptionOffer(id: string, price: string): Promise<SubscriptionOffer | undefined>;
+  deleteSubscriptionOffer(id: string): Promise<boolean>;
   
   // Security Logs
   createSecurityLog(log: { type: string; userId?: string; email?: string; ipAddress?: string; userAgent?: string; details?: string }): Promise<void>;
@@ -535,6 +536,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(subscriptionOffers.id, id))
       .returning();
     return offer;
+  }
+
+  async deleteSubscriptionOffer(id: string): Promise<boolean> {
+    const result = await db.delete(subscriptionOffers).where(eq(subscriptionOffers.id, id)).returning();
+    return result.length > 0;
   }
 
   // Security Logs

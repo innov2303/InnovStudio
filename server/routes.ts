@@ -1983,6 +1983,40 @@ export async function registerRoutes(
     }
   });
 
+  // Delete subscription offer (admin only)
+  app.delete("/api/subscriptions/offers/:id", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const offerId = req.params.id as string;
+
+      // Check if any active subscriptions use this offer
+      const allSubscriptions = await storage.getAllSubscriptions();
+      const activeWithOffer = allSubscriptions.filter(
+        sub => sub.offerType === offerId && sub.status === "active"
+      );
+
+      if (activeWithOffer.length > 0) {
+        return res.status(400).json({ 
+          message: `Impossible de supprimer cette offre : ${activeWithOffer.length} abonnement(s) actif(s) l'utilisent encore.` 
+        });
+      }
+
+      const deleted = await storage.deleteSubscriptionOffer(offerId);
+      if (!deleted) {
+        return res.status(404).json({ message: "Offre non trouvée" });
+      }
+
+      res.json({ message: "Offre supprimée avec succès" });
+    } catch (error) {
+      console.error("Delete subscription offer error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Sync subscription offers with Stripe (admin only)
   app.post("/api/subscriptions/offers/sync-stripe", requireAuth, async (req, res) => {
     try {
