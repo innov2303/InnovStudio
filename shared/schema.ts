@@ -239,6 +239,7 @@ export const subscriptionOffers = pgTable("subscription_offers", {
   name: text("name").notNull(),
   price: text("price").notNull(),
   description: text("description").notNull(),
+  discountPercent: text("discount_percent"),
   stripeProductId: text("stripe_product_id"),
   stripePriceId: text("stripe_price_id"),
   updatedAt: timestamp("updated_at").defaultNow(),
