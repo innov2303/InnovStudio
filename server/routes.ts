@@ -1793,6 +1793,7 @@ export async function registerRoutes(
       const quoteAmount = parseFloat(signedQuote.quoteAmount || "0");
       const depositPercent = parseFloat(signedQuote.quoteDepositPercent || "30");
       const depositAmount = Math.round((quoteAmount * depositPercent / 100) * 100); // Convert to cents
+      console.log("Deposit calculation:", { quoteAmount, depositPercent, depositAmountCents: depositAmount });
 
       if (depositAmount <= 0) {
         return res.status(400).json({ message: "Montant d'acompte invalide" });
@@ -1833,7 +1834,9 @@ export async function registerRoutes(
       res.json({ url: session.url });
     } catch (error: any) {
       console.error("Create deposit checkout error:", error?.message || error);
-      console.error("Stripe error details:", error?.type, error?.code, error?.statusCode);
+      if (error?.raw) {
+        console.error("Stripe raw error:", JSON.stringify(error.raw));
+      }
       res.status(500).json({ message: "Erreur lors de la création de la session de paiement" });
     }
   });
