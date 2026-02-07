@@ -1368,7 +1368,8 @@ export async function registerRoutes(
         // Labels inside boxes
         doc.fontSize(8).fillColor("#9ca3af");
         doc.text("Pour Innov Studio", 55, newPageY + 65);
-        doc.text("Le Client", 300, newPageY + 65);
+        const clientLabel = projectOwner ? `${projectOwner.company ? projectOwner.company + " - " : ""}${projectOwner.firstName} ${projectOwner.lastName}` : "Le Client";
+        doc.text(clientLabel, 300, newPageY + 65);
         
         // Admin date (document creation date)
         const adminDate = document.createdAt ? new Date(document.createdAt).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
@@ -1420,7 +1421,8 @@ export async function registerRoutes(
         // Labels inside boxes
         doc.fontSize(8).fillColor("#9ca3af");
         doc.text("Pour Innov Studio", 55, signatureY + 60);
-        doc.text("Le Client", 300, signatureY + 60);
+        const clientLabelSamePage = projectOwner ? `${projectOwner.company ? projectOwner.company + " - " : ""}${projectOwner.firstName} ${projectOwner.lastName}` : "Le Client";
+        doc.text(clientLabelSamePage, 300, signatureY + 60);
         
         // Admin date (document creation date)
         const adminDateSamePage = document.createdAt ? new Date(document.createdAt).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
