@@ -3025,13 +3025,16 @@ export default function Dashboard() {
               <>
               {/* User View - Subscription Offers */}
               <div className="space-y-8">
-                <h2 className="text-xl font-semibold">Nos offres d'abonnement</h2>
-
                 {/* Site Vitrine Category */}
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Globe className="h-5 w-5 text-blue-500" />
-                    <h3 className="text-lg font-semibold">Site Vitrine</h3>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                      <Globe className="h-4 w-4 text-blue-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Site Vitrine</h3>
+                      <p className="text-sm text-muted-foreground">Offres d'hébergement et maintenance pour votre site vitrine</p>
+                    </div>
                   </div>
                   <div className="grid gap-4 md:grid-cols-3">
                     <Card>
@@ -3127,11 +3130,18 @@ export default function Dashboard() {
                   </div>
                 </div>
 
+                <div className="border-t pt-8" />
+
                 {/* Application Web Entreprise Category */}
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Building2 className="h-5 w-5 text-purple-500" />
-                    <h3 className="text-lg font-semibold">Application Web Entreprise</h3>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
+                      <Building2 className="h-4 w-4 text-purple-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Application Web Entreprise</h3>
+                      <p className="text-sm text-muted-foreground">Offres haute performance pour votre application web sur mesure</p>
+                    </div>
                   </div>
                   <div className="grid gap-4 md:grid-cols-3">
                     <Card>
@@ -3240,85 +3250,85 @@ export default function Dashboard() {
                       <Loader2 className="h-6 w-6 animate-spin text-primary" />
                     </div>
                   ) : subscriptions && subscriptions.filter(s => s.status === "active").length > 0 ? (
-                    <div className="space-y-4">
-                      {subscriptions.filter(s => s.status === "active").map((subscription) => {
-                        const project = projects?.find(p => p.id === subscription.projectId);
-                        const offerInfo = subscriptionOffers?.[subscription.offerType as keyof typeof subscriptionOffers];
-                        return (
-                          <div 
-                            key={subscription.id} 
-                            className="flex items-center justify-between p-4 border rounded-lg"
-                            data-testid={`subscription-${subscription.id}`}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                                subscription.offerType.includes("vitrine") ? "bg-blue-500/10" : "bg-purple-500/10"
-                              }`}>
-                                {subscription.offerType.includes("hosting") && <Server className={`h-5 w-5 ${subscription.offerType.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
-                                {subscription.offerType.includes("maintenance") && <Zap className={`h-5 w-5 ${subscription.offerType.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
-                                {subscription.offerType.includes("pack") && <Package className={`h-5 w-5 ${subscription.offerType.includes("vitrine") ? "text-blue-500" : "text-purple-500"}`} />}
+                    <div className="space-y-6">
+                      {(() => {
+                        const activeSubscriptions = subscriptions.filter(s => s.status === "active");
+                        const vitrineSubs = activeSubscriptions.filter(s => s.offerType.includes("vitrine"));
+                        const enterpriseSubs = activeSubscriptions.filter(s => s.offerType.includes("enterprise"));
+
+                        const renderSubscriptionItem = (subscription: Subscription) => {
+                          const project = projects?.find(p => p.id === subscription.projectId);
+                          const offerInfo = subscriptionOffers?.[subscription.offerType as keyof typeof subscriptionOffers];
+                          const isVitrine = subscription.offerType.includes("vitrine");
+                          return (
+                            <div 
+                              key={subscription.id} 
+                              className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md"
+                              data-testid={`subscription-${subscription.id}`}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${isVitrine ? "bg-blue-500/10" : "bg-purple-500/10"}`}>
+                                  {subscription.offerType.includes("hosting") && <Server className={`h-5 w-5 ${isVitrine ? "text-blue-500" : "text-purple-500"}`} />}
+                                  {subscription.offerType.includes("maintenance") && <Zap className={`h-5 w-5 ${isVitrine ? "text-blue-500" : "text-purple-500"}`} />}
+                                  {subscription.offerType.includes("pack") && <Package className={`h-5 w-5 ${isVitrine ? "text-blue-500" : "text-purple-500"}`} />}
+                                </div>
+                                <div>
+                                  <p className="font-medium">{offerInfo?.name || subscription.offerType}</p>
+                                  <p className="text-sm text-muted-foreground">Projet : {project?.title || "Projet inconnu"}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-medium">{offerInfo?.name || subscription.offerType}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  Projet : {project?.title || "Projet inconnu"}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <p className="font-semibold">{subscription.monthlyPrice}€/mois</p>
-                                {(subscription as any).cancelAtPeriodEnd ? (
-                                  <div>
-                                    <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">
-                                      Résiliation en cours
-                                    </Badge>
-                                    {(subscription as any).currentPeriodEnd && (
-                                      <p className="text-xs text-muted-foreground mt-1">
-                                        Fin le {new Date((subscription as any).currentPeriodEnd).toLocaleDateString('fr-FR')}
-                                      </p>
-                                    )}
-                                  </div>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <p className="font-semibold">{subscription.monthlyPrice}€/mois</p>
+                                  {(subscription as any).cancelAtPeriodEnd ? (
+                                    <div>
+                                      <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">Résiliation en cours</Badge>
+                                      {(subscription as any).currentPeriodEnd && (
+                                        <p className="text-xs text-muted-foreground mt-1">Fin le {new Date((subscription as any).currentPeriodEnd).toLocaleDateString('fr-FR')}</p>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">Actif</Badge>
+                                  )}
+                                </div>
+                                {!(subscription as any).cancelAtPeriodEnd ? (
+                                  <Button variant="ghost" size="icon" onClick={() => cancelSubscriptionMutation.mutate(subscription.id)} disabled={cancelSubscriptionMutation.isPending} data-testid={`button-cancel-subscription-${subscription.id}`}>
+                                    {cancelSubscriptionMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4 text-destructive" />}
+                                  </Button>
                                 ) : (
-                                  <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
-                                    Actif
-                                  </Badge>
+                                  <Button variant="outline" size="sm" onClick={() => reactivateSubscriptionMutation.mutate(subscription.id)} disabled={reactivateSubscriptionMutation.isPending} data-testid={`button-reactivate-subscription-${subscription.id}`}>
+                                    {reactivateSubscriptionMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RotateCcw className="h-4 w-4 mr-1" />}
+                                    Annuler résiliation
+                                  </Button>
                                 )}
                               </div>
-                              {!(subscription as any).cancelAtPeriodEnd ? (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => cancelSubscriptionMutation.mutate(subscription.id)}
-                                  disabled={cancelSubscriptionMutation.isPending}
-                                  data-testid={`button-cancel-subscription-${subscription.id}`}
-                                >
-                                  {cancelSubscriptionMutation.isPending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <XCircle className="h-4 w-4 text-destructive" />
-                                  )}
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => reactivateSubscriptionMutation.mutate(subscription.id)}
-                                  disabled={reactivateSubscriptionMutation.isPending}
-                                  data-testid={`button-reactivate-subscription-${subscription.id}`}
-                                >
-                                  {reactivateSubscriptionMutation.isPending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                                  ) : (
-                                    <RotateCcw className="h-4 w-4 mr-1" />
-                                  )}
-                                  Annuler résiliation
-                                </Button>
-                              )}
                             </div>
-                          </div>
+                          );
+                        };
+
+                        return (
+                          <>
+                            {vitrineSubs.length > 0 && (
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                  <Globe className="h-4 w-4 text-blue-500" />
+                                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Site Vitrine</h4>
+                                </div>
+                                {vitrineSubs.map(renderSubscriptionItem)}
+                              </div>
+                            )}
+                            {enterpriseSubs.length > 0 && (
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                  <Building2 className="h-4 w-4 text-purple-500" />
+                                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Application Web Entreprise</h4>
+                                </div>
+                                {enterpriseSubs.map(renderSubscriptionItem)}
+                              </div>
+                            )}
+                          </>
                         );
-                      })}
+                      })()}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
