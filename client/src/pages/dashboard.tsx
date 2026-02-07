@@ -3216,7 +3216,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Card>
+                  <Card className="flex flex-col">
                     <CardHeader>
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 mb-2">
                         <Server className="h-5 w-5 text-blue-500" />
@@ -3224,16 +3224,16 @@ export default function Dashboard() {
                       <CardTitle className="text-lg">{subscriptionOffers?.hosting_vitrine?.name || "Hébergement Site Vitrine"}</CardTitle>
                       <CardDescription>{subscriptionOffers?.hosting_vitrine?.description || "Hébergement sécurisé pour votre site vitrine"}</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col flex-1">
                       <div className="text-3xl font-bold mb-4">{subscriptionOffers?.hosting_vitrine?.price || "39"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute disponibilité</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Certificat SSL inclus</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Sauvegardes quotidiennes</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Protection DDoS</li>
                       </ul>
                       <Button 
-                        className="w-full" 
+                        className="w-full mt-auto" 
                         onClick={() => {
                           setSelectedOffer("hosting_vitrine");
                           setShowSubscriptionDialog(true);
@@ -3245,7 +3245,7 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="flex flex-col">
                     <CardHeader>
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 mb-2">
                         <Zap className="h-5 w-5 text-blue-500" />
@@ -3253,16 +3253,16 @@ export default function Dashboard() {
                       <CardTitle className="text-lg">{subscriptionOffers?.maintenance_vitrine?.name || "Support & Maintenance 7/7j"}</CardTitle>
                       <CardDescription>{subscriptionOffers?.maintenance_vitrine?.description || "Support technique 7j/7 pour votre site vitrine"}</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col flex-1">
                       <div className="text-3xl font-bold mb-4">{subscriptionOffers?.maintenance_vitrine?.price || "69"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Mises à jour de sécurité</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Correction de bugs</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support technique 7j/7</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Rapport mensuel</li>
                       </ul>
                       <Button 
-                        className="w-full" 
+                        className="w-full mt-auto" 
                         onClick={() => {
                           setSelectedOffer("maintenance_vitrine");
                           setShowSubscriptionDialog(true);
@@ -3274,7 +3274,7 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card className="relative border-blue-500/50">
+                  <Card className="relative border-blue-500/50 flex flex-col">
                     <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
                       Recommandé
                     </div>
@@ -3285,17 +3285,17 @@ export default function Dashboard() {
                       <CardTitle className="text-lg">{subscriptionOffers?.pack_vitrine?.name || "Pack Site Vitrine"}</CardTitle>
                       <CardDescription>{subscriptionOffers?.pack_vitrine?.description || "Hébergement + Support & Maintenance 7/7j"}</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col flex-1">
                       <div className="text-3xl font-bold mb-1">{subscriptionOffers?.pack_vitrine?.price || "89"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
                       <p className="text-sm text-green-600 mb-4">Économisez {Math.round((parseFloat(subscriptionOffers?.hosting_vitrine?.price || "39") + parseFloat(subscriptionOffers?.maintenance_vitrine?.price || "69")) - parseFloat(subscriptionOffers?.pack_vitrine?.price || "89"))}€/mois</p>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement inclus</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support & Maintenance 7/7j</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support prioritaire</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tarif préférentiel</li>
                       </ul>
                       <Button 
-                        className="w-full" 
+                        className="w-full mt-auto" 
                         onClick={() => {
                           setSelectedOffer("pack_vitrine");
                           setShowSubscriptionDialog(true);
@@ -3323,7 +3323,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Card>
+                  <Card className="flex flex-col">
                     <CardHeader>
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 mb-2">
                         <Server className="h-5 w-5 text-purple-500" />
@@ -3331,16 +3331,16 @@ export default function Dashboard() {
                       <CardTitle className="text-lg">{subscriptionOffers?.hosting_enterprise?.name || "Hébergement Application Web"}</CardTitle>
                       <CardDescription>{subscriptionOffers?.hosting_enterprise?.description || "Hébergement haute performance pour votre application"}</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col flex-1">
                       <div className="text-3xl font-bold mb-4">{subscriptionOffers?.hosting_enterprise?.price || "79"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute performance</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Certificat SSL inclus</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Sauvegardes quotidiennes</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Protection DDoS avancée</li>
                       </ul>
                       <Button 
-                        className="w-full" 
+                        className="w-full mt-auto" 
                         onClick={() => {
                           setSelectedOffer("hosting_enterprise");
                           setShowSubscriptionDialog(true);
@@ -3352,7 +3352,7 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="flex flex-col">
                     <CardHeader>
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 mb-2">
                         <Zap className="h-5 w-5 text-purple-500" />
@@ -3360,16 +3360,16 @@ export default function Dashboard() {
                       <CardTitle className="text-lg">{subscriptionOffers?.maintenance_enterprise?.name || "Support & Maintenance 7/7j"}</CardTitle>
                       <CardDescription>{subscriptionOffers?.maintenance_enterprise?.description || "Support technique 7j/7 pour votre application"}</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col flex-1">
                       <div className="text-3xl font-bold mb-4">{subscriptionOffers?.maintenance_enterprise?.price || "129"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Mises à jour de sécurité</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Correction de bugs</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support technique 7j/7</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Monitoring continu</li>
                       </ul>
                       <Button 
-                        className="w-full" 
+                        className="w-full mt-auto" 
                         onClick={() => {
                           setSelectedOffer("maintenance_enterprise");
                           setShowSubscriptionDialog(true);
@@ -3381,7 +3381,7 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card className="relative border-purple-500/50">
+                  <Card className="relative border-purple-500/50 flex flex-col">
                     <div className="absolute top-0 right-0 bg-purple-500 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
                       Recommandé
                     </div>
@@ -3392,17 +3392,17 @@ export default function Dashboard() {
                       <CardTitle className="text-lg">{subscriptionOffers?.pack_enterprise?.name || "Pack Application Web"}</CardTitle>
                       <CardDescription>{subscriptionOffers?.pack_enterprise?.description || "Hébergement + Support & Maintenance 7/7j"}</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col flex-1">
                       <div className="text-3xl font-bold mb-1">{subscriptionOffers?.pack_enterprise?.price || "179"}€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
                       <p className="text-sm text-green-600 mb-4">Économisez {Math.round((parseFloat(subscriptionOffers?.hosting_enterprise?.price || "79") + parseFloat(subscriptionOffers?.maintenance_enterprise?.price || "129")) - parseFloat(subscriptionOffers?.pack_enterprise?.price || "179"))}€/mois</p>
-                      <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+                      <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Hébergement haute performance</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support & Maintenance 7/7j</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Support prioritaire</li>
                         <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Tarif préférentiel</li>
                       </ul>
                       <Button 
-                        className="w-full" 
+                        className="w-full mt-auto" 
                         onClick={() => {
                           setSelectedOffer("pack_enterprise");
                           setShowSubscriptionDialog(true);
