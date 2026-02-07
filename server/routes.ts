@@ -2106,6 +2106,15 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Accès refusé" });
       }
 
+      // Validate project type matches offer type
+      const isVitrineOffer = offerType.includes("vitrine");
+      const requiredProjectType = isVitrineOffer ? "site_vitrine" : "app_enterprise";
+      if (project.projectType !== requiredProjectType) {
+        return res.status(400).json({ 
+          message: `Cette offre est réservée aux projets de type "${isVitrineOffer ? "Site Vitrine" : "Application Web Entreprise"}".` 
+        });
+      }
+
       // Check if project already has any active subscription
       const existingSubscriptions = await storage.getSubscriptionsByProject(projectId);
       const hasActiveSubscription = existingSubscriptions.some(
@@ -2200,6 +2209,15 @@ export async function registerRoutes(
 
       if (project.userId !== currentUser.id && currentUser.role !== "admin") {
         return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      // Validate project type matches offer type
+      const isVitrineOffer = offerType.includes("vitrine");
+      const requiredProjectType = isVitrineOffer ? "site_vitrine" : "app_enterprise";
+      if (project.projectType !== requiredProjectType) {
+        return res.status(400).json({ 
+          message: `Cette offre est réservée aux projets de type "${isVitrineOffer ? "Site Vitrine" : "Application Web Entreprise"}".` 
+        });
       }
 
       // Check if project already has any active subscription

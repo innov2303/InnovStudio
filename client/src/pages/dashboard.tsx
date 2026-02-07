@@ -276,6 +276,7 @@ export default function Dashboard() {
     defaultValues: {
       title: "",
       description: "",
+      projectType: "site_vitrine",
       businessSector: "",
       features: "",
       designStyle: "",
@@ -1594,6 +1595,28 @@ export default function Dashboard() {
 
                         <FormField
                           control={projectForm.control}
+                          name="projectType"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Type de projet</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-project-type">
+                                    <SelectValue placeholder="Sélectionnez le type de projet" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="site_vitrine">Site Vitrine</SelectItem>
+                                  <SelectItem value="app_enterprise">Application Web Entreprise</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={projectForm.control}
                           name="description"
                           render={({ field }) => (
                             <FormItem>
@@ -1759,7 +1782,12 @@ export default function Dashboard() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <CardTitle className="text-lg">{project.title}</CardTitle>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <CardTitle className="text-lg">{project.title}</CardTitle>
+                              <Badge variant="outline" className="text-xs" data-testid={`badge-project-type-${project.id}`}>
+                                {(project as any).projectType === "app_enterprise" ? "Application Web" : "Site Vitrine"}
+                              </Badge>
+                            </div>
                             {!collapsedProjects.has(project.id) && (
                               <CardDescription className="mt-1">
                                 {project.businessSector} • {project.designStyle}
@@ -3400,14 +3428,23 @@ export default function Dashboard() {
                 <p className="text-sm text-muted-foreground">
                   Sélectionnez le projet auquel vous souhaitez associer cet abonnement :
                 </p>
-                {projects && projects.length > 0 ? (
+                {(() => {
+                const isVitrineOffer = selectedOffer?.includes("vitrine");
+                const requiredProjectType = isVitrineOffer ? "site_vitrine" : "app_enterprise";
+                const compatibleProjects = projects?.filter(
+                  (p) => (p as any).projectType === requiredProjectType
+                ) || [];
+                return compatibleProjects.length > 0 ? (
                   <>
+                    <p className="text-xs text-muted-foreground">
+                      Seuls les projets de type <strong>{isVitrineOffer ? "Site Vitrine" : "Application Web Entreprise"}</strong> sont affichés.
+                    </p>
                     <Select value={selectedProjectForSubscription} onValueChange={setSelectedProjectForSubscription}>
                       <SelectTrigger data-testid="select-project-for-subscription">
                         <SelectValue placeholder="Sélectionnez un projet" />
                       </SelectTrigger>
                       <SelectContent>
-                        {projects.map((project) => (
+                        {compatibleProjects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.title}
                           </SelectItem>
@@ -3448,7 +3485,12 @@ export default function Dashboard() {
                   </>
                 ) : (
                   <div className="text-center py-4">
-                    <p className="text-muted-foreground mb-4">Vous n'avez pas encore de projets.</p>
+                    <p className="text-muted-foreground mb-4">
+                      {projects && projects.length > 0 
+                        ? `Vous n'avez aucun projet de type "${isVitrineOffer ? "Site Vitrine" : "Application Web Entreprise"}" compatible avec cette offre.`
+                        : "Vous n'avez pas encore de projets."
+                      }
+                    </p>
                     <Button 
                       onClick={() => {
                         setShowSubscriptionDialog(false);
@@ -3459,7 +3501,8 @@ export default function Dashboard() {
                       Créer un projet
                     </Button>
                   </div>
-                )}
+                );
+              })()}
               </div>
             </DialogContent>
           </Dialog>
