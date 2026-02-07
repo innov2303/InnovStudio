@@ -112,11 +112,14 @@ export type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordData = z.infer<typeof resetPasswordSchema>;
 
 // Projects table
+export const projectTypeEnum = ["site_vitrine", "app_enterprise"] as const;
+
 export const projects = pgTable("projects", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id", { length: 36 }).notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
+  projectType: text("project_type").notNull().default("site_vitrine"),
   businessSector: text("business_sector").notNull(),
   features: text("features").notNull(),
   designStyle: text("design_style").notNull(),
@@ -128,6 +131,7 @@ export const projects = pgTable("projects", {
 export const insertProjectSchema = createInsertSchema(projects).pick({
   title: true,
   description: true,
+  projectType: true,
   businessSector: true,
   features: true,
   designStyle: true,
@@ -136,6 +140,7 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
 export const createProjectSchema = insertProjectSchema.extend({
   title: z.string().min(3, "Minimum 3 caractères"),
   description: z.string().min(10, "Minimum 10 caractères"),
+  projectType: z.enum(projectTypeEnum, { errorMap: () => ({ message: "Type de projet requis" }) }),
   businessSector: z.string().min(1, "Secteur d'activité requis"),
   features: z.string().min(10, "Minimum 10 caractères"),
   designStyle: z.string().min(1, "Style de design requis"),
