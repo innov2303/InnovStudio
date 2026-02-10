@@ -69,11 +69,21 @@ Site vitrine pour un studio de production web spécialisé dans les applications
   - Factures d'abonnement automatiques : titre "Facture - Abonnement '[Nom offre]'"
   - Historique des abonnements annulés/expirés
   - Synchronisation des prix avec Stripe
+- **Logs d'activité** :
+  - Système de logs complet (~20 types d'événements : auth, projets, fonctionnalités, documents, paiements, abonnements, utilisateurs)
+  - Interface admin avec filtres par catégorie (Tout, Authentification, Utilisateurs, Projets, Fonctionnalités, Documents, Paiements, Abonnements)
+  - Compteur de logs par catégorie, badges colorés par type
+- **Analytics** :
+  - Visites par jour (AreaChart), sources de trafic, pages les plus visitées
+  - Exclusion automatique des visites admin
+  - Chiffre d'affaires total (AreaChart factures + abonnements par mois)
+  - Graphique factures projets (BarChart mensuel)
+  - Graphique abonnements (BarChart mensuel)
+  - Répartition des projets par statut (PieChart donut + légende)
+  - Sélecteur de période (7/30/90/365 jours)
 - **Sécurité** :
   - Helmet pour les headers de sécurité (CSP, X-Frame-Options, etc.)
   - Rate limiting: 10 tentatives par 15 min sur auth, 100 req/min général
-  - Logs de sécurité: connexions, échecs, inscriptions, rate limits
-  - Interface admin pour visualiser les logs de sécurité
   - Trust proxy configuré pour Replit et production
 
 ## Tech Stack

@@ -77,6 +77,10 @@ export interface IStorage {
   getTrafficSources(days: number): Promise<{ source: string; count: number }[]>;
   getTopPages(days: number): Promise<{ path: string; count: number }[]>;
   getTotalVisits(days: number): Promise<number>;
+
+  // Revenue analytics
+  getRevenueByMonth(months: number): Promise<{ month: string; invoices: number; subscriptions: number; total: number }[]>;
+  getProjectStatusDistribution(): Promise<{ status: string; count: number }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -629,6 +633,54 @@ export class DatabaseStorage implements IStorage {
       SELECT COUNT(*)::int as count FROM page_visits WHERE created_at >= ${since}
     `);
     return Number((result.rows as any[])[0]?.count || 0);
+  }
+
+  async getRevenueByMonth(months: number): Promise<{ month: string; invoices: number; subscriptions: number; total: number }[]> {
+    const since = new Date();
+    since.setMonth(since.getMonth() - months);
+
+    const invoiceResult = await db.execute(sql`
+      SELECT TO_CHAR(d.created_at, 'YYYY-MM') as month, 
+             COALESCE(SUM(CAST(d.quote_amount AS NUMERIC)), 0) as amount
+      FROM project_documents d
+      WHERE d.type = 'invoice' AND d.created_at >= ${since}
+      GROUP BY TO_CHAR(d.created_at, 'YYYY-MM')
+      ORDER BY month
+    `);
+
+    const subscriptionResult = await db.execute(sql`
+      SELECT TO_CHAR(s.created_at, 'YYYY-MM') as month,
+             COALESCE(SUM(CAST(s.monthly_price AS NUMERIC)), 0) as amount
+      FROM subscriptions s
+      WHERE s.status = 'active' AND s.created_at >= ${since}
+      GROUP BY TO_CHAR(s.created_at, 'YYYY-MM')
+      ORDER BY month
+    `);
+
+    const invoiceMap = new Map<string, number>();
+    (invoiceResult.rows as any[]).forEach(r => invoiceMap.set(r.month, Number(r.amount)));
+
+    const subscriptionMap = new Map<string, number>();
+    (subscriptionResult.rows as any[]).forEach(r => subscriptionMap.set(r.month, Number(r.amount)));
+
+    const allMonths = new Set([...Array.from(invoiceMap.keys()), ...Array.from(subscriptionMap.keys())]);
+    const sorted = Array.from(allMonths).sort();
+
+    return sorted.map(month => {
+      const inv = invoiceMap.get(month) || 0;
+      const sub = subscriptionMap.get(month) || 0;
+      return { month, invoices: inv, subscriptions: sub, total: inv + sub };
+    });
+  }
+
+  async getProjectStatusDistribution(): Promise<{ status: string; count: number }[]> {
+    const result = await db.execute(sql`
+      SELECT status, COUNT(*)::int as count
+      FROM projects
+      GROUP BY status
+      ORDER BY count DESC
+    `);
+    return (result.rows as any[]).map(r => ({ status: r.status, count: Number(r.count) }));
   }
 }
 

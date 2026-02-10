@@ -80,7 +80,7 @@ import { SignaturePad } from "@/components/signature-pad";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "logs" | "analytics";
 
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, PieChart, Pie } from "recharts";
 
 function AnalyticsLineChart({ data }: { data: { date: string; count: number }[] }) {
   const formatted = data.map(d => ({
@@ -261,6 +261,25 @@ export default function Dashboard() {
       if (!res.ok) throw new Error("Failed to fetch analytics");
       return res.json();
     },
+    enabled: user?.role === "admin" && activeSection === "analytics",
+  });
+
+  type RevenueData = { month: string; invoices: number; subscriptions: number; total: number };
+  type ProjectStatusData = { status: string; count: number };
+
+  const { data: revenueData } = useQuery<RevenueData[]>({
+    queryKey: ["/api/analytics/revenue", analyticsDays],
+    queryFn: async () => {
+      const months = analyticsDays <= 30 ? 6 : analyticsDays <= 90 ? 12 : 24;
+      const res = await fetch(`/api/analytics/revenue?months=${months}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch revenue");
+      return res.json();
+    },
+    enabled: user?.role === "admin" && activeSection === "analytics",
+  });
+
+  const { data: projectStatusData } = useQuery<ProjectStatusData[]>({
+    queryKey: ["/api/analytics/project-status"],
     enabled: user?.role === "admin" && activeSection === "analytics",
   });
 
@@ -3950,6 +3969,186 @@ export default function Dashboard() {
                       </CardContent>
                     </Card>
                   </div>
+
+                  {/* Revenue Charts */}
+                  {(() => {
+                    const statusLabels: Record<string, string> = {
+                      pending: 'Déposé',
+                      in_review: 'Étude',
+                      awaiting_signature: 'Signature',
+                      awaiting_deposit: 'Acompte',
+                      approved: 'Validé',
+                      in_progress: 'En cours',
+                      in_progress_1: 'Phase 1',
+                      in_progress_2: 'Phase 2',
+                      awaiting_final_payment: 'Règlement',
+                      completed: 'Terminé',
+                      cancelled: 'Annulé',
+                    };
+                    const statusColors: Record<string, string> = {
+                      pending: 'hsl(220, 13%, 60%)',
+                      in_review: 'hsl(45, 93%, 47%)',
+                      awaiting_signature: 'hsl(25, 95%, 53%)',
+                      awaiting_deposit: 'hsl(280, 65%, 60%)',
+                      approved: 'hsl(142, 71%, 45%)',
+                      in_progress: 'hsl(200, 95%, 50%)',
+                      in_progress_1: 'hsl(200, 80%, 55%)',
+                      in_progress_2: 'hsl(200, 65%, 60%)',
+                      awaiting_final_payment: 'hsl(38, 92%, 50%)',
+                      completed: 'hsl(142, 76%, 36%)',
+                      cancelled: 'hsl(0, 84%, 60%)',
+                    };
+
+                    const formatMonth = (m: string) => {
+                      const [year, month] = m.split('-');
+                      const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+                      return `${months[parseInt(month) - 1]} ${year.slice(2)}`;
+                    };
+
+                    const tooltipStyle = {
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "6px",
+                      color: "hsl(var(--foreground))",
+                    };
+
+                    return (
+                      <>
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">Chiffre d'affaires total</CardTitle>
+                            <CardDescription>Évolution mensuelle (factures + abonnements)</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            {revenueData && revenueData.length > 0 ? (
+                              <div className="h-[300px]" data-testid="chart-revenue-total">
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <AreaChart data={revenueData.map(d => ({ ...d, month: formatMonth(d.month) }))}>
+                                    <defs>
+                                      <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                    <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                                    <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}€`} />
+                                    <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value.toFixed(2)} €`, undefined]} />
+                                    <Area type="monotone" dataKey="total" name="Total" stroke="hsl(142, 71%, 45%)" fillOpacity={1} fill="url(#colorTotal)" strokeWidth={2} />
+                                  </AreaChart>
+                                </ResponsiveContainer>
+                              </div>
+                            ) : (
+                              <p className="text-center text-muted-foreground py-8">Aucune donnée de chiffre d'affaires</p>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        <div className="grid gap-6 md:grid-cols-2">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-base">Factures projets</CardTitle>
+                              <CardDescription>Revenus mensuels des factures</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              {revenueData && revenueData.length > 0 ? (
+                                <div className="h-[250px]" data-testid="chart-revenue-invoices">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={revenueData.map(d => ({ ...d, month: formatMonth(d.month) }))}>
+                                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                      <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                                      <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}€`} />
+                                      <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value.toFixed(2)} €`, undefined]} />
+                                      <Bar dataKey="invoices" name="Factures" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                  </ResponsiveContainer>
+                                </div>
+                              ) : (
+                                <p className="text-center text-muted-foreground py-6">Aucune facture</p>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-base">Abonnements</CardTitle>
+                              <CardDescription>Revenus mensuels récurrents</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              {revenueData && revenueData.length > 0 ? (
+                                <div className="h-[250px]" data-testid="chart-revenue-subscriptions">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={revenueData.map(d => ({ ...d, month: formatMonth(d.month) }))}>
+                                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                      <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                                      <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}€`} />
+                                      <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value.toFixed(2)} €`, undefined]} />
+                                      <Bar dataKey="subscriptions" name="Abonnements" fill="hsl(280, 65%, 60%)" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                  </ResponsiveContainer>
+                                </div>
+                              ) : (
+                                <p className="text-center text-muted-foreground py-6">Aucun abonnement</p>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Project Status Distribution */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">Suivi des projets</CardTitle>
+                            <CardDescription>Répartition des projets par statut</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            {projectStatusData && projectStatusData.length > 0 ? (
+                              <div className="grid gap-6 md:grid-cols-2 items-center">
+                                <div className="h-[280px]" data-testid="chart-project-status">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                      <Pie
+                                        data={projectStatusData.map(d => ({ ...d, name: statusLabels[d.status] || d.status }))}
+                                        dataKey="count"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={100}
+                                        innerRadius={50}
+                                        paddingAngle={2}
+                                        label={({ name, count }) => `${name} (${count})`}
+                                      >
+                                        {projectStatusData.map((d, index) => (
+                                          <Cell key={index} fill={statusColors[d.status] || 'hsl(var(--muted-foreground))'} />
+                                        ))}
+                                      </Pie>
+                                      <Tooltip contentStyle={tooltipStyle} />
+                                    </PieChart>
+                                  </ResponsiveContainer>
+                                </div>
+                                <div className="space-y-2" data-testid="list-project-status">
+                                  {projectStatusData.map((d, i) => (
+                                    <div key={i} className="flex items-center justify-between py-1.5 px-3 rounded-md bg-muted/30">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: statusColors[d.status] || 'hsl(var(--muted-foreground))' }} />
+                                        <span className="text-sm">{statusLabels[d.status] || d.status}</span>
+                                      </div>
+                                      <span className="text-sm font-medium">{d.count}</span>
+                                    </div>
+                                  ))}
+                                  <div className="flex items-center justify-between py-1.5 px-3 rounded-md bg-muted/50 border-t mt-2">
+                                    <span className="text-sm font-medium">Total</span>
+                                    <span className="text-sm font-bold">{projectStatusData.reduce((acc, d) => acc + d.count, 0)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-center text-muted-foreground py-8">Aucun projet</p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </>
+                    );
+                  })()}
                 </>
               ) : (
                 <p className="text-center text-muted-foreground py-8">Aucune donnée analytics disponible</p>

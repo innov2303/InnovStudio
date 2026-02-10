@@ -1854,6 +1854,35 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/analytics/revenue", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+      const months = parseInt(req.query.months as string) || 12;
+      const revenue = await storage.getRevenueByMonth(months);
+      res.json(revenue);
+    } catch (error) {
+      console.error("Revenue analytics error:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération du chiffre d'affaires" });
+    }
+  });
+
+  app.get("/api/analytics/project-status", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+      const distribution = await storage.getProjectStatusDistribution();
+      res.json(distribution);
+    } catch (error) {
+      console.error("Project status analytics error:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération des statuts projets" });
+    }
+  });
+
   // Stripe payment routes
   
   // Get Stripe publishable key
