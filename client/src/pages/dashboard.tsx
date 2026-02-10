@@ -119,6 +119,7 @@ export default function Dashboard() {
   const { user, logout, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<MenuSection>("dashboard");
+  const [logFilter, setLogFilter] = useState<string>("all");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
@@ -3956,98 +3957,135 @@ export default function Dashboard() {
             </div>
           )}
 
-          {activeSection === "logs" && user.role === "admin" && (
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Shield className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle>Logs</CardTitle>
-                  <CardDescription>Historique de toutes les activités</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {securityLogsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          {activeSection === "logs" && user.role === "admin" && (() => {
+            const logCategories = [
+              { key: "all", label: "Tout" },
+              { key: "auth", label: "Authentification", types: ["login_success", "login_failed", "register", "rate_limit_exceeded"] },
+              { key: "users", label: "Utilisateurs", types: ["user_deleted", "password_reset_request", "password_changed"] },
+              { key: "projects", label: "Projets", types: ["project_created", "project_status_changed", "project_deleted"] },
+              { key: "features", label: "Fonctionnalités", types: ["feature_created", "feature_status_changed", "feature_deleted"] },
+              { key: "documents", label: "Documents", types: ["document_created", "document_sent", "document_signed", "document_signed_electronic", "document_deleted"] },
+              { key: "payments", label: "Paiements", types: ["payment_deposit_initiated", "payment_final_initiated"] },
+              { key: "subscriptions", label: "Abonnements", types: ["subscription_cancelled", "subscription_reactivated", "subscription_deleted"] },
+            ];
+            const logTypeLabels: Record<string, string> = {
+              login_success: 'Connexion',
+              login_failed: 'Échec connexion',
+              register: 'Inscription',
+              password_reset_request: 'Demande MDP',
+              password_changed: 'MDP modifié',
+              rate_limit_exceeded: 'Rate limit',
+              user_deleted: 'Utilisateur supprimé',
+              project_created: 'Projet créé',
+              project_status_changed: 'Statut projet',
+              project_deleted: 'Projet supprimé',
+              feature_created: 'Fonctionnalité créée',
+              feature_status_changed: 'Statut fonctionnalité',
+              feature_deleted: 'Fonctionnalité supprimée',
+              document_created: 'Document créé',
+              document_sent: 'Devis envoyé',
+              document_signed: 'Document signé',
+              document_signed_electronic: 'Signature électronique',
+              document_deleted: 'Document supprimé',
+              payment_deposit_initiated: 'Paiement acompte',
+              payment_final_initiated: 'Paiement final',
+              subscription_cancelled: 'Abonnement résilié',
+              subscription_reactivated: 'Abonnement réactivé',
+              subscription_deleted: 'Abonnement supprimé',
+            };
+            const activeCategory = logCategories.find(c => c.key === logFilter);
+            const filteredLogs = securityLogs?.filter(log => {
+              if (logFilter === "all") return true;
+              return activeCategory?.types?.includes(log.type);
+            }) || [];
+            const getCategoryCount = (cat: typeof logCategories[0]) => {
+              if (cat.key === "all") return securityLogs?.length || 0;
+              return securityLogs?.filter(log => cat.types?.includes(log.type)).length || 0;
+            };
+
+            return (
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Shield className="h-5 w-5 text-primary" />
                   </div>
-                ) : securityLogs && securityLogs.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Date</th>
-                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Type</th>
-                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Email</th>
-                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">IP</th>
-                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Détails</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {securityLogs.map((log) => (
-                          <tr key={log.id} className="border-b last:border-0" data-testid={`row-log-${log.id}`}>
-                            <td className="py-3 px-4">
-                              <span className="text-sm">
-                                {new Date(log.createdAt).toLocaleString('fr-FR')}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <Badge variant={
-                                ['login_failed', 'rate_limit_exceeded', 'user_deleted', 'project_deleted', 'feature_deleted', 'document_deleted', 'subscription_deleted', 'subscription_cancelled'].includes(log.type) ? 'destructive' :
-                                ['login_success', 'document_signed', 'document_signed_electronic', 'payment_deposit_initiated', 'payment_final_initiated'].includes(log.type) ? 'default' :
-                                ['register', 'project_created', 'feature_created', 'document_created'].includes(log.type) ? 'secondary' :
-                                'outline'
-                              }>
-                                {{
-                                  login_success: 'Connexion',
-                                  login_failed: 'Échec connexion',
-                                  register: 'Inscription',
-                                  password_reset_request: 'Demande MDP',
-                                  password_changed: 'MDP modifié',
-                                  rate_limit_exceeded: 'Rate limit',
-                                  user_deleted: 'Utilisateur supprimé',
-                                  project_created: 'Projet créé',
-                                  project_status_changed: 'Statut projet',
-                                  project_deleted: 'Projet supprimé',
-                                  feature_created: 'Fonctionnalité créée',
-                                  feature_status_changed: 'Statut fonctionnalité',
-                                  feature_deleted: 'Fonctionnalité supprimée',
-                                  document_created: 'Document créé',
-                                  document_sent: 'Devis envoyé',
-                                  document_signed: 'Document signé',
-                                  document_signed_electronic: 'Signature électronique',
-                                  document_deleted: 'Document supprimé',
-                                  payment_deposit_initiated: 'Paiement acompte',
-                                  payment_final_initiated: 'Paiement final',
-                                  subscription_cancelled: 'Abonnement résilié',
-                                  subscription_reactivated: 'Abonnement réactivé',
-                                  subscription_deleted: 'Abonnement supprimé',
-                                }[log.type] || log.type}
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-sm">{log.email || '-'}</span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-sm font-mono text-xs">{log.ipAddress || '-'}</span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-sm text-muted-foreground">{log.details || '-'}</span>
-                            </td>
+                  <div>
+                    <CardTitle>Logs</CardTitle>
+                    <CardDescription>Historique de toutes les activités</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mb-4" data-testid="log-category-filters">
+                    {logCategories.map(cat => (
+                      <Button
+                        key={cat.key}
+                        variant={logFilter === cat.key ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setLogFilter(cat.key)}
+                        data-testid={`button-log-filter-${cat.key}`}
+                      >
+                        {cat.label}
+                        <span className="ml-1.5 text-xs opacity-70">({getCategoryCount(cat)})</span>
+                      </Button>
+                    ))}
+                  </div>
+                  {securityLogsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  ) : filteredLogs.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Date</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Type</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Email</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">IP</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Détails</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    Aucun log enregistré
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                        </thead>
+                        <tbody>
+                          {filteredLogs.map((log) => (
+                            <tr key={log.id} className="border-b last:border-0" data-testid={`row-log-${log.id}`}>
+                              <td className="py-3 px-4">
+                                <span className="text-sm">
+                                  {new Date(log.createdAt).toLocaleString('fr-FR')}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4">
+                                <Badge variant={
+                                  ['login_failed', 'rate_limit_exceeded', 'user_deleted', 'project_deleted', 'feature_deleted', 'document_deleted', 'subscription_deleted', 'subscription_cancelled'].includes(log.type) ? 'destructive' :
+                                  ['login_success', 'document_signed', 'document_signed_electronic', 'payment_deposit_initiated', 'payment_final_initiated'].includes(log.type) ? 'default' :
+                                  ['register', 'project_created', 'feature_created', 'document_created'].includes(log.type) ? 'secondary' :
+                                  'outline'
+                                }>
+                                  {logTypeLabels[log.type] || log.type}
+                                </Badge>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="text-sm">{log.email || '-'}</span>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="text-sm font-mono text-xs">{log.ipAddress || '-'}</span>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="text-sm text-muted-foreground">{log.details || '-'}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">
+                      Aucun log dans cette catégorie
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
 
         </main>
       </div>
