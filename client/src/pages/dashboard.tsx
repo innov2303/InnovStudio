@@ -78,7 +78,7 @@ type SubscriptionOffer = {
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
-type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "security_logs" | "analytics";
+type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "logs" | "analytics";
 
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
@@ -240,7 +240,7 @@ export default function Dashboard() {
 
   const { data: securityLogs, isLoading: securityLogsLoading } = useQuery<SecurityLog[]>({
     queryKey: ["/api/admin/security-logs"],
-    enabled: user?.role === "admin" && activeSection === "security_logs",
+    enabled: user?.role === "admin" && activeSection === "logs",
   });
 
   const [analyticsDays, setAnalyticsDays] = useState(30);
@@ -1021,7 +1021,7 @@ export default function Dashboard() {
     ...(user.role === "admin" ? [{ id: "documents" as MenuSection, label: "Abonnements", icon: FileText }] : []),
     ...(user.role === "admin" ? [{ id: "subscription_settings" as MenuSection, label: "Gérer les abonnements", icon: Settings }] : []),
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
-    ...(user.role === "admin" ? [{ id: "security_logs" as MenuSection, label: "Logs de sécurité", icon: Shield }] : []),
+    ...(user.role === "admin" ? [{ id: "logs" as MenuSection, label: "Logs", icon: Shield }] : []),
     ...(user.role === "admin" ? [{ id: "analytics" as MenuSection, label: "Analytics", icon: BarChart3 }] : []),
   ];
 
@@ -3956,15 +3956,15 @@ export default function Dashboard() {
             </div>
           )}
 
-          {activeSection === "security_logs" && user.role === "admin" && (
+          {activeSection === "logs" && user.role === "admin" && (
             <Card>
               <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                   <Shield className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle>Logs de sécurité</CardTitle>
-                  <CardDescription>Historique des événements de sécurité</CardDescription>
+                  <CardTitle>Logs</CardTitle>
+                  <CardDescription>Historique de toutes les activités</CardDescription>
                 </div>
               </CardHeader>
               <CardContent>
@@ -3994,19 +3994,36 @@ export default function Dashboard() {
                             </td>
                             <td className="py-3 px-4">
                               <Badge variant={
-                                log.type === 'login_success' ? 'default' :
-                                log.type === 'login_failed' ? 'destructive' :
-                                log.type === 'register' ? 'secondary' :
-                                log.type === 'rate_limit_exceeded' ? 'destructive' :
+                                ['login_failed', 'rate_limit_exceeded', 'user_deleted', 'project_deleted', 'feature_deleted', 'document_deleted', 'subscription_deleted', 'subscription_cancelled'].includes(log.type) ? 'destructive' :
+                                ['login_success', 'document_signed', 'document_signed_electronic', 'payment_deposit_initiated', 'payment_final_initiated'].includes(log.type) ? 'default' :
+                                ['register', 'project_created', 'feature_created', 'document_created'].includes(log.type) ? 'secondary' :
                                 'outline'
                               }>
-                                {log.type === 'login_success' ? 'Connexion réussie' :
-                                 log.type === 'login_failed' ? 'Échec connexion' :
-                                 log.type === 'register' ? 'Inscription' :
-                                 log.type === 'password_reset_request' ? 'Demande MDP' :
-                                 log.type === 'password_changed' ? 'MDP modifié' :
-                                 log.type === 'rate_limit_exceeded' ? 'Rate limit' :
-                                 log.type}
+                                {{
+                                  login_success: 'Connexion',
+                                  login_failed: 'Échec connexion',
+                                  register: 'Inscription',
+                                  password_reset_request: 'Demande MDP',
+                                  password_changed: 'MDP modifié',
+                                  rate_limit_exceeded: 'Rate limit',
+                                  user_deleted: 'Utilisateur supprimé',
+                                  project_created: 'Projet créé',
+                                  project_status_changed: 'Statut projet',
+                                  project_deleted: 'Projet supprimé',
+                                  feature_created: 'Fonctionnalité créée',
+                                  feature_status_changed: 'Statut fonctionnalité',
+                                  feature_deleted: 'Fonctionnalité supprimée',
+                                  document_created: 'Document créé',
+                                  document_sent: 'Devis envoyé',
+                                  document_signed: 'Document signé',
+                                  document_signed_electronic: 'Signature électronique',
+                                  document_deleted: 'Document supprimé',
+                                  payment_deposit_initiated: 'Paiement acompte',
+                                  payment_final_initiated: 'Paiement final',
+                                  subscription_cancelled: 'Abonnement résilié',
+                                  subscription_reactivated: 'Abonnement réactivé',
+                                  subscription_deleted: 'Abonnement supprimé',
+                                }[log.type] || log.type}
                               </Badge>
                             </td>
                             <td className="py-3 px-4">
@@ -4025,7 +4042,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <p className="text-center text-muted-foreground py-8">
-                    Aucun log de sécurité
+                    Aucun log enregistré
                   </p>
                 )}
               </CardContent>

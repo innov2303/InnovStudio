@@ -616,6 +616,7 @@ export async function registerRoutes(
       }
 
       await storage.deleteUser(userId);
+      await logSecurityEvent('user_deleted', req, currentUser.email || undefined, currentUser.id, `Utilisateur supprimé: ${targetUser.firstName} ${targetUser.lastName}`);
       res.json({ message: "Utilisateur supprimé" });
     } catch (error) {
       console.error("Delete user error:", error);
@@ -679,6 +680,7 @@ export async function registerRoutes(
       }
 
       const project = await storage.createProject(req.session.userId!, result.data);
+      await logSecurityEvent('project_created', req, undefined, req.session.userId, `Projet: ${result.data.title}`);
       res.status(201).json(project);
     } catch (error) {
       console.error("Create project error:", error);
@@ -747,6 +749,7 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Projet non trouvé" });
       }
 
+      await logSecurityEvent('project_status_changed', req, currentUser.email || undefined, currentUser.id, `Projet passé en statut: ${status}`);
       res.json(project);
     } catch (error) {
       console.error("Update project status error:", error);
@@ -787,6 +790,7 @@ export async function registerRoutes(
       }
 
       await storage.deleteProject(projectId);
+      await logSecurityEvent('project_deleted', req, currentUser.email || undefined, currentUser.id, `Projet supprimé`);
       res.json({ message: "Projet supprimé" });
     } catch (error) {
       console.error("Delete project error:", error);
@@ -824,6 +828,7 @@ export async function registerRoutes(
       }
 
       const feature = await storage.createFeature(projectId, result.data);
+      await logSecurityEvent('feature_created', req, currentUser.email || undefined, currentUser.id, `Fonctionnalité: ${result.data.title}`);
       res.status(201).json(feature);
     } catch (error) {
       console.error("Create feature error:", error);
@@ -876,6 +881,7 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Fonctionnalité non trouvée" });
       }
 
+      await logSecurityEvent('feature_status_changed', req, currentUser.email || undefined, currentUser.id, `Statut fonctionnalité: ${status}`);
       res.json(feature);
     } catch (error) {
       console.error("Update feature status error:", error);
@@ -943,6 +949,7 @@ export async function registerRoutes(
       }
 
       await storage.deleteFeature(featureId);
+      await logSecurityEvent('feature_deleted', req, currentUser.email || undefined, currentUser.id, `Fonctionnalité supprimée`);
       res.json({ message: "Fonctionnalité supprimée" });
     } catch (error) {
       console.error("Delete feature error:", error);
@@ -995,6 +1002,7 @@ export async function registerRoutes(
 
       const { type = "quote", quoteDescription } = req.body;
       const document = await storage.createDocument(projectId, type, quoteDescription);
+      await logSecurityEvent('document_created', req, currentUser.email || undefined, currentUser.id, `Document: ${type}`);
       res.status(201).json(document);
     } catch (error) {
       console.error("Create document error:", error);
@@ -1072,6 +1080,7 @@ export async function registerRoutes(
       await storage.updateProjectStatus(document.projectId, "awaiting_signature");
       
       const finalDoc = await storage.getDocument(documentId);
+      await logSecurityEvent('document_sent', req, currentUser.email || undefined, currentUser.id, `Devis envoyé`);
       res.json(finalDoc);
     } catch (error) {
       console.error("Send quote error:", error);
@@ -1114,6 +1123,7 @@ export async function registerRoutes(
       // Update project status to awaiting_deposit
       await storage.updateProjectStatus(document.projectId, "awaiting_deposit");
       
+      await logSecurityEvent('document_signed', req, currentUser.email || undefined, currentUser.id, `Document signé (upload)`);
       res.json(updatedDoc);
     } catch (error) {
       console.error("Upload signed document error:", error);
@@ -1161,6 +1171,7 @@ export async function registerRoutes(
       // Update project status to awaiting_deposit
       await storage.updateProjectStatus(document.projectId, "awaiting_deposit");
       
+      await logSecurityEvent('document_signed_electronic', req, currentUser.email || undefined, currentUser.id, `Document signé électroniquement`);
       res.json(updatedDoc);
     } catch (error) {
       console.error("Electronic signature error:", error);
@@ -1721,6 +1732,7 @@ export async function registerRoutes(
       }
 
       await storage.deleteDocument(documentId);
+      await logSecurityEvent('document_deleted', req, currentUser.email || undefined, currentUser.id, `Document supprimé`);
       res.json({ message: "Document supprimé" });
     } catch (error) {
       console.error("Delete document error:", error);
@@ -1931,6 +1943,7 @@ export async function registerRoutes(
         customer_email: currentUser.email || undefined,
       });
 
+      await logSecurityEvent('payment_deposit_initiated', req, currentUser.email || undefined, currentUser.id, `Paiement acompte initié`);
       res.json({ url: session.url });
     } catch (error: any) {
       console.error("Create deposit checkout error:", error?.message || error);
@@ -2017,6 +2030,7 @@ export async function registerRoutes(
         customer_email: currentUser.email || undefined,
       });
 
+      await logSecurityEvent('payment_final_initiated', req, currentUser.email || undefined, currentUser.id, `Paiement final initié`);
       res.json({ url: session.url });
     } catch (error) {
       console.error("Create final checkout error:", error);
@@ -2487,16 +2501,19 @@ export async function registerRoutes(
             subscription.currentPeriodEnd,
             true
           );
+          await logSecurityEvent('subscription_cancelled', req, currentUser.email || undefined, currentUser.id, `Abonnement résilié`);
           res.json(updated);
         } catch (stripeError) {
           console.error("Stripe cancel error:", stripeError);
           // Still update locally if Stripe fails
           const updated = await storage.updateSubscriptionStripeData(subscriptionId, subscription.currentPeriodEnd, true);
+          await logSecurityEvent('subscription_cancelled', req, currentUser.email || undefined, currentUser.id, `Abonnement résilié`);
           res.json(updated);
         }
       } else {
         // No Stripe subscription, cancel immediately
         const updated = await storage.updateSubscriptionStatus(subscriptionId, "cancelled");
+        await logSecurityEvent('subscription_cancelled', req, currentUser.email || undefined, currentUser.id, `Abonnement résilié`);
         res.json(updated);
       }
     } catch (error) {
@@ -2542,6 +2559,7 @@ export async function registerRoutes(
             subscription.currentPeriodEnd,
             false
           );
+          await logSecurityEvent('subscription_reactivated', req, currentUser.email || undefined, currentUser.id, `Abonnement réactivé`);
           res.json(updated);
         } catch (stripeError) {
           console.error("Stripe reactivate error:", stripeError);
@@ -2566,6 +2584,7 @@ export async function registerRoutes(
 
       const subscriptionId = req.params.id as string;
       await storage.deleteSubscription(subscriptionId);
+      await logSecurityEvent('subscription_deleted', req, currentUser.email || undefined, currentUser.id, `Abonnement supprimé`);
       res.json({ success: true });
     } catch (error) {
       console.error("Delete subscription error:", error);
