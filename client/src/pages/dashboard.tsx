@@ -144,6 +144,7 @@ export default function Dashboard() {
   const [newFeatureTitle, setNewFeatureTitle] = useState("");
   const [newFeatureDescription, setNewFeatureDescription] = useState("");
   const [signDocumentId, setSignDocumentId] = useState<string | null>(null);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [clientSignature, setClientSignature] = useState<string | null>(null);
   const [bonPourAccord, setBonPourAccord] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -321,6 +322,21 @@ export default function Dashboard() {
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message || "Impossible de supprimer l'offre", variant: "destructive" });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest("DELETE", `/api/users/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Utilisateur supprimé", description: "L'utilisateur et toutes ses données ont été supprimés" });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur", description: error.message || "Impossible de supprimer l'utilisateur", variant: "destructive" });
     },
   });
 
@@ -3725,6 +3741,7 @@ export default function Dashboard() {
                           <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Utilisateur</th>
                           <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Entreprise</th>
                           <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Rôle</th>
+                          <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3750,6 +3767,19 @@ export default function Dashboard() {
                               <Badge variant={u.role === "admin" ? "default" : "secondary"}>
                                 {u.role === "admin" ? "Admin" : "Client"}
                               </Badge>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              {u.role !== "admin" && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="text-destructive"
+                                  data-testid={`button-delete-user-${u.id}`}
+                                  onClick={() => setDeleteUserId(u.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -4105,6 +4135,32 @@ export default function Dashboard() {
                 }
               }}
               data-testid="button-confirm-delete"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteUserId} onOpenChange={(open) => { if (!open) setDeleteUserId(null); }}>
+        <AlertDialogContent data-testid="dialog-delete-user">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cet utilisateur ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Tous les projets, fonctionnalités, documents et abonnements de cet utilisateur seront définitivement supprimés.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-user">Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete-user"
+              onClick={() => {
+                if (deleteUserId) {
+                  deleteUserMutation.mutate(deleteUserId);
+                  setDeleteUserId(null);
+                }
+              }}
             >
               Supprimer
             </AlertDialogAction>

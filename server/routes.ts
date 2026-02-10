@@ -598,6 +598,31 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/users/:id", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      const userId = req.params.id as string;
+      const targetUser = await storage.getUser(userId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+
+      if (targetUser.role === "admin") {
+        return res.status(400).json({ message: "Impossible de supprimer un administrateur" });
+      }
+
+      await storage.deleteUser(userId);
+      res.json({ message: "Utilisateur supprimé" });
+    } catch (error) {
+      console.error("Delete user error:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Security logs (admin only)
   app.get("/api/admin/security-logs", requireAuth, async (req, res) => {
     try {

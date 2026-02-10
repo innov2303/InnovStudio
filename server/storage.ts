@@ -21,6 +21,7 @@ export interface IStorage {
   getUserByEmailChangeToken(token: string): Promise<User | undefined>;
   confirmEmailChange(userId: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
+  deleteUser(id: string): Promise<boolean>;
   initializeAdmin(): Promise<void>;
   // Projects
   createProject(userId: string, project: InsertProject): Promise<Project>;
@@ -213,6 +214,19 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return db.select().from(users);
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const userProjects = await db.select().from(projects).where(eq(projects.userId, id));
+    for (const project of userProjects) {
+      await db.delete(projectFeatures).where(eq(projectFeatures.projectId, project.id));
+      await db.delete(projectDocuments).where(eq(projectDocuments.projectId, project.id));
+    }
+    await db.delete(projects).where(eq(projects.userId, id));
+    await db.delete(subscriptions).where(eq(subscriptions.userId, id));
+    await db.delete(securityLogs).where(eq(securityLogs.userId, id));
+    await db.delete(users).where(eq(users.id, id));
+    return true;
   }
 
   async initializeAdmin(): Promise<void> {
