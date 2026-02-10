@@ -19,10 +19,12 @@ import NotFound from "@/pages/not-found";
 function PageTracker() {
   const [location] = useLocation();
   const lastTracked = useRef("");
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (location !== lastTracked.current && user?.role !== "admin") {
+    if (isLoading) return;
+    if (user?.role === "admin") return;
+    if (location !== lastTracked.current) {
       lastTracked.current = location;
       fetch("/api/analytics/track", {
         method: "POST",
@@ -31,9 +33,10 @@ function PageTracker() {
           path: location,
           referrer: document.referrer || "",
         }),
+        credentials: "include",
       }).catch(() => {});
     }
-  }, [location, user]);
+  }, [location, user, isLoading]);
 
   return null;
 }

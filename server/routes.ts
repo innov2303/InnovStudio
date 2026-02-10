@@ -1783,6 +1783,13 @@ export async function registerRoutes(
   // Analytics - track page visit (public endpoint, no auth required)
   app.post("/api/analytics/track", async (req, res) => {
     try {
+      if (req.session?.userId) {
+        const sessionUser = await storage.getUser(req.session.userId);
+        if (sessionUser?.role === "admin") {
+          return res.json({ ok: true });
+        }
+      }
+
       const { path: pagePath, referrer } = req.body;
       if (!pagePath || typeof pagePath !== 'string') {
         return res.status(400).json({ message: "Path requis" });
