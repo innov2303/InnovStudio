@@ -23,7 +23,9 @@ function PageTracker() {
 
   useEffect(() => {
     if (isLoading) return;
-    if (user?.role === "admin") return;
+    if (user) return;
+    const privatePaths = ["/dashboard", "/change-password", "/reset-password", "/confirm-email-change", "/verify-email"];
+    if (privatePaths.some(p => location.startsWith(p))) return;
     if (location !== lastTracked.current) {
       lastTracked.current = location;
       fetch("/api/analytics/track", {
