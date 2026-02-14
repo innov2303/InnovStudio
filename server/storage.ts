@@ -587,13 +587,21 @@ export class DatabaseStorage implements IStorage {
     await db.insert(pageVisits).values(visit);
   }
 
+  private get adminIpExclusion() {
+    return sql`ip_address NOT IN (
+      SELECT DISTINCT ip_address FROM security_logs 
+      WHERE user_id IN (SELECT id FROM users WHERE role = 'admin')
+      AND ip_address IS NOT NULL
+    )`;
+  }
+
   async getVisitsPerDay(days: number): Promise<{ date: string; count: number }[]> {
     const since = new Date();
     since.setDate(since.getDate() - days);
     const result = await db.execute(sql`
       SELECT DATE(created_at) as date, COUNT(*)::int as count
       FROM page_visits
-      WHERE created_at >= ${since}
+      WHERE created_at >= ${since} AND ${this.adminIpExclusion}
       GROUP BY DATE(created_at)
       ORDER BY date ASC
     `);
@@ -606,7 +614,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db.execute(sql`
       SELECT COALESCE(source, 'Direct') as source, COUNT(*)::int as count
       FROM page_visits
-      WHERE created_at >= ${since}
+      WHERE created_at >= ${since} AND ${this.adminIpExclusion}
       GROUP BY source
       ORDER BY count DESC
     `);
@@ -619,7 +627,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db.execute(sql`
       SELECT path, COUNT(*)::int as count
       FROM page_visits
-      WHERE created_at >= ${since}
+      WHERE created_at >= ${since} AND ${this.adminIpExclusion}
       GROUP BY path
       ORDER BY count DESC
       LIMIT 10
@@ -631,7 +639,7 @@ export class DatabaseStorage implements IStorage {
     const since = new Date();
     since.setDate(since.getDate() - days);
     const result = await db.execute(sql`
-      SELECT COUNT(*)::int as count FROM page_visits WHERE created_at >= ${since}
+      SELECT COUNT(*)::int as count FROM page_visits WHERE created_at >= ${since} AND ${this.adminIpExclusion}
     `);
     return Number((result.rows as any[])[0]?.count || 0);
   }
