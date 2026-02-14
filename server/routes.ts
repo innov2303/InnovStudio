@@ -1895,6 +1895,20 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/analytics/visits", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+      await storage.clearPageVisits();
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Clear analytics error:", error);
+      res.status(500).json({ message: "Erreur lors de la suppression des données" });
+    }
+  });
+
   // Stripe payment routes
   
   // Get Stripe publishable key

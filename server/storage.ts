@@ -77,6 +77,7 @@ export interface IStorage {
   getTrafficSources(days: number): Promise<{ source: string; count: number }[]>;
   getTopPages(days: number): Promise<{ path: string; count: number }[]>;
   getTotalVisits(days: number): Promise<number>;
+  clearPageVisits(): Promise<void>;
 
   // Revenue analytics
   getRevenueByMonth(months: number): Promise<{ month: string; invoices: number; subscriptions: number; total: number }[]>;
@@ -633,6 +634,10 @@ export class DatabaseStorage implements IStorage {
       SELECT COUNT(*)::int as count FROM page_visits WHERE created_at >= ${since}
     `);
     return Number((result.rows as any[])[0]?.count || 0);
+  }
+
+  async clearPageVisits(): Promise<void> {
+    await db.delete(pageVisits);
   }
 
   async getRevenueByMonth(months: number): Promise<{ month: string; invoices: number; subscriptions: number; total: number }[]> {

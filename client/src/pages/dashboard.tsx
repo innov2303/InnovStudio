@@ -3828,17 +3828,54 @@ export default function Dashboard() {
                     <p className="text-sm text-muted-foreground">Statistiques de fréquentation de votre site</p>
                   </div>
                 </div>
-                <Select value={String(analyticsDays)} onValueChange={(v) => setAnalyticsDays(Number(v))}>
-                  <SelectTrigger className="w-[160px]" data-testid="select-analytics-period">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 derniers jours</SelectItem>
-                    <SelectItem value="30">30 derniers jours</SelectItem>
-                    <SelectItem value="90">90 derniers jours</SelectItem>
-                    <SelectItem value="365">12 derniers mois</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Select value={String(analyticsDays)} onValueChange={(v) => setAnalyticsDays(Number(v))}>
+                    <SelectTrigger className="w-[160px]" data-testid="select-analytics-period">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7">7 derniers jours</SelectItem>
+                      <SelectItem value="30">30 derniers jours</SelectItem>
+                      <SelectItem value="90">90 derniers jours</SelectItem>
+                      <SelectItem value="365">12 derniers mois</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="default" data-testid="button-clear-analytics">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Réinitialiser
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Réinitialiser les données de visite</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Cette action supprimera toutes les données de visites (graphiques de connexion, sources de trafic, pages visitées). Cette action est irréversible.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          data-testid="button-confirm-clear-analytics"
+                          onClick={async () => {
+                            try {
+                              await apiRequest("DELETE", "/api/analytics/visits");
+                              queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats"] });
+                              queryClient.invalidateQueries({ queryKey: ["/api/analytics/revenue"] });
+                              queryClient.invalidateQueries({ queryKey: ["/api/analytics/project-status"] });
+                              toast({ title: "Données de visites réinitialisées" });
+                            } catch {
+                              toast({ title: "Erreur lors de la réinitialisation", variant: "destructive" });
+                            }
+                          }}
+                        >
+                          Confirmer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
 
               {analyticsLoading ? (
