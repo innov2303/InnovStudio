@@ -19,10 +19,17 @@ import NotFound from "@/pages/not-found";
 function PageTracker() {
   const [location] = useLocation();
   const lastTracked = useRef("");
+  const authResolved = useRef(false);
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (!isLoading) {
+      authResolved.current = true;
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (!authResolved.current) return;
     if (user) return;
     const privatePaths = ["/dashboard", "/change-password", "/reset-password", "/confirm-email-change", "/verify-email"];
     if (privatePaths.some(p => location.startsWith(p))) return;
@@ -35,7 +42,6 @@ function PageTracker() {
           path: location,
           referrer: document.referrer || "",
         }),
-        credentials: "include",
       }).catch(() => {});
     }
   }, [location, user, isLoading]);

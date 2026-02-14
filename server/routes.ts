@@ -1784,10 +1784,7 @@ export async function registerRoutes(
   app.post("/api/analytics/track", async (req, res) => {
     try {
       if (req.session?.userId) {
-        const sessionUser = await storage.getUser(req.session.userId);
-        if (sessionUser?.role === "admin") {
-          return res.json({ ok: true });
-        }
+        return res.json({ ok: true });
       }
 
       const { path: pagePath, referrer } = req.body;
