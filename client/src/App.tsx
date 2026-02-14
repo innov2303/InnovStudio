@@ -19,31 +19,27 @@ import NotFound from "@/pages/not-found";
 function PageTracker() {
   const [location] = useLocation();
   const lastTracked = useRef("");
-  const authResolved = useRef(false);
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading) {
-      authResolved.current = true;
-    }
-  }, [isLoading]);
-
-  useEffect(() => {
-    if (!authResolved.current) return;
+    if (isLoading) return;
     if (user) return;
     const privatePaths = ["/dashboard", "/change-password", "/reset-password", "/confirm-email-change", "/verify-email"];
     if (privatePaths.some(p => location.startsWith(p))) return;
-    if (location !== lastTracked.current) {
+    if (location === lastTracked.current) return;
+    const timer = setTimeout(() => {
       lastTracked.current = location;
       fetch("/api/analytics/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           path: location,
           referrer: document.referrer || "",
         }),
       }).catch(() => {});
-    }
+    }, 500);
+    return () => clearTimeout(timer);
   }, [location, user, isLoading]);
 
   return null;
