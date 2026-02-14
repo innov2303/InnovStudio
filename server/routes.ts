@@ -1795,6 +1795,11 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Path requis" });
       }
 
+      const privatePaths = ["/dashboard", "/change-password", "/reset-password", "/confirm-email-change", "/verify-email"];
+      if (privatePaths.some(p => pagePath.startsWith(p))) {
+        return res.json({ ok: true });
+      }
+
       // Determine source from referrer
       let source = "Direct";
       if (referrer && typeof referrer === 'string' && referrer.length > 0) {
