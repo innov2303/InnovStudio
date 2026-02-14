@@ -198,6 +198,15 @@ export async function registerRoutes(
 
       req.session.userId = user.id;
       
+      if (user.role === "admin") {
+        res.cookie("_innov_no_track", "1", {
+          maxAge: 365 * 24 * 60 * 60 * 1000,
+          httpOnly: true,
+          sameSite: "lax",
+          path: "/",
+        });
+      }
+      
       await logSecurityEvent('login_success', req, email, user.id);
       
       const { password: _, ...userWithoutPassword } = user;
@@ -1783,6 +1792,10 @@ export async function registerRoutes(
   // Analytics - track page visit (public endpoint, no auth required)
   app.post("/api/analytics/track", async (req, res) => {
     try {
+      const cookieHeader = req.headers.cookie || "";
+      if (cookieHeader.includes("_innov_no_track=1")) {
+        return res.json({ ok: true });
+      }
       if (req.session?.userId) {
         return res.json({ ok: true });
       }
