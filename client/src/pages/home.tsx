@@ -353,46 +353,51 @@ export default function Home() {
 
         <section id="contact" className="py-20 bg-muted/30">
           <div className="container mx-auto px-6">
-            <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Prêt à lancer votre projet ?
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                Connectez-vous à votre espace client pour déposer les premières bases de votre projet et concrétisons ensemble vos idées.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                {user ? (
-                  <Link href="/dashboard">
-                    <Button size="lg" className="gap-2" data-testid="button-go-dashboard">
-                      Accéder à mon espace
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                ) : (
-                  <>
-                    <Link href="/login">
-                      <Button size="lg" className="gap-2" data-testid="button-login-cta">
-                        Se connecter
+            <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+              <div className="text-center flex flex-col items-center">
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6">
+                  <Rocket className="h-7 w-7" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                  Prêt à lancer votre projet ?
+                </h2>
+                <p className="text-muted-foreground mb-8">
+                  Connectez-vous à votre espace client pour déposer les premières bases de votre projet et concrétisons ensemble vos idées.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  {user ? (
+                    <Link href="/dashboard">
+                      <Button size="lg" className="gap-2" data-testid="button-go-dashboard">
+                        Accéder à mon espace
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     </Link>
-                    <Link href="/register">
-                      <Button size="lg" variant="outline" data-testid="button-register-cta">
-                        Créer un compte
-                      </Button>
-                    </Link>
-                  </>
-                )}
-              </div>
-              
-              <div className="mt-16 pt-12 border-t border-border/50">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <MessageSquare className="h-6 w-6 text-primary" />
-                  <h3 className="text-xl md:text-2xl font-semibold">
-                    Besoin de plus d'informations ?
-                  </h3>
+                  ) : (
+                    <>
+                      <Link href="/login">
+                        <Button size="lg" className="gap-2" data-testid="button-login-cta">
+                          Se connecter
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href="/register">
+                        <Button size="lg" variant="outline" data-testid="button-register-cta">
+                          Créer un compte
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
-                <p className="text-muted-foreground mb-6">
+              </div>
+
+              <div className="text-center flex flex-col items-center">
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6">
+                  <MessageSquare className="h-7 w-7" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                  Besoin de plus d'informations ?
+                </h2>
+                <p className="text-muted-foreground mb-8">
                   N'hésitez pas à me contacter pour discuter de votre projet ou poser vos questions.
                 </p>
                 <Dialog open={contactOpen} onOpenChange={setContactOpen}>
