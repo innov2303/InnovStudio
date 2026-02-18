@@ -227,7 +227,7 @@ export default function Home() {
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-                Studio de production web spécialisé dans les applications entreprise modernes 
+                Studio de production web spécialisé dans les solutions d'entreprise modernes 
                 et les sites vitrines haut de gamme, enrichis par l'intelligence artificielle.
               </p>
               
