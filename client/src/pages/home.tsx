@@ -367,15 +367,15 @@ export default function Home() {
 
         <section id="contact" className="py-20 bg-muted/30">
           <div className="container mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
-              <div className="text-center flex flex-col items-center">
+            <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto items-center">
+              <div className="text-center flex flex-col items-center justify-center">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6">
                   <Rocket className="h-7 w-7" />
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">
                   Prêt à lancer votre projet ?
                 </h2>
-                <p className="text-muted-foreground flex-1">
+                <p className="text-muted-foreground">
                   Connectez-vous à votre espace client pour déposer les premières bases de votre projet et concrétisons ensemble vos idées.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
@@ -404,14 +404,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="text-center flex flex-col items-center">
+              <div className="text-center flex flex-col items-center justify-center">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6">
                   <MessageSquare className="h-7 w-7" />
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">
                   Besoin de plus d'informations ?
                 </h2>
-                <p className="text-muted-foreground flex-1">
+                <p className="text-muted-foreground">
                   N'hésitez pas à me contacter pour discuter de votre projet ou poser vos questions.
                 </p>
                 <div className="mt-8">
