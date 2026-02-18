@@ -272,15 +272,15 @@ export default function Home() {
                         <p className="text-muted-foreground text-sm mt-1">{category.description}</p>
                       </div>
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       {category.items.map((item, itemIndex) => (
                         <div key={itemIndex} className="flex items-start gap-3" data-testid={`service-item-${catIndex}-${itemIndex}`}>
-                          <div className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary/5 text-primary flex-shrink-0 mt-0.5">
-                            <item.icon className="h-4 w-4" />
+                          <div className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary/5 text-primary flex-shrink-0 mt-0.5">
+                            <item.icon className="h-5 w-5" />
                           </div>
                           <div>
-                            <h4 className="font-semibold text-sm">{item.title}</h4>
-                            <p className="text-muted-foreground text-xs mt-0.5">{item.description}</p>
+                            <h4 className="font-semibold text-base">{item.title}</h4>
+                            <p className="text-muted-foreground text-sm mt-0.5">{item.description}</p>
                           </div>
                         </div>
                       ))}
