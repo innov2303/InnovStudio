@@ -368,7 +368,8 @@ export default function Home() {
         <section id="contact" className="py-20 bg-muted/30">
           <div className="container mx-auto px-6">
             <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
-              <div className="text-center flex flex-col items-center h-full">
+              <Card className="border border-transparent bg-card overflow-visible transition-shadow duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
+                <CardContent className="p-8 text-center flex flex-col items-center h-full">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6">
                   <Rocket className="h-7 w-7" />
                 </div>
@@ -402,9 +403,11 @@ export default function Home() {
                     </>
                   )}
                 </div>
-              </div>
+              </CardContent>
+              </Card>
 
-              <div className="text-center flex flex-col items-center h-full">
+              <Card className="border border-transparent bg-card overflow-visible transition-shadow duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
+                <CardContent className="p-8 text-center flex flex-col items-center h-full">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6">
                   <MessageSquare className="h-7 w-7" />
                 </div>
@@ -508,7 +511,8 @@ export default function Home() {
                   </DialogContent>
                 </Dialog>
                 </div>
-              </div>
+              </CardContent>
+              </Card>
             </div>
           </div>
         </section>
