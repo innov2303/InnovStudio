@@ -22,7 +22,9 @@ import {
   Mail,
   MessageSquare,
   Send,
-  Loader2
+  Loader2,
+  ShoppingCart,
+  Check
 } from "lucide-react";
 import {
   Dialog,
@@ -96,36 +98,28 @@ export default function Home() {
     }
   };
 
-  const services = [
+  const serviceCategories = [
     {
       icon: Globe,
       title: "Sites Vitrines",
-      description: "Des sites web élégants et performants qui mettent en valeur votre activité et captent l'attention de vos visiteurs."
+      description: "Des sites web élégants et performants qui mettent en valeur votre activité et captent l'attention de vos visiteurs.",
+      items: [
+        { icon: Palette, title: "Design UI/UX", description: "Interfaces modernes et intuitives conçues pour une expérience utilisateur optimale." },
+        { icon: ShoppingCart, title: "Intégration E-commerce", description: "Boutique en ligne, catalogue produits et paiement sécurisé pour vendre directement sur votre site." },
+        { icon: Headphones, title: "Support & Maintenance 7/7J", description: "Mises à jour régulières, corrections de bugs et support technique réactif." },
+        { icon: Server, title: "Hébergement", description: "Hébergement sécurisé avec certificat SSL, sauvegardes automatiques et disponibilité optimale." },
+      ],
     },
     {
       icon: Briefcase,
-      title: "Applications Web Entreprise",
-      description: "Solutions sur mesure pour digitaliser vos processus métier et optimiser votre productivité."
-    },
-    {
-      icon: Bot,
-      title: "Intégration IA",
-      description: "Exploitez la puissance de l'intelligence artificielle pour automatiser et enrichir vos services."
-    },
-    {
-      icon: Palette,
-      title: "Design UI/UX",
-      description: "Interfaces modernes et intuitives conçues pour offrir une expérience utilisateur exceptionnelle."
-    },
-    {
-      icon: Headphones,
-      title: "Support & Maintenance 7/7J",
-      description: "Mises à jour régulières, corrections de bugs et support technique réactif pour garantir la pérennité de votre projet."
-    },
-    {
-      icon: Server,
-      title: "Hébergement",
-      description: "Hébergement sécurisé avec certificat SSL, sauvegardes automatiques et disponibilité optimale."
+      title: "Solutions Web Entreprise",
+      description: "Solutions sur mesure pour digitaliser vos processus métier et optimiser votre productivité.",
+      items: [
+        { icon: Palette, title: "Design UI/UX", description: "Interfaces professionnelles et ergonomiques adaptées à vos processus métier." },
+        { icon: Bot, title: "Intégration IA", description: "Exploitez la puissance de l'intelligence artificielle pour automatiser et enrichir vos services." },
+        { icon: Headphones, title: "Support & Maintenance 7/7J", description: "Accompagnement continu et support technique dédié pour garantir la pérennité de votre solution." },
+        { icon: Server, title: "Hébergement", description: "Infrastructure performante et sécurisée pour vos applications critiques." },
+      ],
     },
   ];
 
@@ -265,15 +259,32 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((service, index) => (
-                <Card key={index} className="group hover-elevate border-0 bg-card">
-                  <CardContent className="p-6">
-                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <service.icon className="h-6 w-6" />
+            <div className="grid md:grid-cols-2 gap-8">
+              {serviceCategories.map((category, catIndex) => (
+                <Card key={catIndex} className="border-0 bg-card overflow-visible" data-testid={`card-service-category-${catIndex}`}>
+                  <CardContent className="p-8">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                        <category.icon className="h-7 w-7" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold">{category.title}</h3>
+                        <p className="text-muted-foreground text-sm mt-1">{category.description}</p>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">{service.title}</h3>
-                    <p className="text-muted-foreground text-sm">{service.description}</p>
+                    <div className="space-y-4">
+                      {category.items.map((item, itemIndex) => (
+                        <div key={itemIndex} className="flex items-start gap-3" data-testid={`service-item-${catIndex}-${itemIndex}`}>
+                          <div className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary/5 text-primary flex-shrink-0 mt-0.5">
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-sm">{item.title}</h4>
+                            <p className="text-muted-foreground text-xs mt-0.5">{item.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
