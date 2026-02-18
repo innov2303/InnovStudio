@@ -268,19 +268,15 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-8">
               {serviceCategories.map((category, catIndex) => (
                 <Card key={catIndex} className="border-0 bg-card overflow-visible" data-testid={`card-service-category-${catIndex}`}>
-                  <CardContent className="p-8">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
-                        <category.icon className="h-7 w-7" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold">{category.title}</h3>
-                        <p className="text-muted-foreground text-sm mt-1">{category.description}</p>
-                      </div>
+                  <CardContent className="p-8 flex flex-col items-center text-center">
+                    <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
+                      <category.icon className="h-7 w-7" />
                     </div>
-                    <div className="space-y-5">
+                    <h3 className="text-xl font-bold">{category.title}</h3>
+                    <p className="text-muted-foreground text-sm mt-1 mb-6">{category.description}</p>
+                    <div className="space-y-5 w-full">
                       {category.items.map((item, itemIndex) => (
-                        <div key={itemIndex} className="flex items-start gap-3" data-testid={`service-item-${catIndex}-${itemIndex}`}>
+                        <div key={itemIndex} className="flex items-start gap-3 text-left" data-testid={`service-item-${catIndex}-${itemIndex}`}>
                           <div className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary/5 text-primary flex-shrink-0 mt-0.5">
                             <item.icon className="h-5 w-5" />
                           </div>
