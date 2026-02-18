@@ -248,6 +248,12 @@ export default function Home() {
           </div>
         </section>
 
+        <div className="relative h-px">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-md" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
+        </div>
+
         <section id="services" className="py-20 bg-muted/30">
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
@@ -291,6 +297,12 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <div className="relative h-px">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-md" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
+        </div>
 
         <section id="features" className="relative py-20 overflow-hidden">
           <div 
@@ -350,6 +362,12 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <div className="relative h-px">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-md" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
+        </div>
 
         <section id="contact" className="py-20 bg-muted/30">
           <div className="container mx-auto px-6">
