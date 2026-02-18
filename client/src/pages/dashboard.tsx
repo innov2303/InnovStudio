@@ -246,6 +246,7 @@ export default function Dashboard() {
   });
 
   const [analyticsDays, setAnalyticsDays] = useState(30);
+  const [trafficSourcesPage, setTrafficSourcesPage] = useState(1);
 
   type AnalyticsData = {
     visitsPerDay: { date: string; count: number }[];
@@ -3944,30 +3945,39 @@ export default function Dashboard() {
                       </CardHeader>
                       <CardContent>
                         {analyticsData.trafficSources.length > 0 ? (
-                          <div className="space-y-3" data-testid="list-traffic-sources">
-                            {analyticsData.trafficSources.map((s, i) => {
-                              const maxCount = analyticsData.trafficSources[0]?.count || 1;
-                              const percentage = analyticsData.totalVisits > 0 ? ((s.count / analyticsData.totalVisits) * 100).toFixed(1) : "0";
-                              const isSearchEngine = ["Google", "Bing", "Yahoo", "DuckDuckGo"].includes(s.source);
-                              return (
-                                <div key={i} className="space-y-1">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-sm flex items-center gap-2">
-                                      {isSearchEngine && <Globe className="h-3 w-3 text-primary" />}
-                                      {s.source}
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">{s.count} ({percentage}%)</span>
+                          <>
+                            <div className="space-y-3" data-testid="list-traffic-sources">
+                              {analyticsData.trafficSources.slice(0, trafficSourcesPage * 10).map((s, i) => {
+                                const maxCount = analyticsData.trafficSources[0]?.count || 1;
+                                const percentage = analyticsData.totalVisits > 0 ? ((s.count / analyticsData.totalVisits) * 100).toFixed(1) : "0";
+                                const isSearchEngine = ["Google", "Bing", "Yahoo", "DuckDuckGo"].includes(s.source);
+                                return (
+                                  <div key={i} className="space-y-1">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm flex items-center gap-2">
+                                        {isSearchEngine && <Globe className="h-3 w-3 text-primary" />}
+                                        {s.source}
+                                      </span>
+                                      <span className="text-sm text-muted-foreground">{s.count} ({percentage}%)</span>
+                                    </div>
+                                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                                      <div
+                                        className={`h-full rounded-full ${isSearchEngine ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                                        style={{ width: `${(s.count / maxCount) * 100}%` }}
+                                      />
+                                    </div>
                                   </div>
-                                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                                    <div
-                                      className={`h-full rounded-full ${isSearchEngine ? 'bg-primary' : 'bg-muted-foreground/30'}`}
-                                      style={{ width: `${(s.count / maxCount) * 100}%` }}
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+                                );
+                              })}
+                            </div>
+                            {analyticsData.trafficSources.length > trafficSourcesPage * 10 && (
+                              <div className="text-center mt-4">
+                                <Button variant="outline" size="sm" onClick={() => setTrafficSourcesPage(p => p + 1)} data-testid="button-load-more-sources">
+                                  Voir plus ({analyticsData.trafficSources.length - trafficSourcesPage * 10} restantes)
+                                </Button>
+                              </div>
+                            )}
+                          </>
                         ) : (
                           <p className="text-center text-muted-foreground py-4">Aucune source de trafic</p>
                         )}
