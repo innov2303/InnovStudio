@@ -361,10 +361,10 @@ export default function Home() {
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">
                   Prêt à lancer votre projet ?
                 </h2>
-                <p className="text-muted-foreground mb-8">
+                <p className="text-muted-foreground flex-1">
                   Connectez-vous à votre espace client pour déposer les premières bases de votre projet et concrétisons ensemble vos idées.
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
                   {user ? (
                     <Link href="/dashboard">
                       <Button size="lg" className="gap-2" data-testid="button-go-dashboard">
@@ -397,9 +397,10 @@ export default function Home() {
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">
                   Besoin de plus d'informations ?
                 </h2>
-                <p className="text-muted-foreground mb-8">
+                <p className="text-muted-foreground flex-1">
                   N'hésitez pas à me contacter pour discuter de votre projet ou poser vos questions.
                 </p>
+                <div className="mt-8">
                 <Dialog open={contactOpen} onOpenChange={setContactOpen}>
                   <DialogTrigger asChild>
                     <Button size="lg" variant="outline" className="gap-2" data-testid="button-contact-me">
@@ -492,6 +493,7 @@ export default function Home() {
                     </form>
                   </DialogContent>
                 </Dialog>
+                </div>
               </div>
             </div>
           </div>
