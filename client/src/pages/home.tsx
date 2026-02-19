@@ -436,21 +436,21 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
         </div>
 
-        <section id="contact" className="py-20 bg-muted/30">
+        <section id="contact" className="py-12 bg-muted/30">
           <div className="container mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <Card className="border border-transparent bg-card overflow-visible transition-shadow duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
-                <CardContent className="p-8 text-center flex flex-col items-center h-full">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6">
-                  <Rocket className="h-7 w-7" />
+                <CardContent className="p-6 text-center flex flex-col items-center h-full">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
+                  <Rocket className="h-6 w-6" />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                <h2 className="text-xl md:text-2xl font-bold mb-3">
                   Prêt à lancer votre projet ?
                 </h2>
-                <p className="text-muted-foreground flex-1">
+                <p className="text-muted-foreground text-sm flex-1">
                   Connectez-vous à votre espace client pour déposer les premières bases de votre projet et concrétisons ensemble vos idées.
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
                   {user ? (
                     <Link href="/dashboard">
                       <Button size="lg" className="gap-2" data-testid="button-go-dashboard">
@@ -478,17 +478,17 @@ export default function Home() {
               </Card>
 
               <Card className="border border-transparent bg-card overflow-visible transition-shadow duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
-                <CardContent className="p-8 text-center flex flex-col items-center h-full">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-6">
-                  <MessageSquare className="h-7 w-7" />
+                <CardContent className="p-6 text-center flex flex-col items-center h-full">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
+                  <MessageSquare className="h-6 w-6" />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                <h2 className="text-xl md:text-2xl font-bold mb-3">
                   Besoin de plus d'informations ?
                 </h2>
-                <p className="text-muted-foreground flex-1">
+                <p className="text-muted-foreground text-sm flex-1">
                   N'hésitez pas à me contacter pour discuter de votre projet ou poser vos questions.
                 </p>
-                <div className="mt-8">
+                <div className="mt-6">
                 <Dialog open={contactOpen} onOpenChange={setContactOpen}>
                   <DialogTrigger asChild>
                     <Button size="lg" variant="outline" className="gap-2" data-testid="button-contact-me">
