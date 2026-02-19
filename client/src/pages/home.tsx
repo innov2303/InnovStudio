@@ -24,7 +24,14 @@ import {
   Send,
   Loader2,
   ShoppingCart,
-  Check
+  Check,
+  FileText,
+  PenTool,
+  CheckCircle,
+  Layers,
+  Settings,
+  CreditCard,
+  Trophy
 } from "lucide-react";
 import {
   Dialog,
@@ -145,6 +152,60 @@ export default function Home() {
       description: "React, TypeScript, Node.js, Python, PostgreSQL et les frameworks les plus récents"
     },
   ];
+
+  const workflowSteps = [
+    {
+      icon: FileText,
+      step: 1,
+      title: "Dépôt du projet",
+      description: "Décrivez votre projet et vos besoins. Nous étudions votre demande.",
+      color: "from-cyan-500 to-blue-500"
+    },
+    {
+      icon: PenTool,
+      step: 2,
+      title: "Étude & Devis",
+      description: "Analyse détaillée, estimation des coûts et proposition d'un devis personnalisé.",
+      color: "from-blue-500 to-indigo-500"
+    },
+    {
+      icon: CheckCircle,
+      step: 3,
+      title: "Signature & Acompte",
+      description: "Validation du devis, signature électronique et paiement de l'acompte.",
+      color: "from-indigo-500 to-violet-500"
+    },
+    {
+      icon: Layers,
+      step: 4,
+      title: "Développement",
+      description: "Développement de votre projet avec suivi en temps réel des fonctionnalités.",
+      color: "from-violet-500 to-purple-500"
+    },
+    {
+      icon: Settings,
+      step: 5,
+      title: "Tests & Livraison",
+      description: "Tests complets, ajustements finaux et mise en ligne de votre projet.",
+      color: "from-purple-500 to-pink-500"
+    },
+    {
+      icon: CreditCard,
+      step: 6,
+      title: "Règlement final",
+      description: "Paiement du solde restant et remise de tous les accès.",
+      color: "from-pink-500 to-rose-500"
+    },
+    {
+      icon: Trophy,
+      step: 7,
+      title: "Projet terminé",
+      description: "Votre projet est en ligne ! Support et maintenance disponibles.",
+      color: "from-emerald-500 to-green-500"
+    },
+  ];
+
+  const [activeStep, setActiveStep] = useState(0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -334,25 +395,85 @@ export default function Home() {
               </div>
               
               <div className="relative">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-8">
-                  <div className="h-full w-full rounded-xl bg-card border flex flex-col items-center justify-center p-6">
-                    <div className="text-center mb-4">
-                      <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                        <Rocket className="h-6 w-6 text-primary" />
+                <div className="text-center mb-8">
+                  <p className="text-cyan-400 text-sm font-medium tracking-widest uppercase mb-2">Comment ça marche</p>
+                  <h3 className="text-2xl font-bold">Suivi de Projet Interactif</h3>
+                  <p className="text-muted-foreground text-sm mt-2">
+                    De la demande à la livraison, suivez chaque étape de votre projet.
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                  {workflowSteps.slice(0, 4).map((step, index) => {
+                    const StepIcon = step.icon;
+                    const isActive = activeStep === index;
+                    return (
+                      <div
+                        key={index}
+                        data-testid={`workflow-step-${step.step}`}
+                        className={`relative cursor-pointer rounded-md border p-4 text-center transition-all duration-300 ${
+                          isActive 
+                            ? "border-cyan-500/60 bg-cyan-500/10 shadow-[0_0_15px_rgba(0,200,255,0.15)]" 
+                            : "border-border/50 bg-card/50 hover:border-cyan-500/30"
+                        }`}
+                        onClick={() => setActiveStep(index)}
+                      >
+                        {index < 3 && (
+                          <div className="hidden sm:block absolute top-1/2 -right-3 -translate-y-1/2 z-10">
+                            <ChevronRight className="h-4 w-4 text-cyan-500/50" />
+                          </div>
+                        )}
+                        <div className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br ${step.color} transition-all duration-300 ${isActive ? "shadow-[0_0_12px_rgba(0,200,255,0.3)]" : ""}`}>
+                          <StepIcon className="h-5 w-5 text-white" />
+                        </div>
+                        <span className={`text-[10px] font-semibold uppercase tracking-wider ${isActive ? "text-cyan-400" : "text-muted-foreground"}`}>
+                          Étape {step.step}
+                        </span>
+                        <h4 className="text-xs font-semibold mt-1 leading-tight">{step.title}</h4>
                       </div>
-                      <h3 className="text-lg font-semibold mb-1">Suivi de Projet en Temps Réel</h3>
-                      <p className="text-muted-foreground text-xs">
-                        Suivez l'avancement et validez chaque étape de développement.
-                      </p>
-                    </div>
-                    <div className="w-full rounded-lg overflow-hidden border">
-                      <img 
-                        src={projectTracking} 
-                        alt="Exemple de suivi de projet" 
-                        className="w-full h-auto object-cover"
-                      />
-                    </div>
-                  </div>
+                    );
+                  })}
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3 max-w-[75%] mx-auto">
+                  {workflowSteps.slice(4).map((step, index) => {
+                    const realIndex = index + 4;
+                    const StepIcon = step.icon;
+                    const isActive = activeStep === realIndex;
+                    return (
+                      <div
+                        key={realIndex}
+                        data-testid={`workflow-step-${step.step}`}
+                        className={`relative cursor-pointer rounded-md border p-4 text-center transition-all duration-300 ${
+                          isActive 
+                            ? "border-cyan-500/60 bg-cyan-500/10 shadow-[0_0_15px_rgba(0,200,255,0.15)]" 
+                            : "border-border/50 bg-card/50 hover:border-cyan-500/30"
+                        }`}
+                        onClick={() => setActiveStep(realIndex)}
+                      >
+                        {index < 2 && (
+                          <div className="hidden sm:block absolute top-1/2 -right-3 -translate-y-1/2 z-10">
+                            <ChevronRight className="h-4 w-4 text-cyan-500/50" />
+                          </div>
+                        )}
+                        <div className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br ${step.color} transition-all duration-300 ${isActive ? "shadow-[0_0_12px_rgba(0,200,255,0.3)]" : ""}`}>
+                          <StepIcon className="h-5 w-5 text-white" />
+                        </div>
+                        <span className={`text-[10px] font-semibold uppercase tracking-wider ${isActive ? "text-cyan-400" : "text-muted-foreground"}`}>
+                          Étape {step.step}
+                        </span>
+                        <h4 className="text-xs font-semibold mt-1 leading-tight">{step.title}</h4>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 rounded-md border border-cyan-500/20 bg-card/60 p-4 text-center transition-all duration-300">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">{workflowSteps[activeStep].title}</span>
+                    {" — "}
+                    {workflowSteps[activeStep].description}
+                  </p>
                 </div>
               </div>
             </div>
