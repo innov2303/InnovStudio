@@ -158,7 +158,7 @@ export default function Home() {
       icon: FileText,
       step: 1,
       title: "Dépôt du projet",
-      description: "Décrivez votre projet et vos besoins. Nous étudions votre demande.",
+      description: "Décrivez votre projet et vos besoins. J'étudie votre demande.",
       color: "from-cyan-500 to-blue-500"
     },
     {
