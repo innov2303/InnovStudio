@@ -169,36 +169,22 @@ export default function Home() {
       color: "from-blue-500 to-indigo-500"
     },
     {
-      icon: CheckCircle,
-      step: 3,
-      title: "Signature & Acompte",
-      description: "Validation du devis, signature électronique et paiement de l'acompte.",
-      color: "from-indigo-500 to-violet-500"
-    },
-    {
       icon: Layers,
-      step: 4,
+      step: 3,
       title: "Développement",
       description: "Développement de votre projet avec suivi en temps réel des fonctionnalités.",
       color: "from-violet-500 to-purple-500"
     },
     {
       icon: Settings,
-      step: 5,
+      step: 4,
       title: "Tests & Livraison",
       description: "Tests complets, ajustements finaux et mise en ligne de votre projet.",
       color: "from-purple-500 to-pink-500"
     },
     {
-      icon: CreditCard,
-      step: 6,
-      title: "Règlement final",
-      description: "Paiement du solde restant et remise de tous les accès.",
-      color: "from-pink-500 to-rose-500"
-    },
-    {
       icon: Trophy,
-      step: 7,
+      step: 5,
       title: "Projet terminé",
       description: "Votre projet est en ligne ! Support et maintenance disponibles.",
       color: "from-emerald-500 to-green-500"
@@ -368,113 +354,77 @@ export default function Home() {
           />
           <div className="absolute inset-0 bg-background/85 dark:bg-background/92" />
           <div className="container relative mx-auto px-6">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                  Pourquoi choisir{" "}
-                  <span className="text-primary">Innov Studio</span> ?
-                </h2>
-                <p className="text-muted-foreground mb-8">
-                  Mon expertise technique et ma passion pour l'innovation me permettent 
-                  de créer des solutions web qui dépassent vos attentes.
-                </p>
-                
-                <div className="space-y-6">
-                  {features.map((feature, index) => (
-                    <div key={index} className="flex gap-4">
-                      <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <feature.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">{feature.title}</h3>
-                        <p className="text-muted-foreground text-sm">{feature.description}</p>
-                      </div>
-                    </div>
-                  ))}
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Pourquoi choisir{" "}
+                <span className="text-primary">Innov Studio</span> ?
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Mon expertise technique et ma passion pour l'innovation me permettent 
+                de créer des solutions web qui dépassent vos attentes.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto mb-16">
+              {features.map((feature, index) => (
+                <div key={index} className="flex gap-4">
+                  <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <feature.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">{feature.title}</h3>
+                    <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold">Suivi de Projet Interactif</h3>
+                <p className="text-muted-foreground text-sm mt-2">
+                  De la demande à la livraison, suivez chaque étape de votre projet.
+                </p>
               </div>
               
-              <div className="relative">
-                <div className="text-center mb-8">
-                  <p className="text-cyan-400 text-sm font-medium tracking-widest uppercase mb-2">Comment ça marche</p>
-                  <h3 className="text-2xl font-bold">Suivi de Projet Interactif</h3>
-                  <p className="text-muted-foreground text-sm mt-2">
-                    De la demande à la livraison, suivez chaque étape de votre projet.
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                  {workflowSteps.slice(0, 4).map((step, index) => {
-                    const StepIcon = step.icon;
-                    const isActive = activeStep === index;
-                    return (
-                      <div
-                        key={index}
-                        data-testid={`workflow-step-${step.step}`}
-                        className={`relative cursor-pointer rounded-md border p-4 text-center transition-all duration-300 ${
-                          isActive 
-                            ? "border-cyan-500/60 bg-cyan-500/10 shadow-[0_0_15px_rgba(0,200,255,0.15)]" 
-                            : "border-border/50 bg-card/50 hover:border-cyan-500/30"
-                        }`}
-                        onClick={() => setActiveStep(index)}
-                      >
-                        {index < 3 && (
-                          <div className="hidden sm:block absolute top-1/2 -right-3 -translate-y-1/2 z-10">
-                            <ChevronRight className="h-4 w-4 text-cyan-500/50" />
-                          </div>
-                        )}
-                        <div className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br ${step.color} transition-all duration-300 ${isActive ? "shadow-[0_0_12px_rgba(0,200,255,0.3)]" : ""}`}>
-                          <StepIcon className="h-5 w-5 text-white" />
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {workflowSteps.map((step, index) => {
+                  const StepIcon = step.icon;
+                  const isActive = activeStep === index;
+                  return (
+                    <div
+                      key={index}
+                      data-testid={`workflow-step-${step.step}`}
+                      className={`relative cursor-pointer rounded-md border p-4 text-center transition-all duration-300 ${
+                        isActive 
+                          ? "border-cyan-500/60 bg-cyan-500/10 shadow-[0_0_15px_rgba(0,200,255,0.15)]" 
+                          : "border-border/50 bg-card/50 hover:border-cyan-500/30"
+                      }`}
+                      onClick={() => setActiveStep(index)}
+                    >
+                      {index < workflowSteps.length - 1 && (
+                        <div className="hidden sm:block absolute top-1/2 -right-3 -translate-y-1/2 z-10">
+                          <ChevronRight className="h-4 w-4 text-cyan-500/50" />
                         </div>
-                        <span className={`text-[10px] font-semibold uppercase tracking-wider ${isActive ? "text-cyan-400" : "text-muted-foreground"}`}>
-                          Étape {step.step}
-                        </span>
-                        <h4 className="text-xs font-semibold mt-1 leading-tight">{step.title}</h4>
+                      )}
+                      <div className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br ${step.color} transition-all duration-300 ${isActive ? "shadow-[0_0_12px_rgba(0,200,255,0.3)]" : ""}`}>
+                        <StepIcon className="h-5 w-5 text-white" />
                       </div>
-                    );
-                  })}
-                </div>
-                
-                <div className="grid grid-cols-3 gap-3 max-w-[75%] mx-auto">
-                  {workflowSteps.slice(4).map((step, index) => {
-                    const realIndex = index + 4;
-                    const StepIcon = step.icon;
-                    const isActive = activeStep === realIndex;
-                    return (
-                      <div
-                        key={realIndex}
-                        data-testid={`workflow-step-${step.step}`}
-                        className={`relative cursor-pointer rounded-md border p-4 text-center transition-all duration-300 ${
-                          isActive 
-                            ? "border-cyan-500/60 bg-cyan-500/10 shadow-[0_0_15px_rgba(0,200,255,0.15)]" 
-                            : "border-border/50 bg-card/50 hover:border-cyan-500/30"
-                        }`}
-                        onClick={() => setActiveStep(realIndex)}
-                      >
-                        {index < 2 && (
-                          <div className="hidden sm:block absolute top-1/2 -right-3 -translate-y-1/2 z-10">
-                            <ChevronRight className="h-4 w-4 text-cyan-500/50" />
-                          </div>
-                        )}
-                        <div className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br ${step.color} transition-all duration-300 ${isActive ? "shadow-[0_0_12px_rgba(0,200,255,0.3)]" : ""}`}>
-                          <StepIcon className="h-5 w-5 text-white" />
-                        </div>
-                        <span className={`text-[10px] font-semibold uppercase tracking-wider ${isActive ? "text-cyan-400" : "text-muted-foreground"}`}>
-                          Étape {step.step}
-                        </span>
-                        <h4 className="text-xs font-semibold mt-1 leading-tight">{step.title}</h4>
-                      </div>
-                    );
-                  })}
-                </div>
+                      <span className={`text-[10px] font-semibold uppercase tracking-wider ${isActive ? "text-cyan-400" : "text-muted-foreground"}`}>
+                        Étape {step.step}
+                      </span>
+                      <h4 className="text-xs font-semibold mt-1 leading-tight">{step.title}</h4>
+                    </div>
+                  );
+                })}
+              </div>
 
-                <div className="mt-6 rounded-md border border-cyan-500/20 bg-card/60 p-4 text-center transition-all duration-300">
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-semibold text-foreground">{workflowSteps[activeStep].title}</span>
-                    {" — "}
-                    {workflowSteps[activeStep].description}
-                  </p>
-                </div>
+              <div className="mt-6 rounded-md border border-cyan-500/20 bg-card/60 p-4 text-center transition-all duration-300">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">{workflowSteps[activeStep].title}</span>
+                  {" — "}
+                  {workflowSteps[activeStep].description}
+                </p>
               </div>
             </div>
           </div>
