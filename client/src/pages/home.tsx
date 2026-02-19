@@ -268,7 +268,7 @@ export default function Home() {
                 Innov Studio
               </h2>
               
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                 Créons ensemble votre{" "}
                 <span className="text-primary">projet Web</span> de demain
               </h1>
