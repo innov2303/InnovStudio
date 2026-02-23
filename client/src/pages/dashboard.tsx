@@ -76,7 +76,7 @@ type SubscriptionOffer = {
   price: string;
   description: string;
 };
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw, Building2, MapPin, Mail } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "logs" | "analytics";
@@ -147,6 +147,7 @@ export default function Dashboard() {
   const [newFeatureDescription, setNewFeatureDescription] = useState("");
   const [signDocumentId, setSignDocumentId] = useState<string | null>(null);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [viewUser, setViewUser] = useState<any | null>(null);
   const [clientSignature, setClientSignature] = useState<string | null>(null);
   const [bonPourAccord, setBonPourAccord] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -3791,17 +3792,27 @@ export default function Dashboard() {
                               </Badge>
                             </td>
                             <td className="py-3 px-4 text-right">
-                              {u.role !== "admin" && (
+                              <div className="flex items-center justify-end gap-1">
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  className="text-destructive"
-                                  data-testid={`button-delete-user-${u.id}`}
-                                  onClick={() => setDeleteUserId(u.id)}
+                                  data-testid={`button-view-user-${u.id}`}
+                                  onClick={() => setViewUser(u)}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Eye className="h-4 w-4" />
                                 </Button>
-                              )}
+                                {u.role !== "admin" && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="text-destructive"
+                                    data-testid={`button-delete-user-${u.id}`}
+                                    onClick={() => setDeleteUserId(u.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -4469,6 +4480,73 @@ export default function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Fiche client
+            </DialogTitle>
+          </DialogHeader>
+          {viewUser && (
+            <div className="space-y-4" data-testid="client-profile-dialog">
+              <div className="flex items-center gap-4 pb-4 border-b">
+                <Avatar className="h-14 w-14">
+                  <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                    {`${viewUser.firstName?.[0] || ""}${viewUser.lastName?.[0] || ""}`.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-lg font-semibold" data-testid="text-client-name">{viewUser.firstName} {viewUser.lastName}</p>
+                  <Badge variant={viewUser.role === "admin" ? "default" : "secondary"}>
+                    {viewUser.role === "admin" ? "Admin" : "Client"}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <Mail className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-sm font-medium" data-testid="text-client-email">{viewUser.email || viewUser.username}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Entreprise</p>
+                    <p className="text-sm font-medium" data-testid="text-client-company">{viewUser.company || "Non renseigné"}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Adresse</p>
+                    <p className="text-sm font-medium" data-testid="text-client-address">{viewUser.address || "Non renseigné"}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Adresse de facturation</p>
+                    <p className="text-sm font-medium" data-testid="text-client-billing">
+                      {viewUser.sameAsBilling ? (viewUser.address || "Non renseigné") : (viewUser.billingAddress || "Non renseigné")}
+                    </p>
+                    {viewUser.sameAsBilling && (
+                      <p className="text-xs text-muted-foreground italic">Identique à l'adresse principale</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
