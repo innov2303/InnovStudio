@@ -291,13 +291,13 @@ export default function Home() {
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="#contact" onClick={(e) => scrollToSection(e, "contact")}>
-                  <Button size="lg" className="gap-2" data-testid="button-start-project">
+                  <Button size="lg" className="gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 border-0" data-testid="button-start-project">
                     Démarrer un projet
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </a>
                 <a href="#services" onClick={(e) => scrollToSection(e, "services")}>
-                  <Button size="lg" variant="outline" data-testid="button-discover-services">
+                  <Button size="lg" variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 hover:border-cyan-500/60 transition-all duration-300" data-testid="button-discover-services">
                     Découvrir mes services
                   </Button>
                 </a>
@@ -478,7 +478,7 @@ export default function Home() {
                         </Button>
                       </Link>
                       <Link href="/register">
-                        <Button size="lg" className="gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 border-0" data-testid="button-register-cta">
+                        <Button size="lg" variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 hover:border-cyan-500/60 transition-all duration-300" data-testid="button-register-cta">
                           Créer un compte
                         </Button>
                       </Link>
