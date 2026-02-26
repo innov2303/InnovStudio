@@ -66,7 +66,8 @@ import {
   Server,
   Package,
   BarChart3,
-  TrendingUp
+  TrendingUp,
+  Mail
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument, Subscription } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
@@ -76,7 +77,7 @@ type SubscriptionOffer = {
   price: string;
   description: string;
 };
-import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw, Building2, MapPin, Mail } from "lucide-react";
+import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
 type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "logs" | "analytics";
