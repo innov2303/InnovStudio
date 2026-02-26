@@ -64,6 +64,17 @@ export default function Home() {
   });
   const [isSending, setIsSending] = useState(false);
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    const el = document.getElementById(sectionId);
+    if (el) {
+      const headerOffset = 70;
+      const elementPosition = el.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - headerOffset;
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+    }
+  };
+
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) {
@@ -203,13 +214,13 @@ export default function Home() {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-muted-foreground hover:text-foreground transition-colors">
               Services
             </a>
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#features" onClick={(e) => scrollToSection(e, "features")} className="text-muted-foreground hover:text-foreground transition-colors">
               Avantages
             </a>
-            <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-muted-foreground hover:text-foreground transition-colors">
               Contact
             </a>
           </nav>
@@ -279,13 +290,13 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="#contact">
+                <a href="#contact" onClick={(e) => scrollToSection(e, "contact")}>
                   <Button size="lg" className="gap-2" data-testid="button-start-project">
                     Démarrer un projet
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </a>
-                <a href="#services">
+                <a href="#services" onClick={(e) => scrollToSection(e, "services")}>
                   <Button size="lg" variant="outline" data-testid="button-discover-services">
                     Découvrir mes services
                   </Button>
