@@ -248,7 +248,7 @@ export default function Home() {
               </>
             ) : (
               <Link href="/login">
-                <Button data-testid="button-login">
+                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 border-0" data-testid="button-login">
                   Connexion
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
@@ -472,13 +472,13 @@ export default function Home() {
                   ) : (
                     <>
                       <Link href="/login">
-                        <Button size="lg" className="gap-2" data-testid="button-login-cta">
+                        <Button size="lg" className="gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 border-0" data-testid="button-login-cta">
                           Se connecter
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
                       <Link href="/register">
-                        <Button size="lg" variant="outline" data-testid="button-register-cta">
+                        <Button size="lg" className="gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 border-0" data-testid="button-register-cta">
                           Créer un compte
                         </Button>
                       </Link>
