@@ -502,8 +502,8 @@ export default function Home() {
                 <div className="mt-6">
                 <Dialog open={contactOpen} onOpenChange={setContactOpen}>
                   <DialogTrigger asChild>
-                    <Button size="lg" variant="outline" className="gap-2" data-testid="button-contact-me">
-                      <Mail className="h-4 w-4" />
+                    <Button size="lg" className="gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 border-0" data-testid="button-contact-me">
+                      <Mail className="h-5 w-5" />
                       Contactez moi
                     </Button>
                   </DialogTrigger>
