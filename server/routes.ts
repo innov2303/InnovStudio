@@ -135,6 +135,7 @@ export async function registerRoutes(
       },
     },
     crossOriginEmbedderPolicy: false,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   }));
   
   // Rate limiting général
