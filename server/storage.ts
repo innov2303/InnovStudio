@@ -1,4 +1,4 @@
-import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers, securityLogs, type SecurityLog, pageVisits, type PageVisit } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers, securityLogs, type SecurityLog, pageVisits, type PageVisit, type Reference, type InsertReference, references } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, gte, count } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -82,6 +82,13 @@ export interface IStorage {
   // Revenue analytics
   getRevenueByMonth(months: number): Promise<{ month: string; invoices: number; subscriptions: number; total: number }[]>;
   getProjectStatusDistribution(): Promise<{ status: string; count: number }[]>;
+
+  // References
+  createReference(ref: InsertReference): Promise<Reference>;
+  getAllReferences(): Promise<Reference[]>;
+  getReference(id: string): Promise<Reference | undefined>;
+  updateReference(id: string, data: Partial<InsertReference>): Promise<Reference | undefined>;
+  deleteReference(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -694,6 +701,31 @@ export class DatabaseStorage implements IStorage {
       ORDER BY count DESC
     `);
     return (result.rows as any[]).map(r => ({ status: r.status, count: Number(r.count) }));
+  }
+
+  // References
+  async createReference(ref: InsertReference): Promise<Reference> {
+    const [created] = await db.insert(references).values(ref).returning();
+    return created;
+  }
+
+  async getAllReferences(): Promise<Reference[]> {
+    return await db.select().from(references).orderBy(references.displayOrder);
+  }
+
+  async getReference(id: string): Promise<Reference | undefined> {
+    const [ref] = await db.select().from(references).where(eq(references.id, id));
+    return ref;
+  }
+
+  async updateReference(id: string, data: Partial<InsertReference>): Promise<Reference | undefined> {
+    const [updated] = await db.update(references).set(data).where(eq(references.id, id)).returning();
+    return updated;
+  }
+
+  async deleteReference(id: string): Promise<boolean> {
+    const result = await db.delete(references).where(eq(references.id, id)).returning();
+    return result.length > 0;
   }
 }
 

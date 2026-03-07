@@ -128,7 +128,7 @@ export async function registerRoutes(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "blob:", "https:"],
+        imgSrc: ["'self'", "data:", "blob:", "https:", "https://image.thum.io"],
         scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com"],
         frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
         connectSrc: ["'self'", "https://api.stripe.com", "wss:", "ws:"],
@@ -1787,6 +1787,51 @@ export async function registerRoutes(
       res.sendFile(filePath);
     } else {
       res.status(404).json({ message: "Fichier non trouvé" });
+    }
+  });
+
+  // References (public read, admin write)
+  app.get("/api/references", async (_req, res) => {
+    try {
+      const refs = await storage.getAllReferences();
+      res.json(refs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/references", requireAuth, async (req, res) => {
+    try {
+      if ((req.user as any).role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const { title, url, category, description, displayOrder } = req.body;
+      if (!title || !url || !category) return res.status(400).json({ message: "Titre, URL et catégorie requis" });
+      const ref = await storage.createReference({ title, url, category, description: description || null, displayOrder: displayOrder || "0" });
+      await storage.createSecurityLog({ type: "reference_created", userId: (req.user as any).id, details: `Référence créée: ${title}` });
+      res.status(201).json(ref);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/references/:id", requireAuth, async (req, res) => {
+    try {
+      if ((req.user as any).role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const ref = await storage.updateReference(req.params.id, req.body);
+      if (!ref) return res.status(404).json({ message: "Référence non trouvée" });
+      res.json(ref);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/references/:id", requireAuth, async (req, res) => {
+    try {
+      if ((req.user as any).role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const deleted = await storage.deleteReference(req.params.id);
+      if (!deleted) return res.status(404).json({ message: "Référence non trouvée" });
+      res.json({ message: "Référence supprimée" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
     }
   });
 

@@ -4,7 +4,8 @@
 Site vitrine pour un studio de production web spécialisé dans les applications entreprise et les sites vitrines avec intégration IA. Le site comprend un système d'authentification locale avec gestion des utilisateurs.
 
 ## Features
-- **Page d'accueil moderne** : Hero section, services (Sites Vitrines, Applications Web, Intégration IA, Design UI/UX), avantages, Technologies Modernes
+- **Page d'accueil moderne** : Hero section, services (Sites Vitrines, Applications Web, Intégration IA, Design UI/UX), avantages, Technologies Modernes, Références
+- **Références (Portfolio)** : Section sur la page d'accueil avec preview des sites produits, deux catégories (Sites Vitrines / Produits Web Entreprise), gestion admin depuis le dashboard, thumbnails via image.thum.io
 - **Authentification locale** : Login/Register avec sessions PostgreSQL
 - **Compte admin par défaut** : email "admin@innov-studio.fr", password "admin" (changement obligatoire à la première connexion)
 - **Inscription utilisateurs** : Prénom, Nom, Entreprise, Adresse, Adresse de facturation (checkbox "identique")

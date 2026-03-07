@@ -80,7 +80,7 @@ type SubscriptionOffer = {
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 
-type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "logs" | "analytics";
+type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "references" | "logs" | "analytics";
 
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, PieChart, Pie } from "recharts";
 
@@ -229,6 +229,58 @@ export default function Dashboard() {
   const { data: allUsers, isLoading: usersLoading } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
     enabled: user?.role === "admin",
+  });
+
+  const { data: referencesData, isLoading: referencesLoading } = useQuery<any[]>({
+    queryKey: ["/api/references"],
+    enabled: user?.role === "admin",
+  });
+
+  const [newRef, setNewRef] = useState({ title: "", url: "", category: "vitrine", description: "" });
+  const [editingRef, setEditingRef] = useState<any | null>(null);
+
+  const createRefMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/references", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Référence ajoutée" });
+      queryClient.invalidateQueries({ queryKey: ["/api/references"] });
+      setNewRef({ title: "", url: "", category: "vitrine", description: "" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateRefMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await apiRequest("PATCH", `/api/references/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Référence mise à jour" });
+      queryClient.invalidateQueries({ queryKey: ["/api/references"] });
+      setEditingRef(null);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteRefMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest("DELETE", `/api/references/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Référence supprimée" });
+      queryClient.invalidateQueries({ queryKey: ["/api/references"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
   });
 
   type SecurityLog = {
@@ -1045,6 +1097,7 @@ export default function Dashboard() {
     ...(user.role === "admin" ? [{ id: "documents" as MenuSection, label: "Abonnements", icon: FileText }] : []),
     ...(user.role === "admin" ? [{ id: "subscription_settings" as MenuSection, label: "Gérer les abonnements", icon: Settings }] : []),
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
+    ...(user.role === "admin" ? [{ id: "references" as MenuSection, label: "Références", icon: Globe }] : []),
     ...(user.role === "admin" ? [{ id: "logs" as MenuSection, label: "Logs", icon: Shield }] : []),
     ...(user.role === "admin" ? [{ id: "analytics" as MenuSection, label: "Analytics", icon: BarChart3 }] : []),
   ];
@@ -4212,6 +4265,149 @@ export default function Dashboard() {
                 </>
               ) : (
                 <p className="text-center text-muted-foreground py-8">Aucune donnée analytics disponible</p>
+              )}
+            </div>
+          )}
+
+          {activeSection === "references" && user.role === "admin" && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold" data-testid="title-references">Références</h2>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Ajouter une référence</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Titre *</Label>
+                      <Input
+                        placeholder="Nom du site"
+                        value={newRef.title}
+                        onChange={(e) => setNewRef({ ...newRef, title: e.target.value })}
+                        data-testid="input-ref-title"
+                      />
+                    </div>
+                    <div>
+                      <Label>URL *</Label>
+                      <Input
+                        placeholder="https://example.com"
+                        value={newRef.url}
+                        onChange={(e) => setNewRef({ ...newRef, url: e.target.value })}
+                        data-testid="input-ref-url"
+                      />
+                    </div>
+                    <div>
+                      <Label>Catégorie *</Label>
+                      <Select value={newRef.category} onValueChange={(val) => setNewRef({ ...newRef, category: val })}>
+                        <SelectTrigger data-testid="select-ref-category">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="vitrine">Site Vitrine</SelectItem>
+                          <SelectItem value="enterprise">Produit Web Entreprise</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Description</Label>
+                      <Input
+                        placeholder="Courte description"
+                        value={newRef.description}
+                        onChange={(e) => setNewRef({ ...newRef, description: e.target.value })}
+                        data-testid="input-ref-description"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    className="mt-4"
+                    onClick={() => createRefMutation.mutate(newRef)}
+                    disabled={!newRef.title || !newRef.url || createRefMutation.isPending}
+                    data-testid="button-add-ref"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ajouter
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {referencesLoading ? (
+                <div className="flex justify-center py-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
+              ) : (
+                <>
+                  {["vitrine", "enterprise"].map((cat) => {
+                    const refs = (referencesData || []).filter((r: any) => r.category === cat);
+                    return (
+                      <div key={cat} className="space-y-3">
+                        <h3 className="text-lg font-semibold">
+                          {cat === "vitrine" ? "Sites Vitrines" : "Produits Web Entreprise"}
+                          <Badge variant="secondary" className="ml-2">{refs.length}</Badge>
+                        </h3>
+                        {refs.length === 0 ? (
+                          <p className="text-muted-foreground text-sm">Aucune référence dans cette catégorie</p>
+                        ) : (
+                          <div className="grid gap-3">
+                            {refs.map((ref: any) => (
+                              <Card key={ref.id} data-testid={`card-ref-${ref.id}`}>
+                                <CardContent className="py-4 flex items-center justify-between gap-4">
+                                  {editingRef?.id === ref.id ? (
+                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2">
+                                      <Input
+                                        value={editingRef.title}
+                                        onChange={(e) => setEditingRef({ ...editingRef, title: e.target.value })}
+                                        data-testid="input-edit-ref-title"
+                                      />
+                                      <Input
+                                        value={editingRef.url}
+                                        onChange={(e) => setEditingRef({ ...editingRef, url: e.target.value })}
+                                        data-testid="input-edit-ref-url"
+                                      />
+                                      <Input
+                                        value={editingRef.description || ""}
+                                        onChange={(e) => setEditingRef({ ...editingRef, description: e.target.value })}
+                                        placeholder="Description"
+                                        data-testid="input-edit-ref-description"
+                                      />
+                                      <div className="flex gap-2">
+                                        <Button
+                                          size="sm"
+                                          onClick={() => updateRefMutation.mutate({ id: editingRef.id, data: { title: editingRef.title, url: editingRef.url, description: editingRef.description } })}
+                                          disabled={updateRefMutation.isPending}
+                                          data-testid="button-save-ref"
+                                        >
+                                          <Save className="h-4 w-4" />
+                                        </Button>
+                                        <Button size="sm" variant="outline" onClick={() => setEditingRef(null)} data-testid="button-cancel-edit-ref">
+                                          <XIcon className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium" data-testid={`text-ref-title-${ref.id}`}>{ref.title}</p>
+                                        <a href={ref.url} target="_blank" rel="noopener" className="text-sm text-primary hover:underline truncate block" data-testid={`link-ref-url-${ref.id}`}>{ref.url}</a>
+                                        {ref.description && <p className="text-sm text-muted-foreground mt-1">{ref.description}</p>}
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <Button size="icon" variant="ghost" onClick={() => setEditingRef({ ...ref })} data-testid={`button-edit-ref-${ref.id}`}>
+                                          <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button size="icon" variant="ghost" className="text-destructive" onClick={() => deleteRefMutation.mutate(ref.id)} data-testid={`button-delete-ref-${ref.id}`}>
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    </>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </>
               )}
             </div>
           )}

@@ -323,3 +323,25 @@ export const pageVisits = pgTable("page_visits", {
 });
 
 export type PageVisit = typeof pageVisits.$inferSelect;
+
+// References (Portfolio)
+export const references = pgTable("references", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  category: text("category").notNull(),
+  description: text("description"),
+  displayOrder: text("display_order").notNull().default("0"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReferenceSchema = createInsertSchema(references).pick({
+  title: true,
+  url: true,
+  category: true,
+  description: true,
+  displayOrder: true,
+});
+
+export type InsertReference = z.infer<typeof insertReferenceSchema>;
+export type Reference = typeof references.$inferSelect;

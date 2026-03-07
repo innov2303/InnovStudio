@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useForceDark } from "@/hooks/use-force-dark";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Code2, 
   Sparkles, 
@@ -63,6 +63,15 @@ export default function Home() {
     message: ""
   });
   const [isSending, setIsSending] = useState(false);
+  const [refsData, setRefsData] = useState<any[]>([]);
+  const [refsTab, setRefsTab] = useState<"vitrine" | "enterprise">("vitrine");
+
+  useEffect(() => {
+    fetch("/api/references")
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setRefsData(data); })
+      .catch(() => {});
+  }, []);
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
@@ -219,6 +228,9 @@ export default function Home() {
             </a>
             <a href="#features" onClick={(e) => scrollToSection(e, "features")} className="text-muted-foreground hover:text-foreground transition-colors">
               Avantages
+            </a>
+            <a href="#references" onClick={(e) => scrollToSection(e, "references")} className="text-muted-foreground hover:text-foreground transition-colors">
+              Références
             </a>
             <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-muted-foreground hover:text-foreground transition-colors">
               Contact
@@ -440,6 +452,89 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {refsData.length > 0 && (
+          <>
+            <div className="relative h-px">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-md" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
+            </div>
+
+            <section id="references" className="py-20 bg-muted/30">
+              <div className="container mx-auto px-6">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                    Nos <span className="text-primary">Références</span>
+                  </h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Découvrez une sélection de projets réalisés pour nos clients
+                  </p>
+                </div>
+
+                <div className="flex justify-center gap-2 mb-10">
+                  <Button
+                    variant={refsTab === "vitrine" ? "default" : "outline"}
+                    onClick={() => setRefsTab("vitrine")}
+                    className={refsTab === "vitrine" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-0" : "border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"}
+                    data-testid="button-refs-tab-vitrine"
+                  >
+                    Sites Vitrines
+                  </Button>
+                  <Button
+                    variant={refsTab === "enterprise" ? "default" : "outline"}
+                    onClick={() => setRefsTab("enterprise")}
+                    className={refsTab === "enterprise" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-0" : "border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"}
+                    data-testid="button-refs-tab-enterprise"
+                  >
+                    Produits Web Entreprise
+                  </Button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                  {refsData
+                    .filter((r) => r.category === refsTab)
+                    .map((ref) => (
+                      <a
+                        key={ref.id}
+                        href={ref.url}
+                        target="_blank"
+                        rel="noopener"
+                        className="group block"
+                        data-testid={`card-ref-${ref.id}`}
+                      >
+                        <Card className="border border-transparent bg-card overflow-hidden transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)] hover:scale-[1.02]">
+                          <div className="relative aspect-[16/10] bg-muted overflow-hidden">
+                            <img
+                              src={`https://image.thum.io/get/width/600/crop/400/${ref.url}`}
+                              alt={ref.title}
+                              className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
+                          <CardContent className="p-4">
+                            <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">{ref.title}</h3>
+                            {ref.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-2">{ref.description}</p>
+                            )}
+                            <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Globe className="h-3 w-3" />
+                              Visiter le site
+                              <ArrowRight className="h-3 w-3" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </a>
+                    ))}
+                  {refsData.filter((r) => r.category === refsTab).length === 0 && (
+                    <p className="text-muted-foreground text-center col-span-full py-8">Aucune référence dans cette catégorie pour le moment</p>
+                  )}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
 
         <div className="relative h-px">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
