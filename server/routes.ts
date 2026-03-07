@@ -1802,11 +1802,12 @@ export async function registerRoutes(
 
   app.post("/api/references", requireAuth, async (req, res) => {
     try {
-      if ((req.user as any).role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
       const { title, url, category, description, displayOrder } = req.body;
       if (!title || !url || !category) return res.status(400).json({ message: "Titre, URL et catégorie requis" });
       const ref = await storage.createReference({ title, url, category, description: description || null, displayOrder: displayOrder || "0" });
-      await storage.createSecurityLog({ type: "reference_created", userId: (req.user as any).id, details: `Référence créée: ${title}` });
+      await storage.createSecurityLog({ type: "reference_created", userId: currentUser.id, details: `Référence créée: ${title}` });
       res.status(201).json(ref);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -1815,7 +1816,8 @@ export async function registerRoutes(
 
   app.patch("/api/references/:id", requireAuth, async (req, res) => {
     try {
-      if ((req.user as any).role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
       const ref = await storage.updateReference(req.params.id, req.body);
       if (!ref) return res.status(404).json({ message: "Référence non trouvée" });
       res.json(ref);
@@ -1826,7 +1828,8 @@ export async function registerRoutes(
 
   app.delete("/api/references/:id", requireAuth, async (req, res) => {
     try {
-      if ((req.user as any).role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
       const deleted = await storage.deleteReference(req.params.id);
       if (!deleted) return res.status(404).json({ message: "Référence non trouvée" });
       res.json({ message: "Référence supprimée" });
