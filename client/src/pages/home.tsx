@@ -542,8 +542,20 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
         </div>
 
-        <section id="contact" className="py-12 bg-muted/30">
-          <div className="container mx-auto px-6">
+        <section id="contact" className="py-20 relative overflow-hidden">
+          <div className="absolute inset-0">
+            <img src="/images/contact-bg.png" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-background/70" />
+          </div>
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Me <span className="text-primary">Contacter</span>
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Discutons ensemble de votre projet
+              </p>
+            </div>
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <Card className="border border-transparent bg-card overflow-visible transition-shadow duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
                 <CardContent className="p-6 text-center flex flex-col items-center h-full">
