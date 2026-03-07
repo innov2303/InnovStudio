@@ -293,7 +293,7 @@ export default function Home() {
               
               <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                 Créons ensemble votre{" "}
-                <span className="text-primary">projet Web</span> de demain
+                <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">projet Web</span> de demain
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
@@ -328,7 +328,7 @@ export default function Home() {
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Mes <span className="text-primary">Services</span>
+                Mes <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">Services</span>
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Des solutions digitales complètes pour accompagner votre croissance
@@ -380,7 +380,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Pourquoi choisir{" "}
-                <span className="text-primary">Innov Studio</span> ?
+                <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">Innov Studio</span> ?
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Mon expertise technique et ma passion pour l'innovation me permettent 
@@ -465,7 +465,7 @@ export default function Home() {
               <div className="container mx-auto px-6">
                 <div className="text-center mb-12">
                   <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                    Mes <span className="text-primary">Références</span>
+                    Mes <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">Références</span>
                   </h2>
                   <p className="text-muted-foreground max-w-2xl mx-auto">
                     Découvrez les projets réalisés
@@ -550,7 +550,7 @@ export default function Home() {
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Me <span className="text-primary">Contacter</span>
+                Me <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">Contacter</span>
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Discutons ensemble de votre projet
