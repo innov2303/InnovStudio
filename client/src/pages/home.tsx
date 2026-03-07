@@ -468,7 +468,7 @@ export default function Home() {
                     Nos <span className="text-primary">Références</span>
                   </h2>
                   <p className="text-muted-foreground max-w-2xl mx-auto">
-                    Découvrez une sélection de projets réalisés pour nos clients
+                    Découvrez les projets réalisés
                   </p>
                 </div>
 
