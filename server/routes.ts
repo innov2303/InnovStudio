@@ -1778,8 +1778,18 @@ export async function registerRoutes(
   });
 
   // Serve uploaded files
+  app.get("/uploads/:filename", (req, res, next) => {
+    const filename = req.params.filename;
+    if (!filename.startsWith("ref-")) return next();
+    const filePath = path.join(uploadDir, filename);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).json({ message: "Fichier non trouvé" });
+    }
+  });
+
   app.use("/uploads", requireAuth, (req, res, next) => {
-    // Verify user can access the file
     next();
   }, (req, res) => {
     const filePath = path.join(uploadDir, req.path);
@@ -1833,6 +1843,24 @@ export async function registerRoutes(
       const deleted = await storage.deleteReference(req.params.id);
       if (!deleted) return res.status(404).json({ message: "Référence non trouvée" });
       res.json({ message: "Référence supprimée" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/references/:id/upload-image", requireAuth, upload.single("image"), async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
+      if (!req.file) return res.status(400).json({ message: "Aucun fichier" });
+      const newFilename = "ref-" + req.file.filename;
+      const oldPath = path.join(uploadDir, req.file.filename);
+      const newPath = path.join(uploadDir, newFilename);
+      fs.renameSync(oldPath, newPath);
+      const imageUrl = `/uploads/${newFilename}`;
+      const ref = await storage.updateReference(req.params.id, { imageUrl });
+      if (!ref) return res.status(404).json({ message: "Référence non trouvée" });
+      res.json(ref);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

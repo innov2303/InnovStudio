@@ -506,7 +506,7 @@ export default function Home() {
                         <Card className="border border-transparent bg-card overflow-hidden transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)] hover:scale-[1.02]">
                           <div className="relative aspect-[16/10] bg-muted overflow-hidden">
                             <img
-                              src={`https://image.thum.io/get/width/600/crop/400/${ref.url}`}
+                              src={ref.imageUrl || `https://image.thum.io/get/width/600/crop/400/${ref.url}`}
                               alt={ref.title}
                               className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                               loading="lazy"

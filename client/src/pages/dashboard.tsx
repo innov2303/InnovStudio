@@ -4390,6 +4390,36 @@ export default function Dashboard() {
                                         {ref.description && <p className="text-sm text-muted-foreground mt-1">{ref.description}</p>}
                                       </div>
                                       <div className="flex items-center gap-1">
+                                        {ref.imageUrl && (
+                                          <img src={ref.imageUrl} alt="" className="h-10 w-16 object-cover rounded border" />
+                                        )}
+                                        <label className="cursor-pointer" data-testid={`button-upload-ref-image-${ref.id}`}>
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={async (e) => {
+                                              const file = e.target.files?.[0];
+                                              if (!file) return;
+                                              const formData = new FormData();
+                                              formData.append("image", file);
+                                              try {
+                                                const res = await fetch(`/api/references/${ref.id}/upload-image`, {
+                                                  method: "POST",
+                                                  body: formData,
+                                                });
+                                                if (!res.ok) throw new Error("Erreur upload");
+                                                toast({ title: "Image ajoutée" });
+                                                queryClient.invalidateQueries({ queryKey: ["/api/references"] });
+                                              } catch {
+                                                toast({ title: "Erreur", description: "Échec de l'upload", variant: "destructive" });
+                                              }
+                                            }}
+                                          />
+                                          <Button size="icon" variant="ghost" asChild>
+                                            <span><Upload className="h-4 w-4" /></span>
+                                          </Button>
+                                        </label>
                                         <Button size="icon" variant="ghost" onClick={() => setEditingRef({ ...ref })} data-testid={`button-edit-ref-${ref.id}`}>
                                           <Pencil className="h-4 w-4" />
                                         </Button>

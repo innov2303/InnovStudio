@@ -331,6 +331,7 @@ export const references = pgTable("references", {
   url: text("url").notNull(),
   category: text("category").notNull(),
   description: text("description"),
+  imageUrl: text("image_url"),
   displayOrder: text("display_order").notNull().default("0"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -340,6 +341,7 @@ export const insertReferenceSchema = createInsertSchema(references).pick({
   url: true,
   category: true,
   description: true,
+  imageUrl: true,
   displayOrder: true,
 });
 
