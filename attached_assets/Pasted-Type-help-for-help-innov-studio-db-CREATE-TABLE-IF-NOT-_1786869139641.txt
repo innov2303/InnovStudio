@@ -1,0 +1,49 @@
+Type "help" for help.
+
+innov_studio_db=# CREATE TABLE IF NOT EXISTS seo_reports (
+  id VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid(),
+  analysis_date TIMESTAMP DEFAULT NOW(),
+  score VARCHAR(10) NOT NULL DEFAULT '0',
+  suggestions TEXT NOT NULL DEFAULT '[]',
+  applied_suggestions TEXT NOT NULL DEFAULT '[]',
+  trending_keywords TEXT NOT NULL DEFAULT '[]',
+  visit_stats TEXT NOT NULL DEFAULT '{}',
+  email_sent BOOLEAN NOT NULL DEFAULT FALSE
+);
+CREATE TABLE
+innov_studio_db=# exit
+root@my-vps:/var/www/innov-studio# ./update_site.sh
+Updating 7c124a3..1392a2f
+error: Your local changes to the following files would be overwritten by merge:
+        package-lock.json
+        package.json
+Please commit your changes or stash them before you merge.
+Aborting
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+vite v7.3.6 building client environment for production...
+transforming (5) ../node_modules/wouter/src/index.js
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 2472 modules transformed.
+../dist/public/index.html                           5.49 kB │ gzip:   1.78 kB
+../dist/public/assets/features-bg-DG0pRe1y.jpg    238.05 kB
+../dist/public/assets/hero-bg-Cr3bCq_2.jpg        453.94 kB
+../dist/public/assets/index-p8CjHmox.css           86.89 kB │ gzip:  13.85 kB
+../dist/public/assets/index-ewVafmxD.js         1,110.80 kB │ gzip: 305.63 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.60s
+building server...
+
+  dist/index.cjs  1.5mb ⚠️
+
+⚡ Done in 149ms
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [innov-studio](ids: [ 1 ])
+[PM2] [innov-studio](1) ✓
