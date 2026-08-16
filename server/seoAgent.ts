@@ -24,11 +24,11 @@ interface SeoAnalysisResult {
 }
 
 const CURRENT_META = {
-  title: "Innov Studio | Création de Sites Web & Applications à Toulouse",
+  title: "Innov Studio | Création de Sites Web & Applications à Toulouse 2026",
   description:
-    "Innov Studio - Création de sites web et applications sur mesure à Toulouse. Développeur freelance spécialisé en sites vitrines, applications entreprise et intégration IA en Haute-Garonne et Occitanie.",
+    "Innov Studio - Création de sites web et applications sur mesure à Toulouse. Spécialisé en sites vitrines, apps entreprise & intégration IA. Devis gratuit sous 24h.",
   keywords:
-    "création site web Toulouse, développeur web Toulouse, création site internet Toulouse, application web entreprise Toulouse, site vitrine Toulouse, développeur freelance Toulouse, agence web Toulouse, intégration IA, React, Node.js, développement sur mesure, Haute-Garonne, Occitanie",
+    "création site web Toulouse, développeur web Toulouse, création site internet Toulouse, application web entreprise Toulouse, site vitrine Toulouse, développeur freelance Toulouse, agence web Toulouse, intégration IA, React, Node.js, développement sur mesure, Haute-Garonne, Occitanie, refonte site web professionnel, maintenance site web Toulouse, création site web Toulouse 2026",
 };
 
 // Trending keywords for web dev / Toulouse — updated monthly by the agent
