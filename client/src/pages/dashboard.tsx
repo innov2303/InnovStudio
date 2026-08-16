@@ -116,6 +116,171 @@ function AnalyticsLineChart({ data }: { data: { date: string; count: number }[] 
   );
 }
 
+function SeoAgentSection() {
+  const { toast } = useToast();
+  const { data: seoLatest, isLoading: seoLoading, refetch: seoRefetch } = useQuery<any>({
+    queryKey: ["/api/seo/latest"],
+  });
+  const analyzeMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/seo/analyze"),
+    onSuccess: () => { seoRefetch(); toast({ title: "Analyse terminée", description: "Le rapport SEO a été mis à jour." }); },
+    onError: (e: any) => toast({ title: "Erreur", description: e.message, variant: "destructive" }),
+  });
+  const sendReportMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/seo/send-report"),
+    onSuccess: () => toast({ title: "Rapport envoyé !", description: "Le rapport SEO a été envoyé par email." }),
+    onError: (e: any) => toast({ title: "Erreur", description: e.message, variant: "destructive" }),
+  });
+
+  const report = seoLatest;
+  const suggestions: any[] = report ? JSON.parse(report.suggestions || "[]") : [];
+  const trending: string[] = report ? JSON.parse(report.trendingKeywords || "[]") : [];
+  const visitStats: any = report ? JSON.parse(report.visitStats || "{}") : {};
+  const score = report ? parseInt(report.score) : null;
+  const scoreColor = score === null ? "text-muted-foreground" : score >= 80 ? "text-green-500" : score >= 60 ? "text-yellow-500" : "text-red-500";
+  const scoreRingColor = score === null ? "#6b7280" : score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#ef4444";
+  const highPrio = suggestions.filter((s: any) => s.priority === "high");
+  const medPrio = suggestions.filter((s: any) => s.priority === "medium");
+  const lowPrio = suggestions.filter((s: any) => s.priority === "low");
+
+  const PriorityIcon = ({ p }: { p: string }) =>
+    p === "high" ? <AlertTriangle className="h-4 w-4 text-red-500" /> :
+    p === "medium" ? <Info className="h-4 w-4 text-yellow-500" /> :
+    <Star className="h-4 w-4 text-gray-400" />;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2"><Cpu className="h-6 w-6 text-primary" /> Agent SEO</h2>
+          <p className="text-sm text-muted-foreground mt-1">Analyse automatique quotidienne — rapport email chaque lundi</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => analyzeMutation.mutate()} disabled={analyzeMutation.isPending}>
+            {analyzeMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            Analyser maintenant
+          </Button>
+          <Button size="sm" onClick={() => sendReportMutation.mutate()} disabled={sendReportMutation.isPending}>
+            {sendReportMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
+            Envoyer le rapport
+          </Button>
+        </div>
+      </div>
+
+      {seoLoading ? (
+        <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+      ) : !report ? (
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center">
+            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground mb-4">Aucune analyse SEO pour le moment.<br />Lancez une première analyse pour obtenir des recommandations.</p>
+            <Button onClick={() => analyzeMutation.mutate()} disabled={analyzeMutation.isPending}>
+              {analyzeMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+              Lancer l'analyse
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="md:col-span-1">
+              <CardContent className="pt-6 text-center">
+                <div className="relative inline-flex items-center justify-center mb-3">
+                  <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="hsl(var(--border))" strokeWidth="10" />
+                    <circle cx="60" cy="60" r="50" fill="none" stroke={scoreRingColor} strokeWidth="10"
+                      strokeDasharray={`${(score! / 100) * 314} 314`} strokeLinecap="round" />
+                  </svg>
+                  <div className="absolute text-center">
+                    <div className={`text-4xl font-bold ${scoreColor}`}>{score}</div>
+                    <div className="text-xs text-muted-foreground">/100</div>
+                  </div>
+                </div>
+                <p className={`font-semibold ${scoreColor}`}>{score! >= 80 ? "Excellent" : score! >= 60 ? "À améliorer" : "Attention requise"}</p>
+                <p className="text-xs text-muted-foreground mt-1">{suggestions.length} suggestion(s)</p>
+                <p className="text-xs text-muted-foreground mt-2">Analysé le {new Date(report.analysisDate).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /> Trafic (30 jours)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-primary mb-2">{visitStats.totalLast30Days || 0}</div>
+                <p className="text-xs text-muted-foreground mb-3">visites totales</p>
+                <div className="space-y-1">
+                  {(visitStats.topPages || []).slice(0, 4).map((p: any, i: number) => (
+                    <div key={i} className="flex justify-between text-xs">
+                      <span className="text-muted-foreground truncate max-w-[140px]">{p.path || "/"}</span>
+                      <span className="font-medium">{p.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Mots-clés tendance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {trending.map((kw, i) => (
+                    <Badge key={i} variant="secondary" className="text-xs">{kw}</Badge>
+                  ))}
+                  {trending.length === 0 && <p className="text-xs text-muted-foreground">Aucun mot-clé trouvé</p>}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2"><ArrowUpCircle className="h-5 w-5 text-primary" /> Suggestions d'amélioration</CardTitle>
+              <CardDescription>Appliquez ces recommandations pour améliorer votre référencement Google.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {suggestions.length === 0 ? (
+                <div className="text-center py-8 text-green-500 font-medium">✅ Votre SEO est optimal — aucune suggestion !</div>
+              ) : (
+                <>
+                  {[...highPrio, ...medPrio, ...lowPrio].map((s: any, i: number) => (
+                    <div key={i} className={`border rounded-lg p-4 ${s.priority === "high" ? "border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800" : s.priority === "medium" ? "border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-800" : "border-gray-200 bg-gray-50 dark:bg-gray-800/30"}`}>
+                      <div className="flex items-start gap-3">
+                        <PriorityIcon p={s.priority} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs capitalize">{s.type}</Badge>
+                            <Badge variant="outline" className={`text-xs ${s.priority === "high" ? "text-red-600 border-red-300" : s.priority === "medium" ? "text-yellow-600 border-yellow-300" : "text-gray-500"}`}>{s.priority === "high" ? "Haute priorité" : s.priority === "medium" ? "Moyenne priorité" : "Basse priorité"}</Badge>
+                          </div>
+                          <p className="text-sm font-medium mb-1">{s.reason}</p>
+                          {s.suggested && (
+                            <div className="mt-2 p-2 bg-background rounded border text-xs text-muted-foreground font-mono break-all">
+                              💡 {s.suggested}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Mail className="h-3 w-3" />
+            {report.emailSent ? "Rapport email envoyé pour cette analyse." : "Rapport email non encore envoyé pour cette analyse."}
+            <span>·</span>
+            <span>Envoi automatique chaque lundi à 08h00</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user, logout, isLoading: authLoading } = useAuth();
@@ -4443,179 +4608,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {activeSection === "seo" && user.role === "admin" && (() => {
-            const { data: seoLatest, isLoading: seoLoading, refetch: seoRefetch } = useQuery<any>({
-              queryKey: ["/api/seo/latest"],
-              enabled: activeSection === "seo",
-            });
-            const analyzeMutation = useMutation({
-              mutationFn: () => apiRequest("POST", "/api/seo/analyze"),
-              onSuccess: () => { seoRefetch(); toast({ title: "Analyse terminée", description: "Le rapport SEO a été mis à jour." }); },
-              onError: (e: any) => toast({ title: "Erreur", description: e.message, variant: "destructive" }),
-            });
-            const sendReportMutation = useMutation({
-              mutationFn: () => apiRequest("POST", "/api/seo/send-report"),
-              onSuccess: () => toast({ title: "Rapport envoyé !", description: "Le rapport SEO a été envoyé par email." }),
-              onError: (e: any) => toast({ title: "Erreur", description: e.message, variant: "destructive" }),
-            });
-
-            const report = seoLatest;
-            const suggestions: any[] = report ? JSON.parse(report.suggestions || "[]") : [];
-            const trending: string[] = report ? JSON.parse(report.trendingKeywords || "[]") : [];
-            const visitStats: any = report ? JSON.parse(report.visitStats || "{}") : {};
-            const score = report ? parseInt(report.score) : null;
-            const scoreColor = score === null ? "text-muted-foreground" : score >= 80 ? "text-green-500" : score >= 60 ? "text-yellow-500" : "text-red-500";
-            const scoreRingColor = score === null ? "#6b7280" : score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#ef4444";
-            const highPrio = suggestions.filter(s => s.priority === "high");
-            const medPrio = suggestions.filter(s => s.priority === "medium");
-            const lowPrio = suggestions.filter(s => s.priority === "low");
-
-            const PriorityIcon = ({ p }: { p: string }) =>
-              p === "high" ? <AlertTriangle className="h-4 w-4 text-red-500" /> :
-              p === "medium" ? <Info className="h-4 w-4 text-yellow-500" /> :
-              <Star className="h-4 w-4 text-gray-400" />;
-
-            return (
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold flex items-center gap-2"><Cpu className="h-6 w-6 text-primary" /> Agent SEO</h2>
-                    <p className="text-sm text-muted-foreground mt-1">Analyse automatique quotidienne — rapport email chaque lundi</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => analyzeMutation.mutate()} disabled={analyzeMutation.isPending}>
-                      {analyzeMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-                      Analyser maintenant
-                    </Button>
-                    <Button size="sm" onClick={() => sendReportMutation.mutate()} disabled={sendReportMutation.isPending}>
-                      {sendReportMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
-                      Envoyer le rapport
-                    </Button>
-                  </div>
-                </div>
-
-                {seoLoading ? (
-                  <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-                ) : !report ? (
-                  <Card className="border-dashed">
-                    <CardContent className="py-16 text-center">
-                      <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground mb-4">Aucune analyse SEO pour le moment.<br />Lancez une première analyse pour obtenir des recommandations.</p>
-                      <Button onClick={() => analyzeMutation.mutate()} disabled={analyzeMutation.isPending}>
-                        {analyzeMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
-                        Lancer l'analyse
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <>
-                    {/* Score + Stats row */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {/* Score */}
-                      <Card className="md:col-span-1">
-                        <CardContent className="pt-6 text-center">
-                          <div className="relative inline-flex items-center justify-center mb-3">
-                            <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
-                              <circle cx="60" cy="60" r="50" fill="none" stroke="hsl(var(--border))" strokeWidth="10" />
-                              <circle cx="60" cy="60" r="50" fill="none" stroke={scoreRingColor} strokeWidth="10"
-                                strokeDasharray={`${(score! / 100) * 314} 314`} strokeLinecap="round" />
-                            </svg>
-                            <div className="absolute text-center">
-                              <div className={`text-4xl font-bold ${scoreColor}`}>{score}</div>
-                              <div className="text-xs text-muted-foreground">/100</div>
-                            </div>
-                          </div>
-                          <p className={`font-semibold ${scoreColor}`}>{score! >= 80 ? "Excellent" : score! >= 60 ? "À améliorer" : "Attention requise"}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{suggestions.length} suggestion(s)</p>
-                          <p className="text-xs text-muted-foreground mt-2">Analysé le {new Date(report.analysisDate).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-                        </CardContent>
-                      </Card>
-
-                      {/* Visit stats */}
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /> Trafic (30 jours)</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-3xl font-bold text-primary mb-2">{visitStats.totalLast30Days || 0}</div>
-                          <p className="text-xs text-muted-foreground mb-3">visites totales</p>
-                          <div className="space-y-1">
-                            {(visitStats.topPages || []).slice(0, 4).map((p: any, i: number) => (
-                              <div key={i} className="flex justify-between text-xs">
-                                <span className="text-muted-foreground truncate max-w-[140px]">{p.path || "/"}</span>
-                                <span className="font-medium">{p.count}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Trending keywords */}
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Mots-clés tendance</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-wrap gap-2">
-                            {trending.map((kw, i) => (
-                              <Badge key={i} variant="secondary" className="text-xs">{kw}</Badge>
-                            ))}
-                            {trending.length === 0 && <p className="text-xs text-muted-foreground">Aucun mot-clé trouvé</p>}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Suggestions */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-base flex items-center gap-2"><ArrowUpCircle className="h-5 w-5 text-primary" /> Suggestions d'amélioration</CardTitle>
-                        <CardDescription>Appliquez ces recommandations pour améliorer votre référencement Google.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {suggestions.length === 0 ? (
-                          <div className="text-center py-8 text-green-500 font-medium">✅ Votre SEO est optimal — aucune suggestion !</div>
-                        ) : (
-                          <>
-                            {[...highPrio, ...medPrio, ...lowPrio].map((s, i) => (
-                              <div key={i} className={`border rounded-lg p-4 ${s.priority === "high" ? "border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800" : s.priority === "medium" ? "border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-800" : "border-gray-200 bg-gray-50 dark:bg-gray-800/30"}`}>
-                                <div className="flex items-start gap-3">
-                                  <PriorityIcon p={s.priority} />
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <Badge variant="outline" className="text-xs capitalize">{s.type}</Badge>
-                                      <Badge variant="outline" className={`text-xs ${s.priority === "high" ? "text-red-600 border-red-300" : s.priority === "medium" ? "text-yellow-600 border-yellow-300" : "text-gray-500"}`}>{s.priority === "high" ? "Haute priorité" : s.priority === "medium" ? "Moyenne priorité" : "Basse priorité"}</Badge>
-                                    </div>
-                                    <p className="text-sm font-medium mb-1">{s.reason}</p>
-                                    {s.suggested && (
-                                      <div className="mt-2 p-2 bg-background rounded border text-xs text-muted-foreground font-mono break-all">
-                                        💡 {s.suggested}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* Email status */}
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Mail className="h-3 w-3" />
-                      {report.emailSent
-                        ? "Rapport email envoyé pour cette analyse."
-                        : "Rapport email non encore envoyé pour cette analyse."}
-                      <span>·</span>
-                      <span>Envoi automatique chaque lundi à 08h00</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })()}
+          {activeSection === "seo" && user.role === "admin" && <SeoAgentSection />}
 
           {activeSection === "logs" && user.role === "admin" && (() => {
             const logCategories = [
