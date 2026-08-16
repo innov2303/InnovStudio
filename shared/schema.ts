@@ -347,3 +347,17 @@ export const insertReferenceSchema = createInsertSchema(references).pick({
 
 export type InsertReference = z.infer<typeof insertReferenceSchema>;
 export type Reference = typeof references.$inferSelect;
+
+// SEO Reports (Agent SEO)
+export const seoReports = pgTable("seo_reports", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  analysisDate: timestamp("analysis_date").defaultNow(),
+  score: varchar("score", { length: 10 }).notNull().default("0"),
+  suggestions: text("suggestions").notNull().default("[]"),
+  appliedSuggestions: text("applied_suggestions").notNull().default("[]"),
+  trendingKeywords: text("trending_keywords").notNull().default("[]"),
+  visitStats: text("visit_stats").notNull().default("{}"),
+  emailSent: boolean("email_sent").notNull().default(false),
+});
+
+export type SeoReport = typeof seoReports.$inferSelect;

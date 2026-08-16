@@ -1866,6 +1866,60 @@ export async function registerRoutes(
     }
   });
 
+  // ─── SEO Agent routes ───────────────────────────────────────────────────────
+
+  app.get("/api/seo/latest", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const { getLatestReport } = await import("./seoAgent");
+      const report = await getLatestReport();
+      res.json(report || null);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/seo/history", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const { getReportHistory } = await import("./seoAgent");
+      const reports = await getReportHistory(10);
+      res.json(reports);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/seo/analyze", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const { runSeoAnalysis, saveReport } = await import("./seoAgent");
+      const result = await runSeoAnalysis();
+      const report = await saveReport(result);
+      res.json({ ...report, parsed: result });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/seo/send-report", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const { runSeoAnalysis, saveReport } = await import("./seoAgent");
+      const { sendSeoReportEmail } = await import("./email");
+      const result = await runSeoAnalysis();
+      const emailOk = await sendSeoReportEmail(result.score, result.suggestions, result.trendingKeywords, result.visitStats);
+      await saveReport(result, emailOk);
+      res.json({ success: emailOk, message: emailOk ? "Rapport envoyé !" : "Erreur lors de l'envoi" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Analytics - track page visit (public endpoint, no auth required)
   app.post("/api/analytics/track", async (req, res) => {
     try {

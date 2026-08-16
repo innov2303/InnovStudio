@@ -305,6 +305,103 @@ export async function sendEmailChangeConfirmation(to: string, firstName: string,
   }
 }
 
+export async function sendSeoReportEmail(
+  score: number,
+  suggestions: any[],
+  trendingKeywords: string[],
+  visitStats: Record<string, any>
+): Promise<boolean> {
+  try {
+    const { client, fromEmail } = await getResendClient();
+    const adminEmail = "contact@innov-studio.fr";
+    const scoreColor = score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#ef4444";
+    const scoreLabel = score >= 80 ? "Excellent" : score >= 60 ? "À améliorer" : "Attention requise";
+    const highPriority = suggestions.filter((s: any) => s.priority === "high");
+    const mediumPriority = suggestions.filter((s: any) => s.priority === "medium");
+    const lowPriority = suggestions.filter((s: any) => s.priority === "low");
+
+    const renderSuggestions = (list: any[], color: string, label: string) =>
+      list.length === 0 ? "" : `
+        <div style="margin-bottom: 20px;">
+          <h4 style="color: ${color}; margin: 0 0 12px 0; font-size: 15px;">● Priorité ${label} (${list.length})</h4>
+          ${list.map((s: any) => `
+            <div style="background:#f9fafb;border-left:4px solid ${color};padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:10px;">
+              <p style="margin:0 0 6px 0;font-weight:600;color:#1f2937;font-size:14px;">${s.type === "title" ? "🏷️ Titre" : s.type === "description" ? "📝 Description" : s.type === "keywords" ? "🔑 Mots-clés" : s.type === "structure" ? "🏗️ Structure" : "📄 Contenu"}</p>
+              <p style="margin:0 0 6px 0;color:#6b7280;font-size:13px;">💡 ${s.reason}</p>
+              ${s.suggested ? `<p style="margin:0;color:#0ea5e9;font-size:12px;font-style:italic;">Suggestion : "${s.suggested.substring(0, 120)}${s.suggested.length > 120 ? '...' : ''}"</p>` : ""}
+            </div>
+          `).join("")}
+        </div>`;
+
+    const { error } = await client.emails.send({
+      from: fromEmail,
+      to: adminEmail,
+      subject: `🤖 Rapport SEO hebdomadaire — Score ${score}/100 (${scoreLabel})`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+        <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.6;color:#1f2937;max-width:640px;margin:0 auto;padding:20px;background:#f3f4f6;">
+          <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:32px;border-radius:16px;">
+            <div style="background:white;padding:32px;border-radius:12px;">
+              <!-- Header -->
+              <div style="text-align:center;margin-bottom:28px;">
+                <h1 style="color:#0ea5e9;font-size:24px;font-weight:300;margin:0 0 4px 0;">Innov Studio</h1>
+                <p style="color:#6b7280;font-size:14px;margin:0;">Rapport SEO automatique — ${new Date().toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+              </div>
+
+              <!-- Score card -->
+              <div style="background:linear-gradient(135deg,${scoreColor}15,${scoreColor}08);border:2px solid ${scoreColor};border-radius:12px;padding:24px;text-align:center;margin-bottom:28px;">
+                <div style="font-size:64px;font-weight:700;color:${scoreColor};line-height:1;">${score}</div>
+                <div style="font-size:18px;color:#6b7280;margin-top:4px;">/ 100 — ${scoreLabel}</div>
+                <div style="font-size:13px;color:#9ca3af;margin-top:8px;">${suggestions.length} suggestion(s) d'amélioration identifiée(s)</div>
+              </div>
+
+              <!-- Visit stats -->
+              <div style="background:#f0f9ff;border-radius:12px;padding:20px;margin-bottom:28px;">
+                <h3 style="color:#0ea5e9;margin:0 0 12px 0;font-size:16px;">📊 Trafic (30 derniers jours)</h3>
+                <p style="margin:0;font-size:28px;font-weight:700;color:#1f2937;">${visitStats.totalLast30Days || 0} <span style="font-size:14px;font-weight:400;color:#6b7280;">visites</span></p>
+                ${(visitStats.topPages || []).slice(0, 3).map((p: any) => `
+                  <p style="margin:8px 0 0 0;font-size:13px;color:#6b7280;">${p.path || "/"} — <strong>${p.count}</strong> visites</p>
+                `).join("")}
+              </div>
+
+              <!-- Trending keywords -->
+              <div style="background:#fdf4ff;border-radius:12px;padding:20px;margin-bottom:28px;">
+                <h3 style="color:#8b5cf6;margin:0 0 12px 0;font-size:16px;">🔥 Mots-clés tendance cette semaine</h3>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                  ${trendingKeywords.map(kw => `<span style="background:#8b5cf620;color:#7c3aed;padding:4px 12px;border-radius:20px;font-size:12px;border:1px solid #8b5cf640;">${kw}</span>`).join("")}
+                </div>
+              </div>
+
+              <!-- Suggestions -->
+              <h3 style="color:#1f2937;margin:0 0 16px 0;font-size:16px;">🎯 Suggestions d'amélioration</h3>
+              ${renderSuggestions(highPriority, "#ef4444", "haute")}
+              ${renderSuggestions(mediumPriority, "#f59e0b", "moyenne")}
+              ${renderSuggestions(lowPriority, "#6b7280", "basse")}
+
+              ${suggestions.length === 0 ? '<p style="text-align:center;color:#10b981;font-weight:600;padding:20px;">✅ Aucune suggestion — votre SEO est optimal !</p>' : ""}
+
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
+              <p style="color:#9ca3af;font-size:12px;text-align:center;margin:0;">Ce rapport est généré automatiquement par l'Agent SEO Innov Studio chaque lundi. <br>Connectez-vous au dashboard pour appliquer les suggestions.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error("Error sending SEO report email:", error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error sending SEO report email:", error);
+    return false;
+  }
+}
+
 export async function sendContactEmail(senderName: string, senderEmail: string, senderPhone: string, subject: string, message: string): Promise<boolean> {
   try {
     const { client, fromEmail } = await getResendClient();

@@ -150,6 +150,10 @@ app.use((req, res, next) => {
   await initStripe();
   await registerRoutes(httpServer, app);
 
+  // Initialize SEO agent cron jobs
+  const { initSeoAgent } = await import("./seoAgent");
+  initSeoAgent();
+
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
