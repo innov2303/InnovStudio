@@ -436,7 +436,7 @@ export default function Home() {
                 </span>
               </h2>
               <p className="text-muted-foreground">
-                Du site vitrine à l’application Web Entreprise, construisons une solution numérique qui correspond à votre activité.
+                Une solution web évolutive peut commencer par un site vitrine et grandir vers une application Web Entreprise, selon les besoins de votre activité.
               </p>
             </div>
 
@@ -446,22 +446,22 @@ export default function Home() {
                   <Code2 className="h-6 w-6" />
                 </div>
                 <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
-                  Présence en ligne
+                  Du site vitrine aux outils métier
                 </p>
-                <h3 className="mb-3 text-2xl font-bold text-slate-900">Site vitrine</h3>
+                <h3 className="mb-3 text-2xl font-bold text-slate-900">Solution web évolutive</h3>
                 <p className="mb-6 text-muted-foreground">
-                  Présentez votre activité et vos services avec un site professionnel, adapté aux mobiles et conçu pour faciliter les prises de contact.
+                  Commencez par un site vitrine professionnel pour présenter votre activité, puis ajoutez les pages et fonctionnalités utiles à mesure que vos besoins évoluent.
                 </p>
                 <ul className="mb-8 space-y-2 text-sm text-slate-600">
-                  <li>• Pages et contenus adaptés à votre activité</li>
-                  <li>• Design responsive pour mobile et ordinateur</li>
-                  <li>• Une base que vous pourrez faire évoluer</li>
+                  <li>• Un site vitrine adapté à votre activité</li>
+                  <li>• Des fonctionnalités ajoutées progressivement</li>
+                  <li>• Une évolution possible vers une application métier</li>
                 </ul>
                 <a
                   href="/site-evolutif"
                   className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
                 >
-                  Découvrir le site vitrine <ArrowRight className="h-4 w-4" />
+                  Découvrir la solution web évolutive <ArrowRight className="h-4 w-4" />
                 </a>
               </article>
 
