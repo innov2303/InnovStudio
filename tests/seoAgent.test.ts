@@ -53,6 +53,7 @@ test("the evolving service page presents the path to an application on one page"
   assert.match(html, /Interface d’administration complète/);
   assert.match(html, /gestion|Gérez les utilisateurs/i);
   assert.match(html, /Dashboard selon vos besoins/);
+  assert.match(html, /Visualisez les indicateurs clés/);
   const customFeatureEnd = html.indexOf(
     "</section>",
     html.indexOf("Fonctionnalités sur mesure"),

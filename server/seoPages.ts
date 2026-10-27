@@ -109,7 +109,9 @@ export const seoPages: SeoPage[] = [
       {
         icon: "dashboard",
         title: "Dashboard selon vos besoins",
-        paragraphs: [],
+        paragraphs: [
+          "Visualisez les indicateurs clés et les données utiles à votre activité dans un tableau de bord adapté.",
+        ],
       },
       {
         icon: "ai",
