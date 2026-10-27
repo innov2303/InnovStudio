@@ -9,13 +9,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useForceDark } from "@/hooks/use-force-dark";
+import { useForceLight } from "@/hooks/use-force-light";
 import { registerSchema, type RegisterData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Loader2, Mail, CheckCircle, Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
-  useForceDark();
+  useForceLight();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);

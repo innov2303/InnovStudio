@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useForceDark } from "@/hooks/use-force-dark";
+import { useForceLight } from "@/hooks/use-force-light";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
 export default function VerifyEmail() {
-  useForceDark();
+  useForceLight();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useForceDark } from "@/hooks/use-force-dark";
+import { useForceLight } from "@/hooks/use-force-light";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Loader2, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
@@ -24,7 +24,7 @@ const resetFormSchema = z.object({
 type ResetFormData = z.infer<typeof resetFormSchema>;
 
 export default function ResetPassword() {
-  useForceDark();
+  useForceLight();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);

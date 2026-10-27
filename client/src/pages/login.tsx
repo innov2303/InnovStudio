@@ -9,13 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
-import { useForceDark } from "@/hooks/use-force-dark";
+import { useForceLight } from "@/hooks/use-force-light";
 import { loginSchema, type LoginData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
-  useForceDark();
+  useForceLight();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { login } = useAuth();

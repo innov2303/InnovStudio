@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-export function useForceDark() {
+export function useForceLight() {
   useEffect(() => {
-    document.documentElement.classList.add("dark");
-    
+    document.documentElement.classList.remove("dark");
+
     return () => {
       const stored = localStorage.getItem("theme") as "light" | "dark" | null;
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useForceDark } from "@/hooks/use-force-dark";
+import { useForceLight } from "@/hooks/use-force-light";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
 import { useState } from "react";
@@ -39,11 +39,10 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import SiteFooter from "@/components/site-footer";
 
-import featuresBg from "@/assets/images/features-bg.jpg";
 import projectTracking from "@/assets/images/project-tracking.png";
 
 export default function Home() {
-  useForceDark();
+  useForceLight();
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [contactOpen, setContactOpen] = useState(false);
@@ -174,7 +173,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-2">
+        <div className="container mx-auto grid grid-cols-[auto_1fr] lg:grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-2">
           <Link href="/" className="justify-self-start">
             <span className="text-xl md:text-2xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent cursor-pointer">
               Innov Studio
@@ -232,18 +231,14 @@ export default function Home() {
       </header>
 
       <main>
-        <section className="relative pt-32 pb-20 overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: "url(/images/hero-bg.jpg)" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/80 to-background/70 dark:from-background/98 dark:via-background/90 dark:to-background/80" />
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <section className="relative pt-32 pb-20 overflow-hidden bg-white text-slate-900">
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-sky-50" />
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-100/70 rounded-full blur-3xl" />
           
           <div className="container relative mx-auto px-6">
             <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border bg-background/50 backdrop-blur px-4 py-2 mb-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 backdrop-blur px-4 py-2 mb-8">
                 <Sparkles className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Innovation Web & Intelligence Artificielle</span>
               </div>
@@ -269,7 +264,7 @@ export default function Home() {
                   </Button>
                 </a>
                 <a href="/site-evolutif">
-                  <Button size="lg" variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 hover:border-cyan-500/60 transition-all duration-300" data-testid="button-discover-services">
+                  <Button size="lg" variant="outline" className="border-cyan-700/40 text-cyan-800 hover:bg-cyan-50 hover:border-cyan-700/60 transition-all duration-300" data-testid="button-discover-services">
                     Découvrir le site évolutif
                   </Button>
                 </a>
@@ -284,12 +279,8 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
         </div>
 
-        <section id="features" className="relative py-20 overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${featuresBg})` }}
-          />
-          <div className="absolute inset-0 bg-background/85 dark:bg-background/92" />
+        <section id="features" className="relative py-20 overflow-hidden bg-slate-50">
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50" />
           <div className="container relative mx-auto px-6">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -347,7 +338,7 @@ export default function Home() {
                       <div className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br ${step.color} transition-all duration-300 ${isActive ? "shadow-[0_0_12px_rgba(0,200,255,0.3)]" : ""}`}>
                         <StepIcon className="h-5 w-5 text-white" />
                       </div>
-                      <span className={`text-[10px] font-semibold uppercase tracking-wider ${isActive ? "text-cyan-400" : "text-muted-foreground"}`}>
+                      <span className={`text-[10px] font-semibold uppercase tracking-wider ${isActive ? "text-cyan-700" : "text-muted-foreground"}`}>
                         Étape {step.step}
                       </span>
                       <h4 className="text-xs font-semibold mt-1 leading-tight">{step.title}</h4>
@@ -376,7 +367,7 @@ export default function Home() {
         <section id="contact" className="py-20 relative overflow-hidden">
           <div className="absolute inset-0">
             <img src="/images/contact-bg.png" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-background/70" />
+            <div className="absolute inset-0 bg-white/90" />
           </div>
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-12">
@@ -416,7 +407,7 @@ export default function Home() {
                         </Button>
                       </Link>
                       <Link href="/register">
-                        <Button size="lg" variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 hover:border-cyan-500/60 transition-all duration-300" data-testid="button-register-cta">
+                        <Button size="lg" variant="outline" className="border-cyan-700/40 text-cyan-800 hover:bg-cyan-50 hover:border-cyan-700/60 transition-all duration-300" data-testid="button-register-cta">
                           Créer un compte
                         </Button>
                       </Link>

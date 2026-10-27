@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForceDark } from "@/hooks/use-force-dark";
+import { useForceLight } from "@/hooks/use-force-light";
 import { forgotPasswordSchema, type ForgotPasswordData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Loader2, Mail, CheckCircle } from "lucide-react";
 
 export default function ForgotPassword() {
-  useForceDark();
+  useForceLight();
   const [success, setSuccess] = useState(false);
 
   const form = useForm<ForgotPasswordData>({

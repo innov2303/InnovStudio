@@ -462,26 +462,26 @@ export function renderSeoPage(page: SeoPage): string {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     ${jsonLd(page)}
     <style>
-      :root{color-scheme:dark;--bg:#080b12;--panel:#111722;--text:#f5f7fb;--muted:#9aa4b2;--cyan:#22d3ee;--blue:#3b82f6;--line:rgba(148,163,184,.18)}
+      :root{color-scheme:light;--bg:#f8fafc;--panel:#fff;--text:#0f172a;--muted:#475569;--cyan:#0e7490;--blue:#2563eb;--line:rgba(15,23,42,.12)}
       *{box-sizing:border-box}
       body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
       a{color:inherit;text-decoration:none}a:hover{color:var(--cyan)}
       .wrap{width:min(1280px,calc(100% - 48px));margin:auto}
-      header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid var(--line);background:rgba(8,11,18,.82);backdrop-filter:blur(14px)}
-      .nav{height:52px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
-      .brand{justify-self:start;flex:none;font-size:24px;letter-spacing:.025em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
+      header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid var(--line);background:rgba(255,255,255,.88);backdrop-filter:blur(14px)}
+      .nav{height:52px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px}
+      .brand{justify-self:start;flex:none;font-size:24px;letter-spacing:.025em;font-weight:300;white-space:nowrap;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
       nav{justify-self:center;display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;white-space:nowrap}
-      nav a{color:var(--muted);transition:color .2s ease}nav a:hover{color:var(--text)}
-      .login{justify-self:end;flex:none;display:inline-flex;align-items:center;height:38px;padding:8px 20px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:600;line-height:20px;box-shadow:0 8px 24px rgba(34,211,238,.18)}
+      nav a{color:var(--muted);transition:color .2s ease}nav a:hover{color:var(--blue)}
+      .login{justify-self:end;flex:none;display:inline-flex;align-items:center;height:38px;padding:8px 20px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:600;line-height:20px;white-space:nowrap;box-shadow:0 8px 24px rgba(34,211,238,.18)}
       .login span{display:inline-flex;width:16px;justify-content:center;margin-left:4px}
       .login:hover{color:white;filter:brightness(1.08)}
       main{padding:0 0 80px}
       .hero{position:relative;isolation:isolate;overflow:hidden;width:100%;padding:128px 24px 80px;text-align:center}
       .hero-bg,.hero-overlay{position:absolute;inset:0;pointer-events:none}
-      .hero-bg{z-index:-2;background:url("/images/hero-bg.jpg") center/cover no-repeat}
-      .hero-overlay{z-index:-1;background:linear-gradient(135deg,rgba(8,11,18,.96),rgba(8,11,18,.82),rgba(8,11,18,.88)),radial-gradient(circle at 16% 24%,rgba(59,130,246,.18),transparent 34%),radial-gradient(circle at 82% 78%,rgba(34,211,238,.12),transparent 38%)}
+      .hero-bg{z-index:-2;background:linear-gradient(135deg,#fff 0%,#fff 72%,#f0f9ff 100%)}
+      .hero-overlay{z-index:-1;background:radial-gradient(circle at 16% 24%,rgba(59,130,246,.06),transparent 34%),radial-gradient(circle at 82% 78%,rgba(34,211,238,.08),transparent 38%)}
       .hero-content{position:relative;max-width:1080px;margin:0 auto}
-      .eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px;font-weight:500;letter-spacing:0;border:1px solid var(--line);border-radius:999px;background:rgba(15,23,42,.5);backdrop-filter:blur(8px);padding:8px 16px;margin-bottom:24px}
+      .eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px;font-weight:500;letter-spacing:0;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);padding:8px 16px;margin-bottom:24px}
       .hero-brand{font-size:clamp(56px,8vw,96px);line-height:1.05;letter-spacing:.02em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent;margin:0 0 20px}
       .hero h1{max-width:920px;margin:0 auto 18px;font-size:clamp(32px,3.75vw,48px);line-height:1.12;letter-spacing:-.035em}
       .accent{background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
@@ -489,13 +489,13 @@ export function renderSeoPage(page: SeoPage): string {
       .page-label{color:var(--cyan);font-weight:600;text-align:center;margin:0 auto 30px}
       .hero-actions{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap}
       .hero-actions .button{margin:0;padding:10px 20px;font-size:14px;line-height:20px}
-      .button-secondary{border:1px solid rgba(34,211,238,.4);background:rgba(8,11,18,.28);color:#a5f3fc;box-shadow:none}
-      .hero-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.75),transparent);box-shadow:0 0 14px rgba(34,211,238,.35)}
+      .button-secondary{border:1px solid rgba(14,116,144,.35);background:rgba(255,255,255,.85);color:#0e7490;box-shadow:none}
+      .hero-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(14,116,144,.42),transparent)}
       .page-content{padding-top:40px}
       .content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
       #services{scroll-margin-top:80px}
       .service-grid,.reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
-      .service-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:30px;display:flex;flex-direction:column}
+      .service-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:30px;display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(15,23,42,.04)}
       .service-card h2{font-size:25px}
       .service-card>p{min-height:54px}
       .service-items{display:grid;gap:14px;margin:10px 0 24px}
@@ -505,23 +505,25 @@ export function renderSeoPage(page: SeoPage): string {
       .service-card .button{align-self:flex-start;margin-top:auto}
       .reference-section{margin:0 0 42px}
       .reference-section h2{margin:0 0 20px}
-      .reference-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel);transition:border-color .2s ease,transform .2s ease}
+      .reference-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 8px 24px rgba(15,23,42,.04);transition:border-color .2s ease,transform .2s ease}
       a.reference-card{display:block}
       a.reference-card:hover{border-color:rgba(34,211,238,.55);transform:translateY(-2px)}
-      .reference-card img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;background:#0b111d}
+      .reference-card img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;background:#f1f5f9}
       .reference-copy{padding:18px}
       .reference-copy span{display:inline-block;color:var(--cyan);font-size:13px;margin-top:12px}
       .empty-reference{border:1px dashed var(--line);border-radius:12px;padding:20px}
-      .content-section{background:var(--panel);border:1px solid transparent;border-radius:12px;padding:30px;transition:border-color .25s ease,box-shadow .25s ease}
-      .content-section:hover{border-color:rgba(34,211,238,.5);box-shadow:0 0 18px rgba(0,200,255,.12)}
+      .content-section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:30px;box-shadow:0 8px 24px rgba(15,23,42,.04);transition:border-color .25s ease,box-shadow .25s ease}
+      .content-section:hover{border-color:rgba(14,116,144,.4);box-shadow:0 8px 24px rgba(15,23,42,.08)}
       h2{font-size:22px;line-height:1.3;margin:0 0 14px}
       p{color:var(--muted);margin:0 0 14px}p:last-child{margin-bottom:0}
-      ul{color:#dbe6f5;padding-left:20px;margin:12px 0 0}li{padding:3px 0}
-      .cta{margin:48px 0;padding:40px 28px;border:1px solid rgba(34,211,238,.32);border-radius:12px;background:linear-gradient(115deg,rgba(14,38,55,.75),rgba(16,23,42,.85));text-align:center}
+      ul{color:#334155;padding-left:20px;margin:12px 0 0}li{padding:3px 0}
+      .cta{margin:48px 0;padding:40px 28px;border:1px solid rgba(14,116,144,.22);border-radius:12px;background:linear-gradient(115deg,#eff6ff,#f0fdfa);text-align:center}
       .cta h2{font-size:26px}
       .cta p{max-width:620px;margin:0 auto 14px}
       .button{display:inline-flex;align-items:center;justify-content:center;margin-top:8px;padding:12px 20px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-weight:600;box-shadow:0 8px 24px rgba(34,211,238,.18);transition:filter .2s ease}
       .button:hover{color:white;filter:brightness(1.1)}
+      .hero-actions .button.button-secondary{border:1px solid rgba(14,116,144,.35);background:#fff;color:#0e7490;box-shadow:none}
+      .hero-actions .button.button-secondary:hover{background:#f0fdfa;color:#0e7490}
       .faq{margin:54px auto 0;max-width:900px}.faq h2{margin-bottom:18px}
       details{padding:17px 0;border-bottom:1px solid var(--line)}
       summary{cursor:pointer;font-weight:650}
@@ -532,6 +534,7 @@ export function renderSeoPage(page: SeoPage): string {
       .footer-copy{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;text-align:right}
       .footer-copy p{margin:0;font-size:13px}
       .footer-copy a{color:var(--muted)}
+      @media(min-width:1024px){.nav{grid-template-columns:1fr auto 1fr}}
       @media(max-width:1023px){nav{display:none}}
       @media(max-width:767px){.wrap{width:calc(100% - 40px)}.nav{height:52px}.brand{font-size:20px}.login{font-size:13px;padding:8px 12px}.hero{padding:118px 20px 56px}.hero-brand{font-size:clamp(52px,14vw,72px);margin-bottom:18px}.hero h1{font-size:clamp(30px,8vw,40px)}.hero-actions{flex-direction:column}.hero-actions .button{width:min(100%,280px)}.page-content{padding-top:28px}.content-grid,.service-grid,.reference-grid{grid-template-columns:1fr;gap:16px}.content-section,.service-card{padding:24px}.cta{padding:30px 20px}.footer-inner{align-items:center;flex-direction:column;text-align:center}.footer-copy{justify-content:center;text-align:center}}
     </style>
