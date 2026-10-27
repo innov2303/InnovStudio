@@ -1,2 +1,3 @@
 - [Positionnement de l’offre](seo-positioning.md) — présenter les services comme un site web évolutif, du lancement à l’application métier.
+- [Cohérence visuelle des pages](shared-page-design.md) — conserver la même base graphique sur l’accueil et les pages publiques.
 - [Dépendances post-merge](post-merge-dependencies.md) — si npm ci est bloqué par une version vulnérable verrouillée, mettre à jour sa dépendance directe et le lockfile.

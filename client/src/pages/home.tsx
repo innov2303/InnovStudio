@@ -39,7 +39,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import SiteFooter from "@/components/site-footer";
 
-import heroBg from "@/assets/images/hero-bg.jpg";
 import featuresBg from "@/assets/images/features-bg.jpg";
 import projectTracking from "@/assets/images/project-tracking.png";
 
@@ -181,7 +180,7 @@ export default function Home() {
               Innov Studio
             </span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-6">
             <a href="/" className="text-muted-foreground hover:text-foreground transition-colors">
               Accueil
             </a>
@@ -236,7 +235,7 @@ export default function Home() {
         <section className="relative pt-32 pb-20 overflow-hidden">
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${heroBg})` }}
+            style={{ backgroundImage: "url(/images/hero-bg.jpg)" }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/80 to-background/70 dark:from-background/98 dark:via-background/90 dark:to-background/80" />
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />

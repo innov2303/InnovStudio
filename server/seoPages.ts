@@ -468,21 +468,29 @@ export function renderSeoPage(page: SeoPage): string {
       a{color:inherit;text-decoration:none}a:hover{color:var(--cyan)}
       .wrap{width:min(1280px,calc(100% - 48px));margin:auto}
       header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid var(--line);background:rgba(8,11,18,.82);backdrop-filter:blur(14px)}
-      .nav{height:60px;display:flex;align-items:center;justify-content:space-between;gap:18px}
-      .brand{flex:none;font-size:22px;letter-spacing:.04em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
-      nav{display:flex;align-items:center;justify-content:center;gap:clamp(12px,1.5vw,24px);font-size:14px;white-space:nowrap}
+      .nav{height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+      .brand{flex:none;font-size:24px;letter-spacing:.04em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
+      nav{display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;white-space:nowrap}
       nav a{color:var(--muted);transition:color .2s ease}nav a:hover{color:var(--text)}
-      .login{flex:none;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(34,211,238,.18)}
+      .login{flex:none;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(34,211,238,.18)}
       .login:hover{color:white;filter:brightness(1.08)}
-      main{padding:60px 0 80px}
-      .crumbs{font-size:13px;color:var(--muted);margin:24px 0 0}
-      .crumbs a{color:var(--cyan)}
-      .hero{padding:74px 0 70px;max-width:920px;margin:0 auto;text-align:center}
-      .eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px;font-weight:500;letter-spacing:0;border:1px solid var(--line);border-radius:999px;background:rgba(15,23,42,.5);padding:8px 16px}
-      h1{font-size:clamp(36px,5.4vw,64px);line-height:1.12;letter-spacing:-.035em;margin:28px 0 22px}
+      main{padding:0 0 80px}
+      .hero{position:relative;isolation:isolate;overflow:hidden;width:100vw;margin-left:calc((100% - 100vw)/2);padding:128px 24px 72px;text-align:center}
+      .hero-bg,.hero-overlay{position:absolute;inset:0;pointer-events:none}
+      .hero-bg{z-index:-2;background:url("/images/hero-bg.jpg") center/cover no-repeat}
+      .hero-overlay{z-index:-1;background:linear-gradient(135deg,rgba(8,11,18,.96),rgba(8,11,18,.82),rgba(8,11,18,.88)),radial-gradient(circle at 16% 24%,rgba(59,130,246,.18),transparent 34%),radial-gradient(circle at 82% 78%,rgba(34,211,238,.12),transparent 38%)}
+      .hero-content{position:relative;max-width:920px;margin:0 auto}
+      .eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px;font-weight:500;letter-spacing:0;border:1px solid var(--line);border-radius:999px;background:rgba(15,23,42,.5);backdrop-filter:blur(8px);padding:8px 16px;margin-bottom:24px}
+      .hero-brand{font-size:clamp(56px,8vw,96px);line-height:1.05;letter-spacing:.02em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent;margin:0 0 20px}
+      .hero h1{font-size:clamp(32px,4vw,52px);line-height:1.12;letter-spacing:-.035em;margin:0 0 18px}
       .accent{background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
-      .intro{font-size:clamp(18px,2.1vw,21px);color:var(--muted);line-height:1.65;max-width:800px;margin:0 auto}
-      .hero-label{color:var(--cyan);font-weight:600;margin:22px 0 0}
+      .intro{font-size:clamp(18px,2.1vw,21px);color:var(--muted);line-height:1.65;max-width:700px;margin:0 auto 20px}
+      .hero-label{color:var(--cyan);font-weight:600;margin:0 auto 26px}
+      .hero-actions{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap}
+      .hero-actions .button{margin:0}
+      .button-secondary{border:1px solid rgba(34,211,238,.4);background:rgba(8,11,18,.28);color:#a5f3fc;box-shadow:none}
+      .hero-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.75),transparent);box-shadow:0 0 14px rgba(34,211,238,.35)}
+      .page-content{padding-top:40px}
       .content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
       #services{scroll-margin-top:80px}
       .service-grid,.reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
@@ -523,9 +531,8 @@ export function renderSeoPage(page: SeoPage): string {
       .footer-copy{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;text-align:right}
       .footer-copy p{margin:0;font-size:13px}
       .footer-copy a{color:var(--muted)}
-      @media(max-width:1000px){nav{gap:12px;font-size:12px}.login{padding:8px 12px}}
-      @media(max-width:900px){nav{display:none}}
-      @media(max-width:767px){.wrap{width:calc(100% - 40px)}.nav{height:56px}.brand{font-size:20px}.login{font-size:13px;padding:8px 12px}main{padding-top:56px}.crumbs{margin-top:18px}.hero{padding:58px 0 48px}.content-grid,.service-grid,.reference-grid{grid-template-columns:1fr;gap:16px}.content-section,.service-card{padding:24px}.cta{padding:30px 20px}.footer-inner{align-items:center;flex-direction:column;text-align:center}.footer-copy{justify-content:center;text-align:center}}
+      @media(max-width:1023px){nav{display:none}}
+      @media(max-width:767px){.wrap{width:calc(100% - 40px)}.nav{height:52px}.brand{font-size:20px}.login{font-size:13px;padding:8px 12px}.hero{padding:118px 20px 56px}.hero-brand{font-size:clamp(52px,14vw,72px);margin-bottom:18px}.hero h1{font-size:clamp(30px,8vw,40px)}.hero-actions{flex-direction:column}.hero-actions .button{width:min(100%,280px)}.page-content{padding-top:28px}.content-grid,.service-grid,.reference-grid{grid-template-columns:1fr;gap:16px}.content-section,.service-card{padding:24px}.cta{padding:30px 20px}.footer-inner{align-items:center;flex-direction:column;text-align:center}.footer-copy{justify-content:center;text-align:center}}
     </style>
   </head>
   <body>
@@ -542,25 +549,36 @@ export function renderSeoPage(page: SeoPage): string {
         <a class="login" href="/login">Connexion <span aria-hidden="true">›</span></a>
       </div>
     </header>
-    <main class="wrap">
-      <div class="crumbs"><a href="/">Accueil</a> <span aria-hidden="true">›</span> ${escapeHtml(page.h1)}</div>
+    <main>
       <article>
         <section class="hero">
-          <div class="eyebrow"><span aria-hidden="true">✧</span> Innovation Web & Intelligence Artificielle</div>
-          <h1>${headingMarkup}</h1>
-          <p class="intro">${escapeHtml(page.intro)}</p>
-          <p class="hero-label">${escapeHtml(page.label)}</p>
+          <div class="hero-bg" aria-hidden="true"></div>
+          <div class="hero-overlay" aria-hidden="true"></div>
+          <div class="hero-content">
+            <div class="eyebrow"><span aria-hidden="true">✧</span> Innovation Web & Intelligence Artificielle</div>
+            <div class="hero-brand" aria-hidden="true">Innov Studio</div>
+            <h1>${headingMarkup}</h1>
+            <p class="intro">${escapeHtml(page.intro)}</p>
+            <p class="hero-label">${escapeHtml(page.label)}</p>
+            <div class="hero-actions">
+              <a class="button" href="/#contact">Démarrer un projet <span aria-hidden="true">→</span></a>
+              <a class="button button-secondary" href="/references">Découvrir nos références</a>
+            </div>
+          </div>
         </section>
-        ${pageContent}
-        <section class="cta">
-          <h2>${escapeHtml(page.cta)}</h2>
-          <p>Présentez votre activité, votre objectif et les besoins que vous souhaitez traiter en premier.</p>
-          <a class="button" href="/#contact">Parler de mon projet</a>
-        </section>
-        <section class="faq">
-          <h2>Questions fréquentes</h2>
-          ${faq}
-        </section>
+        <div class="hero-divider" aria-hidden="true"></div>
+        <div class="wrap page-content">
+          ${pageContent}
+          <section class="cta">
+            <h2>${escapeHtml(page.cta)}</h2>
+            <p>Présentez votre activité, votre objectif et les besoins que vous souhaitez traiter en premier.</p>
+            <a class="button" href="/#contact">Parler de mon projet</a>
+          </section>
+          <section class="faq">
+            <h2>Questions fréquentes</h2>
+            ${faq}
+          </section>
+        </div>
       </article>
     </main>
     <footer>
