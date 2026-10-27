@@ -546,7 +546,7 @@ export function renderSeoPage(page: SeoPage): string {
         <nav aria-label="Navigation principale">
           <a href="/">Accueil</a>
           <a href="/site-evolutif">Site vitrine</a>
-          <a href="/application-web-entreprise">Application métier</a>
+          <a href="/application-web-entreprise">Application web métier</a>
           <a href="/references">Références</a>
           <a href="/#contact">Contact</a>
         </nav>

@@ -217,7 +217,7 @@ export default function Home() {
               Site vitrine
             </a>
             <a href="/application-web-entreprise" className="text-muted-foreground hover:text-foreground transition-colors">
-              Application métier
+              Application web métier
             </a>
             <a href="/references" className="text-muted-foreground hover:text-foreground transition-colors">
               Références
