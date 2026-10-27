@@ -63,7 +63,10 @@ test("the evolving service page presents the path to an application on one page"
     html.lastIndexOf('<section class="feature-item"', html.indexOf("Dashboard selon vos besoins")) >
       customFeatureEnd,
   );
-  assert.match(html, /référencement SEO dynamique/);
+  assert.match(
+    html,
+    /Analyse des connexions au site, Agent SEO Dynamique et autre modules IA selon vos besoins/,
+  );
   assert.doesNotMatch(html, /Questions fréquentes|Parlons de la première étape/);
   assert.match(html, /href="\/site-evolutif">Site Web Evolutif<\/a>/);
   assert.doesNotMatch(html, /href="\/application-web-entreprise">Application web métier<\/a>/);

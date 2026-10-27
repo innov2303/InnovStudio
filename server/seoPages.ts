@@ -117,7 +117,7 @@ export const seoPages: SeoPage[] = [
         icon: "ai",
         title: "Modules IA sur demande",
         paragraphs: [
-          "Demandez l’analyse des connexions au site ou des fonctions de référencement SEO dynamique.",
+          "Analyse des connexions au site, Agent SEO Dynamique et autre modules IA selon vos besoins",
         ],
       },
     ],
