@@ -474,10 +474,10 @@ export default function Home() {
                 </p>
                 <h3 className="mb-3 text-2xl font-bold text-slate-900">Application web métier</h3>
                 <p className="mb-6 text-muted-foreground">
-                  Créez directement une application adaptée à vos processus, ou faites évoluer votre site vitrine existant avec les fonctionnalités métier dont vous avez besoin.
+                  Créez votre application métier adaptée ou faites évoluer votre site vitrine existant avec les fonctionnalités métier dont vous avez besoin.
                 </p>
                 <ul className="mb-8 space-y-2 text-sm text-slate-600">
-                  <li>• Création directe d’un outil métier sur mesure</li>
+                  <li>• Création de votre application web entreprise</li>
                   <li>• Évolution possible d’un site vitrine existant</li>
                   <li>• Espace client, suivi, tableaux de bord ou automatisations</li>
                 </ul>
