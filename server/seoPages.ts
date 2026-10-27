@@ -534,11 +534,8 @@ export function renderSeoPage(page: SeoPage): string {
         <a class="brand" href="/">Innov Studio</a>
         <nav aria-label="Navigation principale">
           <a href="/">Accueil</a>
-          <a href="/services">Services</a>
           <a href="/site-evolutif">Site évolutif</a>
           <a href="/application-web-entreprise">Application métier</a>
-          <a href="/creation-site-web">Création de site</a>
-          <a href="/#features">Avantages</a>
           <a href="/references">Références</a>
           <a href="/#contact">Contact</a>
         </nav>

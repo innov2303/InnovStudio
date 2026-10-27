@@ -185,20 +185,11 @@ export default function Home() {
             <a href="/" className="text-muted-foreground hover:text-foreground transition-colors">
               Accueil
             </a>
-            <a href="/services" className="text-muted-foreground hover:text-foreground transition-colors">
-              Services
-            </a>
             <a href="/site-evolutif" className="text-muted-foreground hover:text-foreground transition-colors">
               Site évolutif
             </a>
             <a href="/application-web-entreprise" className="text-muted-foreground hover:text-foreground transition-colors">
               Application métier
-            </a>
-            <a href="/creation-site-web" className="text-muted-foreground hover:text-foreground transition-colors">
-              Création de site
-            </a>
-            <a href="#features" onClick={(e) => scrollToSection(e, "features")} className="text-muted-foreground hover:text-foreground transition-colors">
-              Avantages
             </a>
             <a href="/references" className="text-muted-foreground hover:text-foreground transition-colors">
               Références
