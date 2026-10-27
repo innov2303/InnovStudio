@@ -1,1 +1,2 @@
 - [Positionnement de l’offre](seo-positioning.md) — présenter les services comme un site web évolutif, du lancement à l’application métier.
+- [Dépendances post-merge](post-merge-dependencies.md) — si npm ci est bloqué par une version vulnérable verrouillée, mettre à jour sa dépendance directe et le lockfile.
