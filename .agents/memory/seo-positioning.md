@@ -7,7 +7,7 @@ Présenter l’offre comme un site web évolutif : le client peut commencer avec
 
 **Why:** l’utilisateur a demandé de remplacer les catégories « site vitrine » et « site web entreprise » par ce parcours progressif.
 
-**How to apply:** garder ce fil conducteur dans les intitulés de services, la navigation, les pages SEO et les contenus commerciaux.
+**How to apply:** garder ce fil conducteur dans les intitulés de services, la navigation, les pages SEO et les contenus commerciaux. Dans le menu principal, présenter le parcours sous une entrée « Site Web Evolutif » ; garder la page spécialisée application accessible hors du menu pour le référencement, et orienter les cartes de services vers la page unifiée.
 
 Ne pas utiliser de mention géographique liée à Toulouse dans les textes du site, les métadonnées SEO ou les mots-clés de l’agent SEO.
 

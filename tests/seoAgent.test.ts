@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getSeoPageAuditData, seoPages, type SeoPageAuditData } from "../server/seoPages";
+import { getSeoPageAuditData, renderSeoPage, seoPages, type SeoPageAuditData } from "../server/seoPages";
 
 process.env.DATABASE_URL ??= "postgres://test:test@localhost:5432/test";
 const { analyzeServicePages } = await import("../server/seoAgent");
@@ -18,6 +18,22 @@ test("the rendered service pages expose their title, description, canonical and 
     assert.equal(page.indexable, true);
     assert.ok(page.contentLength >= 300, `${page.path} has enough visible content`);
   }
+});
+
+test("the evolving service page presents the path to an application on one page", () => {
+  const page = seoPages.find((candidate) => candidate.path === "/site-evolutif");
+  assert.ok(page);
+
+  const html = renderSeoPage(page);
+  assert.match(html, /Du site vitrine à l’application web métier/);
+  assert.match(html, /id="application-metier"/);
+  assert.match(html, /href="\/site-evolutif">Site Web Evolutif<\/a>/);
+  assert.doesNotMatch(html, /href="\/application-web-entreprise">Application web métier<\/a>/);
+
+  const servicesPage = seoPages.find((candidate) => candidate.path === "/services");
+  assert.ok(servicesPage);
+  const servicesHtml = renderSeoPage(servicesPage);
+  assert.match(servicesHtml, /href="\/site-evolutif#application-metier"/);
 });
 
 test("service-page recommendations identify their URL and detect canonical/indexability issues", () => {

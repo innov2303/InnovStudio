@@ -214,10 +214,7 @@ export default function Home() {
               Accueil
             </a>
             <a href="/site-evolutif" className="text-muted-foreground hover:text-foreground transition-colors">
-              Site vitrine
-            </a>
-            <a href="/application-web-entreprise" className="text-muted-foreground hover:text-foreground transition-colors">
-              Application web métier
+              Site Web Evolutif
             </a>
             <a href="/references" className="text-muted-foreground hover:text-foreground transition-colors">
               Références
@@ -326,7 +323,7 @@ export default function Home() {
                 </a>
                 <a href="/site-evolutif">
                   <Button size="lg" variant="outline" className="border-cyan-700/40 text-cyan-800 hover:bg-cyan-50 hover:border-cyan-700/60 transition-all duration-300" data-testid="button-discover-services">
-                    Découvrir le site vitrine
+                    Découvrir le site web évolutif
                   </Button>
                 </a>
               </div>
@@ -448,7 +445,7 @@ export default function Home() {
                 <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
                   Présence en ligne
                 </p>
-                <h3 className="mb-3 text-2xl font-bold text-slate-900">Site vitrine</h3>
+                <h3 className="mb-3 text-2xl font-bold text-slate-900">Site Web Evolutif</h3>
                 <p className="mb-6 text-muted-foreground">
                   Présentez votre activité et vos services avec un site professionnel, adapté aux mobiles et conçu pour faciliter les prises de contact.
                 </p>
@@ -461,7 +458,7 @@ export default function Home() {
                   href="/site-evolutif"
                   className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
                 >
-                  Découvrir le site vitrine <ArrowRight className="h-4 w-4" />
+                  Découvrir le site web évolutif <ArrowRight className="h-4 w-4" />
                 </a>
               </article>
 
@@ -482,10 +479,10 @@ export default function Home() {
                   <li>• Espace client, suivi, tableaux de bord ou automatisations</li>
                 </ul>
                 <a
-                  href="/application-web-entreprise"
+                  href="/site-evolutif#application-metier"
                   className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
                 >
-                  Découvrir l’application web métier <ArrowRight className="h-4 w-4" />
+                  Voir l’évolution vers une application métier <ArrowRight className="h-4 w-4" />
                 </a>
               </article>
             </div>

@@ -4,6 +4,7 @@ type SeoSection = {
   title: string;
   paragraphs: string[];
   bullets?: string[];
+  id?: string;
 };
 
 type ServiceCard = {
@@ -50,14 +51,14 @@ export type SeoPageAuditData = {
 export const seoPages: SeoPage[] = [
   {
     path: "/site-evolutif",
-    title: "Site vitrine professionnel et SEO | Innov Studio",
+    title: "Site Web Évolutif : du site vitrine à l’application | Innov Studio",
     description:
-      "Un site vitrine professionnel avec des pages adaptées à votre activité, un design responsive et les fondations SEO incluses. Faites-le évoluer selon vos besoins.",
-    h1: "Un site vitrine qui évolue avec votre activité",
-    h1Accent: "évolue avec votre activité",
+      "Démarrez avec un site vitrine professionnel, puis faites-le évoluer vers une application web métier : espace client, suivi, tableaux de bord et automatisations.",
+    h1: "Du site vitrine à l’application web métier",
+    h1Accent: "application web métier",
     intro:
-      "Présentez clairement vos services avec un site adapté aux mobiles et aux ordinateurs, structuré pour le référencement naturel et prêt à évoluer vers des fonctionnalités métier.",
-    label: "Une présence professionnelle, visible et prête à grandir.",
+      "Commencez par un site vitrine clair et bien référencé, puis ajoutez les fonctionnalités métier utiles à votre activité, jusqu’à une application web sur mesure.",
+    label: "Une solution web qui évolue au rythme de votre activité.",
     sections: [
       {
         title: "Des pages et des contenus adaptés à votre activité",
@@ -109,15 +110,18 @@ export const seoPages: SeoPage[] = [
         ],
       },
       {
-        title: "Un site vitrine qui peut évoluer avec votre activité",
+        id: "application-metier",
+        title: "Du site vitrine à l’application web métier, étape par étape",
         paragraphs: [
-          "Votre projet peut commencer par les pages et les informations dont vous avez besoin aujourd’hui, puis accueillir de nouvelles fonctions lorsque votre activité évolue : prise de rendez-vous, catalogue, formulaires métier, espace client ou automatisations.",
-          "Si vos besoins deviennent plus complexes, le site peut servir de point de départ vers une application web métier. Les évolutions sont définies selon vos priorités et vos utilisateurs.",
+          "Vous pouvez commencer par un site vitrine professionnel : des pages adaptées à votre activité, une présentation claire de vos services et des bases SEO solides. C’est un point de départ pour vous rendre visible et faciliter les prises de contact.",
+          "Quand vos besoins grandissent, ajoutez progressivement des fonctions utiles : réservation, catalogue, formulaires connectés, espace client, comptes utilisateurs, suivi de dossiers, tableaux de bord ou automatisations.",
+          "Lorsque ces fonctions deviennent centrales dans votre activité, le projet peut évoluer vers une application web métier conçue autour de vos processus. Selon le site existant et ses données, nous définissons ce qui peut être conservé et les étapes à construire. Vous pouvez aussi démarrer directement par l’application si c’est votre besoin prioritaire.",
         ],
         bullets: [
-          "Ajout de pages et de fonctionnalités au fil des besoins",
-          "Possibilité de créer un espace client ou des outils métier",
-          "Évolution progressive vers une application web",
+          "Commencer par un site vitrine professionnel et bien structuré",
+          "Ajouter des fonctionnalités au rythme de vos besoins",
+          "Faire évoluer le projet vers une application web métier sur mesure",
+          "Planifier chaque étape selon vos usages et vos priorités",
         ],
       },
       {
@@ -135,9 +139,9 @@ export const seoPages: SeoPage[] = [
     cta: "Parlons de la première étape de votre projet",
     faq: [
       {
-        question: "Peut-on transformer un site existant en application web ?",
+        question: "Peut-on passer d’un site vitrine à une application web métier ?",
         answer:
-          "C’est parfois possible. Une première analyse du site, de ses données et des besoins permet de définir les éléments à conserver et les évolutions à prévoir.",
+          "Oui, selon la structure du site, ses données et les fonctionnalités souhaitées. Une première analyse permet de déterminer ce qui peut être conservé et de planifier les évolutions.",
       },
       {
         question: "Dois-je prévoir toutes les fonctionnalités dès le départ ?",
@@ -270,11 +274,11 @@ export const seoPages: SeoPage[] = [
     sections: [],
     serviceCards: [
       {
-        title: "Site vitrine",
+        title: "Site Web Evolutif",
         href: "/site-evolutif",
-        linkLabel: "Découvrir le site vitrine",
+        linkLabel: "Découvrir le site web évolutif",
         description:
-          "Lancez une présence web professionnelle, puis ajoutez de nouvelles pages et fonctionnalités à mesure que votre activité grandit.",
+          "Commencez par un site vitrine professionnel et faites-le évoluer avec de nouvelles pages et des fonctionnalités métier.",
         items: [
           { title: "Une base web sur mesure", description: "Un design clair, des contenus bien organisés et une expérience adaptée au mobile." },
           { title: "Des fonctionnalités utiles", description: "Réservation, catalogue, espace client ou outils connectés selon vos priorités." },
@@ -284,8 +288,8 @@ export const seoPages: SeoPage[] = [
       },
       {
         title: "Application web métier",
-        href: "/application-web-entreprise",
-        linkLabel: "Découvrir les applications métier",
+        href: "/site-evolutif#application-metier",
+        linkLabel: "Voir l’évolution vers une application métier",
         description:
           "Transformez vos processus en outils web adaptés à vos équipes et à vos clients lorsque votre activité en a besoin.",
         items: [
@@ -459,7 +463,7 @@ export function renderSeoPage(page: SeoPage): string {
   const sections = page.sections
     .map(
       (section) => `
-        <section class="content-section">
+        <section class="content-section"${section.id ? ` id="${escapeHtml(section.id)}"` : ""}>
           <h2>${escapeHtml(section.title)}</h2>
           ${section.paragraphs.map(renderParagraph).join("")}
           ${
@@ -552,6 +556,7 @@ export function renderSeoPage(page: SeoPage): string {
       .empty-reference{border:1px dashed var(--line);border-radius:12px;padding:20px}
       .content-section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:30px;box-shadow:0 8px 24px rgba(15,23,42,.04);transition:border-color .25s ease,box-shadow .25s ease}
       .content-section:hover{border-color:rgba(14,116,144,.4);box-shadow:0 8px 24px rgba(15,23,42,.08)}
+      .content-section[id]{scroll-margin-top:88px}
       h2{font-size:22px;line-height:1.3;margin:0 0 14px}
       p{color:var(--muted);margin:0 0 14px}p:last-child{margin-bottom:0}
       ul{color:#334155;padding-left:20px;margin:12px 0 0}li{padding:3px 0}
@@ -596,8 +601,7 @@ export function renderSeoPage(page: SeoPage): string {
         <a class="brand" href="/">Innov Studio</a>
         <nav aria-label="Navigation principale">
           <a href="/">Accueil</a>
-          <a href="/site-evolutif">Site vitrine</a>
-          <a href="/application-web-entreprise">Application web métier</a>
+          <a href="/site-evolutif">Site Web Evolutif</a>
           <a href="/references">Références</a>
           <a href="/#contact">Contact</a>
         </nav>
