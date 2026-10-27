@@ -231,7 +231,7 @@ export default function Home() {
       </header>
 
       <main>
-        <section className="relative pt-32 pb-20 overflow-hidden bg-white text-slate-900">
+        <section className="relative flex min-h-[100svh] items-center pt-32 pb-20 overflow-hidden bg-white text-slate-900">
           <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-sky-50" />
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-100/70 rounded-full blur-3xl" />
@@ -279,7 +279,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
         </div>
 
-        <section id="features" className="relative py-20 overflow-hidden bg-slate-50">
+        <section id="features" className="relative flex min-h-[100svh] items-center py-20 overflow-hidden bg-slate-50">
           <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50" />
           <div className="container relative mx-auto px-6">
             <div className="text-center mb-10">
@@ -364,7 +364,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
         </div>
 
-        <section id="contact" className="py-20 relative overflow-hidden">
+        <section id="contact" className="relative flex min-h-[100svh] items-center overflow-hidden py-20">
           <div className="absolute inset-0">
             <img src="/images/contact-bg.png" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-white/90" />
