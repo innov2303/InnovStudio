@@ -429,9 +429,6 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-sky-50" />
           <div className="container relative mx-auto px-6">
             <div className="mx-auto mb-12 max-w-2xl text-center">
-              <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-cyan-700">
-                Des solutions adaptées à vos besoins
-              </p>
               <h2 className="mb-4 text-3xl font-bold md:text-4xl">
                 Mes{" "}
                 <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">
