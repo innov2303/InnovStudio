@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useForceLight } from "@/hooks/use-force-light";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   Code2, 
   Sparkles, 
@@ -41,10 +41,17 @@ import SiteFooter from "@/components/site-footer";
 
 import projectTracking from "@/assets/images/project-tracking.png";
 
+const homeSections = [
+  { id: "home-hero", label: "Accueil" },
+  { id: "features", label: "Présentation" },
+  { id: "contact", label: "Contact" },
+];
+
 export default function Home() {
   useForceLight();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const [activeSection, setActiveSection] = useState(homeSections[0].id);
   const [contactOpen, setContactOpen] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: "",
@@ -54,6 +61,28 @@ export default function Home() {
     message: ""
   });
   const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+    const sections = homeSections
+      .map(({ id }) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section !== null);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const mostVisible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (mostVisible) {
+          setActiveSection(mostVisible.target.id);
+        }
+      },
+      { rootMargin: "-25% 0px -35% 0px", threshold: [0, 0.2, 0.5, 0.75] },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
@@ -230,8 +259,39 @@ export default function Home() {
         </div>
       </header>
 
+      <nav
+        aria-label="Navigation entre les sections"
+        className="fixed right-2 sm:right-4 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-2"
+      >
+        {homeSections.map(({ id, label }) => {
+          const isActive = activeSection === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-label={`Aller à la section ${label}`}
+              aria-current={isActive ? "location" : undefined}
+              data-testid={`section-nav-${id}`}
+              onClick={() => {
+                document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className={`group relative flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border shadow-md backdrop-blur transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-2 ${
+                isActive
+                  ? "border-cyan-600 bg-cyan-600 text-white"
+                  : "border-slate-300 bg-white/95 text-slate-600 hover:border-cyan-500 hover:text-cyan-700"
+              }`}
+            >
+              <span className={`h-2 w-2 rounded-full ${isActive ? "bg-white" : "bg-current"}`} />
+              <span className="pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                {label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
       <main>
-        <section className="relative flex min-h-[100svh] items-center pt-32 pb-20 overflow-hidden bg-white text-slate-900">
+        <section id="home-hero" className="relative flex min-h-[100svh] items-center pt-32 pb-20 overflow-hidden bg-white text-slate-900">
           <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-sky-50" />
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-100/70 rounded-full blur-3xl" />
