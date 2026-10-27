@@ -37,6 +37,10 @@ type SeoPage = {
   faq: { question: string; answer: string }[];
   serviceCards?: ServiceCard[];
   references?: PublicReference[];
+  journey?: {
+    start: { label: string; title: string; description: string };
+    next: { label: string; title: string; description: string };
+  };
 };
 
 export type SeoPageAuditData = {
@@ -59,6 +63,20 @@ export const seoPages: SeoPage[] = [
     intro:
       "Commencez par un site vitrine clair et bien référencé, puis ajoutez les fonctionnalités métier utiles à votre activité, jusqu’à une application web sur mesure.",
     label: "Une solution web qui évolue au rythme de votre activité.",
+    journey: {
+      start: {
+        label: "Point de départ",
+        title: "Site vitrine professionnel",
+        description:
+          "Des pages adaptées à votre activité, une présentation claire de vos services et des bases SEO solides.",
+      },
+      next: {
+        label: "Quand vos besoins grandissent",
+        title: "Application web métier",
+        description:
+          "Des fonctionnalités ajoutées progressivement, puis un outil conçu autour de vos processus.",
+      },
+    },
     sections: [
       {
         title: "Des pages et des contenus adaptés à votre activité",
@@ -460,6 +478,32 @@ export function renderSeoPage(page: SeoPage): string {
     escapedAccent,
     `<span class="accent">${escapedAccent}</span>`,
   );
+  const journeyMarkup = page.journey
+    ? `
+      <section class="journey" aria-label="Les étapes de votre solution web">
+        <div class="journey-stage">
+          <div class="journey-stage-top">
+            <span class="journey-number" aria-hidden="true">01</span>
+            <div>
+              <p class="journey-label">${escapeHtml(page.journey.start.label)}</p>
+              <h2>${escapeHtml(page.journey.start.title)}</h2>
+            </div>
+          </div>
+          <p class="journey-description">${escapeHtml(page.journey.start.description)}</p>
+        </div>
+        <span class="journey-connector" aria-hidden="true"></span>
+        <div class="journey-stage journey-stage-next">
+          <div class="journey-stage-top">
+            <span class="journey-number" aria-hidden="true">02</span>
+            <div>
+              <p class="journey-label">${escapeHtml(page.journey.next.label)}</p>
+              <h2>${escapeHtml(page.journey.next.title)}</h2>
+            </div>
+          </div>
+          <p class="journey-description">${escapeHtml(page.journey.next.description)}</p>
+        </div>
+      </section>`
+    : "";
   const sections = page.sections
     .map(
       (section) => `
@@ -593,9 +637,56 @@ export function renderSeoPage(page: SeoPage): string {
         .footer-inner{align-items:center;flex-direction:column;text-align:center}
         .footer-copy{justify-content:center;text-align:center}
       }
+      body.site-evolution{background:linear-gradient(180deg,#fff 0,#f5fbff 310px,#f8fafc 760px)}
+      body.site-evolution .page-content{padding-top:88px}
+      body.site-evolution .page-heading{max-width:980px;margin-bottom:32px}
+      body.site-evolution .page-label{display:inline-flex;align-items:center;border:1px solid rgba(14,116,144,.16);border-radius:999px;background:rgba(255,255,255,.86);padding:7px 14px;margin-bottom:16px;color:#0e7490;font-size:13px;box-shadow:0 4px 14px rgba(15,60,90,.04)}
+      body.site-evolution .page-heading h1{font-weight:700;letter-spacing:-.04em}
+      body.site-evolution .journey{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);align-items:stretch;gap:14px;max-width:960px;margin:0 auto 30px}
+      body.site-evolution .journey-stage{padding:22px 24px;border:1px solid #dce7ed;border-radius:18px;background:rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(15,60,90,.055);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+      body.site-evolution .journey-stage:hover{transform:translateY(-3px);border-color:rgba(14,116,144,.3);box-shadow:0 15px 30px rgba(15,60,90,.09)}
+      body.site-evolution .journey-stage-next{border-color:rgba(37,99,235,.2);background:linear-gradient(130deg,#f0f9fb,#f1f5ff)}
+      body.site-evolution .journey-stage-top{display:flex;align-items:center;gap:13px}
+      body.site-evolution .journey-number{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:12px;background:#e7f4f7;color:#0e7490;font-weight:700;font-size:14px}
+      body.site-evolution .journey-stage-next .journey-number{background:#e9efff;color:#2563eb}
+      body.site-evolution .journey-label{margin:0 0 3px;color:#64788b;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+      body.site-evolution .journey-stage h2{margin:0;font-size:18px;line-height:1.3}
+      body.site-evolution .journey-description{margin:14px 0 0;font-size:14px;line-height:1.55}
+      body.site-evolution .journey-connector{position:relative;display:grid;place-items:center;color:#0e7490}
+      body.site-evolution .journey-connector::before{content:"";position:absolute;top:18%;bottom:18%;left:50%;width:1px;background:linear-gradient(transparent,#8cbecb,transparent)}
+      body.site-evolution .journey-connector::after{content:"→";position:relative;display:grid;place-items:center;width:34px;height:34px;border:1px solid rgba(14,116,144,.16);border-radius:50%;background:#f7fcfd;font-size:19px;line-height:1}
+      body.site-evolution .content-grid{counter-reset:evolution-section;gap:20px}
+      body.site-evolution .content-section{position:relative;overflow:hidden;border-radius:18px;padding:30px 30px 28px;border-color:#dce7ed;box-shadow:0 9px 24px rgba(15,60,90,.045);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+      body.site-evolution .content-section:hover{transform:translateY(-3px);border-color:rgba(14,116,144,.32);box-shadow:0 15px 32px rgba(15,60,90,.085)}
+      body.site-evolution .content-section:not(#application-metier){counter-increment:evolution-section}
+      body.site-evolution .content-section:not(#application-metier)::before{content:counter(evolution-section,decimal-leading-zero);display:grid;place-items:center;width:38px;height:38px;margin-bottom:16px;border-radius:11px;background:#eaf5f8;color:#0e7490;font-size:12px;font-weight:700}
+      body.site-evolution .content-section h2{font-size:21px;letter-spacing:-.02em}
+      body.site-evolution .content-section ul{margin-top:15px}
+      body.site-evolution .content-section li{padding:4px 0}
+      body.site-evolution .content-section#application-metier{grid-column:1/-1;border-color:rgba(14,116,144,.23);background:linear-gradient(135deg,#eff8fb 0%,#fff 52%,#f1f5ff 100%);box-shadow:0 12px 30px rgba(15,60,90,.06);scroll-margin-top:88px}
+      body.site-evolution .content-section#application-metier h2{font-size:25px}
+      body.site-evolution .content-section#application-metier h2::before{content:"Parcours évolutif";display:table;align-items:center;margin:0 0 12px;padding:5px 10px;border-radius:999px;background:#e2f3f4;color:#0e7490;font-size:10px;letter-spacing:.07em;text-transform:uppercase}
+      body.site-evolution .content-section#application-metier ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+      body.site-evolution .cta{border-radius:18px;box-shadow:0 10px 26px rgba(15,60,90,.045)}
+      body.site-evolution .button{transition:transform .2s ease,filter .2s ease}
+      body.site-evolution .button:hover{transform:translateY(-2px)}
+      body.site-evolution .faq summary{position:relative;padding-right:36px}
+      body.site-evolution .faq summary::after{content:"+";position:absolute;right:4px;top:10px;color:#0e7490;font-size:22px;font-weight:400;transition:transform .2s ease}
+      body.site-evolution .faq details[open] summary::after{transform:rotate(45deg)}
+      @media(max-width:767px){
+        body.site-evolution .page-content{padding-top:78px}
+        body.site-evolution .journey{grid-template-columns:1fr;gap:9px;margin-bottom:22px}
+        body.site-evolution .journey-stage{padding:19px 20px}
+        body.site-evolution .journey-connector{min-height:30px}
+        body.site-evolution .journey-connector::before{top:0;bottom:0}
+        body.site-evolution .journey-connector::after{content:"↓";width:30px;height:30px;font-size:18px}
+        body.site-evolution .content-grid{grid-template-columns:1fr;gap:14px}
+        body.site-evolution .content-section{padding:24px}
+        body.site-evolution .content-section#application-metier ul{grid-template-columns:1fr}
+      }
     </style>
   </head>
-  <body>
+  <body class="${page.path === "/site-evolutif" ? "site-evolution" : ""}">
     <header>
       <div class="wrap nav">
         <a class="brand" href="/">Innov Studio</a>
@@ -616,6 +707,7 @@ export function renderSeoPage(page: SeoPage): string {
             <h1>${headingMarkup}</h1>
             <p class="page-intro">${escapeHtml(page.intro)}</p>
           </div>
+          ${journeyMarkup}
           ${pageContent}
           <section class="cta">
             <h2>${escapeHtml(page.cta)}</h2>
