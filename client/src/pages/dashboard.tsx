@@ -254,6 +254,11 @@ function SeoAgentSection() {
                             <Badge variant="outline" className="text-xs capitalize">{s.type}</Badge>
                             <Badge variant="outline" className={`text-xs ${s.priority === "high" ? "text-red-600 border-red-300" : s.priority === "medium" ? "text-yellow-600 border-yellow-300" : "text-gray-500"}`}>{s.priority === "high" ? "Haute priorité" : s.priority === "medium" ? "Moyenne priorité" : "Basse priorité"}</Badge>
                           </div>
+                          {s.urls?.length > 0 && (
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Pages concernées : {s.urls.join(", ")}
+                            </p>
+                          )}
                           <p className="text-sm font-medium mb-1">{s.reason}</p>
                           {s.suggested && (
                             <div className="mt-2 p-2 bg-background rounded border text-xs text-muted-foreground font-mono break-all">

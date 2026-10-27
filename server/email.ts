@@ -326,7 +326,8 @@ export async function sendSeoReportEmail(
           <h4 style="color: ${color}; margin: 0 0 12px 0; font-size: 15px;">● Priorité ${label} (${list.length})</h4>
           ${list.map((s: any) => `
             <div style="background:#f9fafb;border-left:4px solid ${color};padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:10px;">
-              <p style="margin:0 0 6px 0;font-weight:600;color:#1f2937;font-size:14px;">${s.type === "title" ? "🏷️ Titre" : s.type === "description" ? "📝 Description" : s.type === "keywords" ? "🔑 Mots-clés" : s.type === "structure" ? "🏗️ Structure" : "📄 Contenu"}</p>
+              <p style="margin:0 0 6px 0;font-weight:600;color:#1f2937;font-size:14px;">${s.type === "title" ? "🏷️ Titre" : s.type === "description" ? "📝 Description" : s.type === "keywords" ? "🔑 Mots-clés" : s.type === "structure" ? "🏗️ Structure" : s.type === "canonical" ? "🔗 Canonical" : s.type === "indexability" ? "🌐 Indexabilité" : "📄 Contenu"}</p>
+              ${s.urls?.length ? `<p style="margin:0 0 6px 0;color:#0ea5e9;font-size:12px;">Page(s) : ${s.urls.join(", ")}</p>` : ""}
               <p style="margin:0 0 6px 0;color:#6b7280;font-size:13px;">💡 ${s.reason}</p>
               ${s.suggested ? `<p style="margin:0;color:#0ea5e9;font-size:12px;font-style:italic;">Suggestion : "${s.suggested.substring(0, 120)}${s.suggested.length > 120 ? '...' : ''}"</p>` : ""}
             </div>

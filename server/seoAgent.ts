@@ -3,17 +3,20 @@ import { db } from "./db";
 import { seoReports, pageVisits, references } from "../shared/schema";
 import { desc, gte, sql } from "drizzle-orm";
 import { sendSeoReportEmail } from "./email";
+import { getSeoPageAuditData, seoPages, type SeoPageAuditData } from "./seoPages";
 
 // ─── SEO scoring helpers ────────────────────────────────────────────────────
 
 interface SeoSuggestion {
   id: string;
-  type: "title" | "description" | "keywords" | "structure" | "performance" | "content";
+  type: "title" | "description" | "keywords" | "structure" | "performance" | "content" | "canonical" | "indexability";
   priority: "high" | "medium" | "low";
   current: string;
   suggested: string;
   reason: string;
   field?: string; // html field to update if applicable
+  urls?: string[];
+  currentByUrl?: Record<string, string>;
 }
 
 interface SeoAnalysisResult {
@@ -238,6 +241,103 @@ function analyzeStructure(refs: any[]): SeoSuggestion[] {
   return suggestions;
 }
 
+function attachUrl(suggestions: SeoSuggestion[], url: string): SeoSuggestion[] {
+  return suggestions.map((suggestion) => ({
+    ...suggestion,
+    id: `${suggestion.id}-${url === "/" ? "home" : url.slice(1).replace(/\//g, "-")}`,
+    urls: [url],
+  }));
+}
+
+export function analyzeServicePages(
+  pages: SeoPageAuditData[],
+  trending: string[],
+): SeoSuggestion[] {
+  const suggestions = pages.flatMap((page) => {
+    const suggestions = [
+      ...analyzeTitle(page.title, trending),
+      ...analyzeDescription(page.description, trending),
+    ];
+
+    const expectedCanonical = `https://innov-studio.fr${page.path}`;
+    if (page.canonical !== expectedCanonical) {
+      suggestions.push({
+        id: "canonical-missing-or-incorrect",
+        type: "canonical",
+        priority: "high",
+        current: page.canonical ?? "Aucun canonical",
+        suggested: expectedCanonical,
+        reason: "Le canonical doit pointer vers l’URL principale de cette page.",
+        field: "canonical",
+      });
+    }
+
+    if (!page.indexable) {
+      suggestions.push({
+        id: "page-not-indexable",
+        type: "indexability",
+        priority: "high",
+        current: "Page déclarée noindex",
+        suggested: "Autoriser l’indexation de cette page",
+        reason: "La directive robots empêche les moteurs de recherche d’indexer cette page.",
+        field: "robots",
+      });
+    } else if (page.contentLength < 300) {
+      suggestions.push({
+        id: "page-content-too-short",
+        type: "content",
+        priority: "medium",
+        current: `${page.contentLength} caractères de contenu visible`,
+        suggested: "Enrichir le contenu visible de la page",
+        reason: "La page contient peu de contenu textuel visible pour les moteurs de recherche.",
+        field: "content",
+      });
+    }
+
+    return attachUrl(suggestions, page.path);
+  });
+  return deduplicateSuggestions(suggestions);
+}
+
+function deduplicateSuggestions(suggestions: SeoSuggestion[]): SeoSuggestion[] {
+  const deduplicated = new Map<string, SeoSuggestion>();
+
+  for (const suggestion of suggestions) {
+    const key = [
+      suggestion.type,
+      suggestion.priority,
+      suggestion.field ?? "",
+      suggestion.suggested,
+      suggestion.reason,
+    ].join("|");
+    const existing = deduplicated.get(key);
+
+    if (!existing) {
+      deduplicated.set(key, {
+        ...suggestion,
+        currentByUrl: suggestion.urls?.length
+          ? { [suggestion.urls[0]]: suggestion.current }
+          : undefined,
+      });
+      continue;
+    }
+
+    existing.urls ??= [];
+    for (const url of suggestion.urls ?? []) {
+      if (!existing.urls.includes(url)) existing.urls.push(url);
+      existing.currentByUrl ??= {};
+      existing.currentByUrl[url] = suggestion.current;
+    }
+  }
+
+  return Array.from(deduplicated.values()).map((suggestion) => {
+    if ((suggestion.urls?.length ?? 0) < 2) {
+      delete suggestion.currentByUrl;
+    }
+    return suggestion;
+  });
+}
+
 function calculateScore(suggestions: SeoSuggestion[]): number {
   let score = 100;
   for (const s of suggestions) {
@@ -267,12 +367,13 @@ export async function runSeoAnalysis(): Promise<SeoAnalysisResult> {
   const trending = pickTrendingKeywords();
 
   // 3. Run rules
-  const suggestions: SeoSuggestion[] = [
-    ...analyzeTitle(CURRENT_META.title, trending),
-    ...analyzeDescription(CURRENT_META.description, trending),
-    ...analyzeKeywords(CURRENT_META.keywords, trending),
-    ...analyzeStructure(refs),
-  ];
+  const suggestions = deduplicateSuggestions([
+    ...attachUrl(analyzeTitle(CURRENT_META.title, trending), "/"),
+    ...attachUrl(analyzeDescription(CURRENT_META.description, trending), "/"),
+    ...attachUrl(analyzeKeywords(CURRENT_META.keywords, trending), "/"),
+    ...attachUrl(analyzeStructure(refs), "/"),
+    ...analyzeServicePages(seoPages.map(getSeoPageAuditData), trending),
+  ]);
 
   // 4. Score
   const score = calculateScore(suggestions);

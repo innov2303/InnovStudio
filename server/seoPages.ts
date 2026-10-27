@@ -19,6 +19,15 @@ type SeoPage = {
   faq: { question: string; answer: string }[];
 };
 
+export type SeoPageAuditData = {
+  path: string;
+  title: string;
+  description: string;
+  canonical: string | null;
+  indexable: boolean;
+  contentLength: number;
+};
+
 export const seoPages: SeoPage[] = [
   {
     path: "/site-evolutif",
@@ -379,6 +388,41 @@ export function renderSeoPage(page: SeoPage): string {
     </footer>
   </body>
 </html>`;
+}
+
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+export function getSeoPageAuditData(page: SeoPage): SeoPageAuditData {
+  const html = renderSeoPage(page);
+  const title = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? "";
+  const description =
+    html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1] ?? "";
+  const canonical = html.match(/<link\s+rel="canonical"\s+href="([^"]*)"/i)?.[1] ?? null;
+  const robots = html.match(/<meta\s+name="robots"\s+content="([^"]*)"/i)?.[1] ?? "";
+  const mainContent = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? "";
+  const visibleContent = decodeHtmlEntities(
+    mainContent
+      .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
+      .replace(/<[^>]+>/g, " "),
+  ).replace(/\s+/g, " ").trim();
+
+  return {
+    path: page.path,
+    title: decodeHtmlEntities(title),
+    description: decodeHtmlEntities(description),
+    canonical: canonical ? decodeHtmlEntities(canonical) : null,
+    indexable: !robots
+      .split(",")
+      .some((directive) => ["noindex", "none"].includes(directive.trim().toLowerCase())),
+    contentLength: visibleContent.length,
+  };
 }
 
 export function renderSitemap(): string {
