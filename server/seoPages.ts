@@ -102,7 +102,7 @@ export const seoPages: SeoPage[] = [
         icon: "custom",
         title: "Fonctionnalités sur mesure",
         paragraphs: [
-          "Suivez vos commandes et vos documents avec des tableaux de bord sur mesure.",
+          "Suivez et gérez vos commandes, clients et documents",
         ],
       },
       {
