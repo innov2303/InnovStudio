@@ -47,6 +47,7 @@ test("the evolving service page presents the path to an application on one page"
   );
   assert.match(html, /Interface d’administration complète/);
   assert.match(html, /gestion|Gérez les utilisateurs/i);
+  assert.match(html, /Dashboard selon vos besoins/);
   assert.match(html, /référencement SEO dynamique/);
   assert.doesNotMatch(html, /Questions fréquentes|Parlons de la première étape/);
   assert.match(html, /href="\/site-evolutif">Site Web Evolutif<\/a>/);
