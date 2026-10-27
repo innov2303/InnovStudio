@@ -1829,7 +1829,9 @@ export async function registerRoutes(
     try {
       const currentUser = await storage.getUser(req.session.userId!);
       if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
-      const ref = await storage.updateReference(req.params.id, req.body);
+      const referenceId = req.params.id;
+      if (typeof referenceId !== "string") return res.status(400).json({ message: "Identifiant de référence invalide" });
+      const ref = await storage.updateReference(referenceId, req.body);
       if (!ref) return res.status(404).json({ message: "Référence non trouvée" });
       res.json(ref);
     } catch (error: any) {
@@ -1841,7 +1843,9 @@ export async function registerRoutes(
     try {
       const currentUser = await storage.getUser(req.session.userId!);
       if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
-      const deleted = await storage.deleteReference(req.params.id);
+      const referenceId = req.params.id;
+      if (typeof referenceId !== "string") return res.status(400).json({ message: "Identifiant de référence invalide" });
+      const deleted = await storage.deleteReference(referenceId);
       if (!deleted) return res.status(404).json({ message: "Référence non trouvée" });
       res.json({ message: "Référence supprimée" });
     } catch (error: any) {
@@ -1854,12 +1858,14 @@ export async function registerRoutes(
       const currentUser = await storage.getUser(req.session.userId!);
       if (!currentUser || currentUser.role !== "admin") return res.status(403).json({ message: "Admin only" });
       if (!req.file) return res.status(400).json({ message: "Aucun fichier" });
+      const referenceId = req.params.id;
+      if (typeof referenceId !== "string") return res.status(400).json({ message: "Identifiant de référence invalide" });
       const newFilename = "ref-" + req.file.filename;
       const oldPath = path.join(uploadDir, req.file.filename);
       const newPath = path.join(uploadDir, newFilename);
       fs.renameSync(oldPath, newPath);
       const imageUrl = `/uploads/${newFilename}`;
-      const ref = await storage.updateReference(req.params.id, { imageUrl });
+      const ref = await storage.updateReference(referenceId, { imageUrl });
       if (!ref) return res.status(404).json({ message: "Référence non trouvée" });
       res.json(ref);
     } catch (error: any) {
