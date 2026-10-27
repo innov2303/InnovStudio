@@ -248,7 +248,7 @@ export default function Home() {
               </h2>
               
               <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-                Un site web évolutif{" "}
+                Un site web sur mesure{" "}
                 <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">pour votre activité</span>
               </h1>
               
