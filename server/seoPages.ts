@@ -1,6 +1,13 @@
 const SITE_URL = "https://innov-studio.fr";
 
-type FeatureIcon = "pages" | "responsive" | "search" | "evolution";
+type FeatureIcon =
+  | "pages"
+  | "responsive"
+  | "search"
+  | "evolution"
+  | "administration"
+  | "custom"
+  | "ai";
 
 type SeoSection = {
   title: string;
@@ -41,6 +48,7 @@ type SeoPage = {
   serviceCards?: ServiceCard[];
   references?: PublicReference[];
   featureGrid?: boolean;
+  applicationFeatures?: SeoSection[];
   journey?: {
     start: { label: string; title: string; description: string };
     next: { label: string; title: string; description: string };
@@ -61,7 +69,7 @@ export const seoPages: SeoPage[] = [
     path: "/site-evolutif",
     title: "Site Web Évolutif : du site vitrine à l’application | Innov Studio",
     description:
-      "Démarrez avec un site vitrine professionnel, puis faites-le évoluer vers une application web métier : espace client, suivi, tableaux de bord et automatisations.",
+      "Démarrez avec un site vitrine professionnel, puis ajoutez une administration, le suivi des commandes, des tableaux de bord sur mesure ou des modules IA.",
     h1: "Du site vitrine à l’application web métier",
     h1Accent: "application web métier",
     intro:
@@ -82,6 +90,29 @@ export const seoPages: SeoPage[] = [
           "Des fonctionnalités ajoutées progressivement, puis un outil conçu autour de vos processus.",
       },
     },
+    applicationFeatures: [
+      {
+        icon: "administration",
+        title: "Interface d’administration complète",
+        paragraphs: [
+          "Gérez les utilisateurs et modifiez vos contenus depuis un espace dédié.",
+        ],
+      },
+      {
+        icon: "custom",
+        title: "Fonctionnalités sur mesure",
+        paragraphs: [
+          "Suivez vos commandes et vos documents avec des tableaux de bord sur mesure.",
+        ],
+      },
+      {
+        icon: "ai",
+        title: "Modules IA sur demande",
+        paragraphs: [
+          "Demandez l’analyse des connexions au site ou des fonctions de référencement SEO dynamique.",
+        ],
+      },
+    ],
     sections: [
       {
         icon: "pages",
@@ -427,9 +458,36 @@ function renderFeatureIcon(icon?: FeatureIcon): string {
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m15.5 15.5 4.2 4.2M8.3 10.8h5"/></svg>',
     evolution:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18M7 6h.01M10 6h.01m1 7h6m-2.5-2.5L17 13l-2.5 2.5"/></svg>',
+    administration:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.4-3 2.5-5 5.5-5 1.3 0 2.4.4 3.3 1M16.5 8.5l1.5 1.5 3-3"/><path d="M17 14v2m0 4v.01m-3-2h2m4 0h1"/></svg>',
+    custom:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="4" rx="1.5"/><rect x="13" y="10" width="8" height="10" rx="1.5"/><path d="M3 14h8m-4-3v9"/></svg>',
+    ai:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15ZM5 3l.6 1.4L7 5l-1.4.6L5 7l-.6-1.4L3 5l1.4-.6L5 3Z"/></svg>',
   };
 
   return icon ? icons[icon] : "";
+}
+
+function renderFeatureGrid(
+  sections: SeoSection[],
+  additionalClass = "",
+): string {
+  const items = sections
+    .map(
+      (section) => `
+        <section class="feature-item"${section.id ? ` id="${escapeHtml(section.id)}"` : ""}>
+          <span class="feature-icon" aria-hidden="true">${renderFeatureIcon(section.icon)}</span>
+          <div class="feature-copy">
+            <h2>${escapeHtml(section.title)}</h2>
+            ${section.paragraphs.map(renderParagraph).join("")}
+          </div>
+        </section>
+      `,
+    )
+    .join("");
+
+  return `<div class="content-grid feature-grid${additionalClass ? ` ${additionalClass}` : ""}">${items}</div>`;
 }
 
 export function renderSeoPage(page: SeoPage): string {
@@ -444,18 +502,6 @@ export function renderSeoPage(page: SeoPage): string {
       const sectionId = section.id
         ? ` id="${escapeHtml(section.id)}"`
         : "";
-
-      if (page.featureGrid) {
-        return `
-          <section class="feature-item"${sectionId}>
-            <span class="feature-icon" aria-hidden="true">${renderFeatureIcon(section.icon)}</span>
-            <div class="feature-copy">
-              <h2>${escapeHtml(section.title)}</h2>
-              ${section.paragraphs.map(renderParagraph).join("")}
-            </div>
-          </section>
-        `;
-      }
 
       return `
         <section class="content-section"${sectionId}>
@@ -484,7 +530,12 @@ export function renderSeoPage(page: SeoPage): string {
     ? renderServiceCards(page.serviceCards)
     : page.references !== undefined
       ? renderReferenceGroups(page.references)
-      : `<div class="content-grid${page.featureGrid ? " feature-grid" : ""}">${sections}</div>`;
+      : page.featureGrid
+        ? renderFeatureGrid(page.sections)
+        : `<div class="content-grid">${sections}</div>`;
+  const applicationFeaturesMarkup = page.applicationFeatures?.length
+    ? renderFeatureGrid(page.applicationFeatures, "application-feature-grid")
+    : "";
   const journeyMarkup = page.journey
     ? `
       <section class="journey" aria-label="Les étapes de votre solution web">
@@ -502,15 +553,18 @@ export function renderSeoPage(page: SeoPage): string {
           ${page.featureGrid ? pageContent : ""}
         </div>
         <span class="journey-connector" aria-hidden="true"></span>
-        <div class="journey-stage journey-stage-next">
-          <div class="journey-stage-top">
-            <span class="journey-number" aria-hidden="true">02</span>
-            <div>
-              <p class="journey-label">${escapeHtml(page.journey.next.label)}</p>
-              <h2>${escapeHtml(page.journey.next.title)}</h2>
+        <div class="journey-option-next">
+          <div class="journey-stage journey-stage-next">
+            <div class="journey-stage-top">
+              <span class="journey-number" aria-hidden="true">02</span>
+              <div>
+                <p class="journey-label">${escapeHtml(page.journey.next.label)}</p>
+                <h2>${escapeHtml(page.journey.next.title)}</h2>
+              </div>
             </div>
+            <p class="journey-description">${escapeHtml(page.journey.next.description)}</p>
           </div>
-          <p class="journey-description">${escapeHtml(page.journey.next.description)}</p>
+          ${applicationFeaturesMarkup}
         </div>
       </section>`
     : "";
@@ -641,6 +695,7 @@ export function renderSeoPage(page: SeoPage): string {
       body.site-evolution .page-heading h1{font-weight:700;letter-spacing:-.04em}
       body.site-evolution .journey{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);align-items:start;gap:14px;max-width:960px;margin:0 auto 30px}
       body.site-evolution .journey-option-start{min-width:0}
+      body.site-evolution .journey-option-next{min-width:0}
       body.site-evolution .journey-stage{padding:22px 24px;border:1px solid #dce7ed;border-radius:18px;background:rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(15,60,90,.055);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
       body.site-evolution .journey-stage:hover{transform:translateY(-3px);border-color:rgba(14,116,144,.3);box-shadow:0 15px 30px rgba(15,60,90,.09)}
       body.site-evolution .journey-stage-next{border-color:rgba(37,99,235,.2);background:linear-gradient(130deg,#f0f9fb,#f1f5ff)}
@@ -654,7 +709,7 @@ export function renderSeoPage(page: SeoPage): string {
       body.site-evolution .journey-connector::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(transparent,#8cbecb,transparent)}
       body.site-evolution .journey-connector::after{content:"→";position:relative;display:grid;place-items:center;width:34px;height:34px;border:1px solid rgba(14,116,144,.16);border-radius:50%;background:#f7fcfd;font-size:19px;line-height:1}
       body.site-evolution .journey-stage-next{align-self:start}
-      body.site-evolution .journey-option-start .content-grid.feature-grid{max-width:none;margin:26px 0 0;grid-template-columns:1fr;gap:22px}
+      body.site-evolution .journey-option-start .content-grid.feature-grid,body.site-evolution .journey-option-next .content-grid.feature-grid{max-width:none;margin:26px 0 0;grid-template-columns:1fr;gap:22px}
       body.site-evolution .feature-item{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:start;gap:14px;min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;transition:none}
       body.site-evolution .feature-item:hover{transform:none;border-color:transparent;box-shadow:none}
       body.site-evolution .feature-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:10px;background:#eaf2ff;color:#4380e5}
@@ -669,7 +724,7 @@ export function renderSeoPage(page: SeoPage): string {
         body.site-evolution .journey-connector{height:30px;min-height:30px;margin-top:0}
         body.site-evolution .journey-connector::before{top:0;bottom:0}
         body.site-evolution .journey-connector::after{content:"↓";width:30px;height:30px;font-size:18px}
-        body.site-evolution .journey-option-start .content-grid.feature-grid{max-width:560px;margin:22px auto 0;gap:23px}
+        body.site-evolution .journey-option-start .content-grid.feature-grid,body.site-evolution .journey-option-next .content-grid.feature-grid{max-width:560px;margin:22px auto 0;gap:23px}
         body.site-evolution .feature-item{grid-template-columns:40px minmax(0,1fr);gap:13px}
         body.site-evolution .feature-icon{width:40px;height:40px}
         body.site-evolution .feature-copy h2{font-size:16px}

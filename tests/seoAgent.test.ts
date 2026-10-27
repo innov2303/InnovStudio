@@ -28,15 +28,26 @@ test("the evolving service page presents the path to an application on one page"
   assert.match(html, /Du site vitrine à l’application web métier/);
   assert.match(html, /id="application-metier"/);
   assert.match(html, /class="content-grid feature-grid"/);
-  assert.equal((html.match(/class="feature-item"/g) ?? []).length, 4);
+  assert.match(html, /class="content-grid feature-grid application-feature-grid"/);
+  assert.equal((html.match(/class="feature-item"/g) ?? []).length, 7);
+  const startGridIndex = html.indexOf('class="content-grid feature-grid"');
+  const applicationStageIndex = html.indexOf(
+    'class="journey-stage journey-stage-next"',
+  );
+  const applicationGridIndex = html.indexOf(
+    'class="content-grid feature-grid application-feature-grid"',
+  );
   assert.ok(
     html.indexOf("Site vitrine professionnel") <
-      html.indexOf('class="content-grid feature-grid"'),
+      startGridIndex,
   );
   assert.ok(
-    html.indexOf('class="content-grid feature-grid"') <
-      html.indexOf("Quand vos besoins grandissent"),
+    startGridIndex < applicationStageIndex &&
+      applicationStageIndex < applicationGridIndex,
   );
+  assert.match(html, /Interface d’administration complète/);
+  assert.match(html, /gestion|Gérez les utilisateurs/i);
+  assert.match(html, /référencement SEO dynamique/);
   assert.doesNotMatch(html, /Questions fréquentes|Parlons de la première étape/);
   assert.match(html, /href="\/site-evolutif">Site Web Evolutif<\/a>/);
   assert.doesNotMatch(html, /href="\/application-web-entreprise">Application web métier<\/a>/);
