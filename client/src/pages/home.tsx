@@ -174,13 +174,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex items-center justify-between gap-4 px-6 py-2">
-          <Link href="/">
+        <div className="container mx-auto grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-2">
+          <Link href="/" className="justify-self-start">
             <span className="text-xl md:text-2xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent cursor-pointer">
               Innov Studio
             </span>
           </Link>
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center justify-self-center gap-6">
             <a href="/" className="text-muted-foreground hover:text-foreground transition-colors">
               Accueil
             </a>
@@ -197,7 +197,7 @@ export default function Home() {
               Contact
             </a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-self-end gap-2">
             {user ? (
               <>
                 <Link href="/dashboard">

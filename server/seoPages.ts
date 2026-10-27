@@ -468,26 +468,27 @@ export function renderSeoPage(page: SeoPage): string {
       a{color:inherit;text-decoration:none}a:hover{color:var(--cyan)}
       .wrap{width:min(1280px,calc(100% - 48px));margin:auto}
       header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid var(--line);background:rgba(8,11,18,.82);backdrop-filter:blur(14px)}
-      .nav{height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-      .brand{flex:none;font-size:24px;letter-spacing:.04em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
-      nav{display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;white-space:nowrap}
+      .nav{height:52px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+      .brand{justify-self:start;flex:none;font-size:24px;letter-spacing:.025em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
+      nav{justify-self:center;display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;white-space:nowrap}
       nav a{color:var(--muted);transition:color .2s ease}nav a:hover{color:var(--text)}
-      .login{flex:none;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(34,211,238,.18)}
+      .login{justify-self:end;flex:none;display:inline-flex;align-items:center;height:38px;padding:8px 20px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:600;line-height:20px;box-shadow:0 8px 24px rgba(34,211,238,.18)}
+      .login span{display:inline-flex;width:16px;justify-content:center;margin-left:4px}
       .login:hover{color:white;filter:brightness(1.08)}
       main{padding:0 0 80px}
-      .hero{position:relative;isolation:isolate;overflow:hidden;width:100vw;margin-left:calc((100% - 100vw)/2);padding:128px 24px 72px;text-align:center}
+      .hero{position:relative;isolation:isolate;overflow:hidden;width:100%;padding:128px 24px 80px;text-align:center}
       .hero-bg,.hero-overlay{position:absolute;inset:0;pointer-events:none}
       .hero-bg{z-index:-2;background:url("/images/hero-bg.jpg") center/cover no-repeat}
       .hero-overlay{z-index:-1;background:linear-gradient(135deg,rgba(8,11,18,.96),rgba(8,11,18,.82),rgba(8,11,18,.88)),radial-gradient(circle at 16% 24%,rgba(59,130,246,.18),transparent 34%),radial-gradient(circle at 82% 78%,rgba(34,211,238,.12),transparent 38%)}
-      .hero-content{position:relative;max-width:920px;margin:0 auto}
+      .hero-content{position:relative;max-width:1080px;margin:0 auto}
       .eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px;font-weight:500;letter-spacing:0;border:1px solid var(--line);border-radius:999px;background:rgba(15,23,42,.5);backdrop-filter:blur(8px);padding:8px 16px;margin-bottom:24px}
       .hero-brand{font-size:clamp(56px,8vw,96px);line-height:1.05;letter-spacing:.02em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent;margin:0 0 20px}
-      .hero h1{font-size:clamp(32px,4vw,52px);line-height:1.12;letter-spacing:-.035em;margin:0 0 18px}
+      .hero h1{max-width:920px;margin:0 auto 18px;font-size:clamp(32px,3.75vw,48px);line-height:1.12;letter-spacing:-.035em}
       .accent{background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
-      .intro{font-size:clamp(18px,2.1vw,21px);color:var(--muted);line-height:1.65;max-width:700px;margin:0 auto 20px}
-      .hero-label{color:var(--cyan);font-weight:600;margin:0 auto 26px}
+      .intro{font-size:clamp(18px,2.1vw,20px);color:var(--muted);line-height:1.65;max-width:1080px;margin:0 auto 32px}
+      .page-label{color:var(--cyan);font-weight:600;text-align:center;margin:0 auto 30px}
       .hero-actions{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap}
-      .hero-actions .button{margin:0}
+      .hero-actions .button{margin:0;padding:10px 20px;font-size:14px;line-height:20px}
       .button-secondary{border:1px solid rgba(34,211,238,.4);background:rgba(8,11,18,.28);color:#a5f3fc;box-shadow:none}
       .hero-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.75),transparent);box-shadow:0 0 14px rgba(34,211,238,.35)}
       .page-content{padding-top:40px}
@@ -546,7 +547,7 @@ export function renderSeoPage(page: SeoPage): string {
           <a href="/references">Références</a>
           <a href="/#contact">Contact</a>
         </nav>
-        <a class="login" href="/login">Connexion <span aria-hidden="true">›</span></a>
+        <a class="login" href="/login">Connexion<span aria-hidden="true">›</span></a>
       </div>
     </header>
     <main>
@@ -559,7 +560,6 @@ export function renderSeoPage(page: SeoPage): string {
             <div class="hero-brand" aria-hidden="true">Innov Studio</div>
             <h1>${headingMarkup}</h1>
             <p class="intro">${escapeHtml(page.intro)}</p>
-            <p class="hero-label">${escapeHtml(page.label)}</p>
             <div class="hero-actions">
               <a class="button" href="/#contact">Démarrer un projet <span aria-hidden="true">→</span></a>
               <a class="button button-secondary" href="/references">Découvrir nos références</a>
@@ -568,6 +568,7 @@ export function renderSeoPage(page: SeoPage): string {
         </section>
         <div class="hero-divider" aria-hidden="true"></div>
         <div class="wrap page-content">
+          <p class="page-label">${escapeHtml(page.label)}</p>
           ${pageContent}
           <section class="cta">
             <h2>${escapeHtml(page.cta)}</h2>
