@@ -436,7 +436,7 @@ export default function Home() {
                 </span>
               </h2>
               <p className="text-muted-foreground">
-                Une solution web évolutive peut commencer par un site vitrine et grandir vers une application Web Entreprise, selon les besoins de votre activité.
+                Du site vitrine à l’application web métier, choisissez le point de départ adapté à votre projet et faites évoluer votre solution au fil de vos besoins.
               </p>
             </div>
 
@@ -446,22 +446,22 @@ export default function Home() {
                   <Code2 className="h-6 w-6" />
                 </div>
                 <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
-                  Du site vitrine aux outils métier
+                  Présence en ligne
                 </p>
-                <h3 className="mb-3 text-2xl font-bold text-slate-900">Solution web évolutive</h3>
+                <h3 className="mb-3 text-2xl font-bold text-slate-900">Site vitrine</h3>
                 <p className="mb-6 text-muted-foreground">
-                  Commencez par un site vitrine professionnel pour présenter votre activité, puis ajoutez les pages et fonctionnalités utiles à mesure que vos besoins évoluent.
+                  Présentez votre activité et vos services avec un site professionnel, adapté aux mobiles et conçu pour faciliter les prises de contact.
                 </p>
                 <ul className="mb-8 space-y-2 text-sm text-slate-600">
-                  <li>• Un site vitrine adapté à votre activité</li>
-                  <li>• Des fonctionnalités ajoutées progressivement</li>
-                  <li>• Une évolution possible vers une application métier</li>
+                  <li>• Pages et contenus adaptés à votre activité</li>
+                  <li>• Design responsive pour mobile et ordinateur</li>
+                  <li>• Une base que vous pourrez faire évoluer</li>
                 </ul>
                 <a
                   href="/site-evolutif"
                   className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
                 >
-                  Découvrir la solution web évolutive <ArrowRight className="h-4 w-4" />
+                  Découvrir le site vitrine <ArrowRight className="h-4 w-4" />
                 </a>
               </article>
 
@@ -472,20 +472,20 @@ export default function Home() {
                 <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
                   Outil métier sur mesure
                 </p>
-                <h3 className="mb-3 text-2xl font-bold text-slate-900">Application Web Entreprise</h3>
+                <h3 className="mb-3 text-2xl font-bold text-slate-900">Application web métier</h3>
                 <p className="mb-6 text-muted-foreground">
-                  Simplifiez vos processus avec une application web pensée selon vos usages : espace client, suivi d’activité, tableaux de bord ou automatisations.
+                  Créez directement une application adaptée à vos processus, ou faites évoluer votre site vitrine existant avec les fonctionnalités métier dont vous avez besoin.
                 </p>
                 <ul className="mb-8 space-y-2 text-sm text-slate-600">
-                  <li>• Fonctionnalités définies selon vos priorités</li>
-                  <li>• Outils réunis autour de vos processus</li>
-                  <li>• Évolutions possibles au rythme de votre activité</li>
+                  <li>• Création directe d’un outil métier sur mesure</li>
+                  <li>• Évolution possible d’un site vitrine existant</li>
+                  <li>• Espace client, suivi, tableaux de bord ou automatisations</li>
                 </ul>
                 <a
                   href="/application-web-entreprise"
                   className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
                 >
-                  Découvrir les applications métier <ArrowRight className="h-4 w-4" />
+                  Découvrir l’application web métier <ArrowRight className="h-4 w-4" />
                 </a>
               </article>
             </div>
