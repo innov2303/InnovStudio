@@ -391,10 +391,19 @@ function renderReferenceGroups(references: PublicReference[]): string {
     { category: "vitrine", title: "Sites vitrine" },
     { category: "enterprise", title: "Produits web d’entreprise" },
   ];
-  return groups.map(({ category, title }) => {
-    const items = references.filter((reference) => reference.category === category);
-    return `
-      <section class="reference-section">
+  const categories = groups.map((group) => ({
+    ...group,
+    items: references.filter(
+      (reference) => reference.category === group.category,
+    ),
+  }));
+  const referenceCount = categories.reduce(
+    (total, group) => total + group.items.length,
+    0,
+  );
+  const sections = categories
+    .map(({ category, title, items }) => `
+      <section class="reference-section" data-reference-category="${escapeHtml(category)}">
         <h2>${escapeHtml(title)}</h2>
         ${items.length
           ? `<div class="reference-grid">${items.map((reference) => {
@@ -420,8 +429,30 @@ function renderReferenceGroups(references: PublicReference[]): string {
             }).join("")}</div>`
           : `<p class="empty-reference">Aucune référence publiée dans cette catégorie pour le moment.</p>`}
       </section>
-    `;
-  }).join("");
+    `)
+    .join("");
+  const tabs = referenceCount > 2
+    ? `
+      <div class="reference-tabs" role="group" aria-label="Filtrer les références par catégorie" data-reference-tabs hidden>
+        <button class="reference-tab is-active" type="button" aria-pressed="true" data-reference-tab="all">Tous</button>
+        ${categories
+          .filter((group) => group.items.length > 0)
+          .map(({ category, title }) => `
+            <button class="reference-tab" type="button" aria-pressed="false" data-reference-tab="${escapeHtml(category)}">${escapeHtml(title)}</button>
+          `)
+          .join("")}
+      </div>
+    `
+    : "";
+
+  return `
+    <div class="reference-browser" data-reference-browser>
+      ${tabs}
+      <div class="reference-groups">
+        ${sections}
+      </div>
+    </div>
+  `;
 }
 
 function jsonLd(page: SeoPage): string {
@@ -595,6 +626,33 @@ export function renderSeoPage(page: SeoPage): string {
         ${faq}
       </section>`
     : "";
+  const referenceTabsScript =
+    page.path === "/references" && (page.references?.length ?? 0) > 2
+      ? `<script>
+          (() => {
+            const browser = document.querySelector("[data-reference-browser]");
+            const tabList = browser?.querySelector("[data-reference-tabs]");
+            const tabs = Array.from(browser?.querySelectorAll("[data-reference-tab]") ?? []);
+            const sections = Array.from(browser?.querySelectorAll("[data-reference-category]") ?? []);
+            if (!browser || !tabList || tabs.length === 0 || sections.length === 0) return;
+
+            const setCategory = (category) => {
+              tabs.forEach((tab) => {
+                tab.setAttribute("aria-pressed", String(tab.dataset.referenceTab === category));
+              });
+              sections.forEach((section) => {
+                section.hidden = category !== "all" && section.dataset.referenceCategory !== category;
+              });
+            };
+
+            tabs.forEach((tab) => {
+              tab.addEventListener("click", () => setCategory(tab.dataset.referenceTab || "all"));
+            });
+            setCategory("all");
+            tabList.hidden = false;
+          })();
+        </script>`
+      : "";
 
   return `<!doctype html>
 <html lang="fr">
@@ -652,6 +710,13 @@ export function renderSeoPage(page: SeoPage): string {
       .service-card .button{align-self:flex-start;margin-top:auto}
       .reference-section{margin:0 0 42px}
       .reference-section h2{margin:0 0 20px}
+      .reference-section[hidden]{display:none}
+      .reference-tabs{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 28px}
+      .reference-tabs[hidden]{display:none}
+      .reference-tab{appearance:none;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);padding:10px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease}
+      .reference-tab:hover{border-color:rgba(14,116,144,.35);color:var(--cyan)}
+      .reference-tab[aria-pressed="true"]{border-color:transparent;background:linear-gradient(90deg,#06b6d4,#2563eb);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.16)}
+      .reference-tab:focus-visible{outline:3px solid rgba(37,99,235,.3);outline-offset:3px}
       .reference-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 8px 24px rgba(15,23,42,.04);transition:border-color .2s ease,transform .2s ease}
       a.reference-card{display:block}
       a.reference-card:hover{border-color:rgba(34,211,238,.55);transform:translateY(-2px)}
@@ -692,7 +757,14 @@ export function renderSeoPage(page: SeoPage): string {
         .page-content{padding-top:78px}
         .page-heading{margin-bottom:28px}
         .page-heading h1{font-size:clamp(30px,8vw,40px)}
-        .content-grid,.service-grid,.reference-grid{grid-template-columns:1fr;gap:16px}
+        .content-grid,.service-grid{grid-template-columns:1fr;gap:16px}
+        .reference-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .reference-copy{padding:12px}
+        .reference-card h3{font-size:14px}
+        .reference-card p{font-size:12px;line-height:1.45}
+        .reference-copy span{font-size:12px}
+        .reference-tabs{gap:7px;margin-bottom:22px}
+        .reference-tab{padding:9px 12px;font-size:13px}
         .content-section,.service-card{padding:24px}
         .cta{padding:30px 20px}
         .footer-inner{align-items:center;flex-direction:column;text-align:center}
@@ -780,6 +852,7 @@ export function renderSeoPage(page: SeoPage): string {
         </div>
       </div>
     </footer>
+    ${referenceTabsScript}
   </body>
 </html>`;
 }

@@ -77,6 +77,54 @@ test("the evolving service page presents the path to an application on one page"
   assert.match(servicesHtml, /href="\/site-evolutif#application-metier"/);
 });
 
+test("references use category tabs and keep two cards per row when over two projects", () => {
+  const page = seoPages.find((candidate) => candidate.path === "/references");
+  assert.ok(page);
+
+  const references = [
+    {
+      id: "vitrine-1",
+      title: "Site vitrine 1",
+      url: "https://example.com/one",
+      category: "vitrine",
+    },
+    {
+      id: "vitrine-2",
+      title: "Site vitrine 2",
+      url: "https://example.com/two",
+      category: "vitrine",
+    },
+    {
+      id: "enterprise-1",
+      title: "Produit web 1",
+      url: "https://example.com/three",
+      category: "enterprise",
+    },
+  ];
+  const html = renderSeoPage({ ...page, references });
+
+  assert.match(html, /data-reference-tabs hidden/);
+  assert.equal((html.match(/data-reference-tab="/g) ?? []).length, 3);
+  assert.equal((html.match(/class="reference-card"/g) ?? []).length, 3);
+  assert.match(html, /data-reference-category="vitrine"/);
+  assert.match(html, /data-reference-category="enterprise"/);
+  assert.match(
+    html,
+    /\.service-grid,\.reference-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);gap:24px\}/,
+  );
+  assert.match(
+    html,
+    /\.reference-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\);gap:12px\}/,
+  );
+  assert.match(html, /section\.hidden = category !== "all"/);
+
+  const shortListHtml = renderSeoPage({
+    ...page,
+    references: references.slice(0, 2),
+  });
+  assert.doesNotMatch(shortListHtml, /data-reference-tabs hidden/);
+});
+
 test("service-page recommendations identify their URL and detect canonical/indexability issues", () => {
   const page: SeoPageAuditData = {
     path: "/page-test",
