@@ -8,7 +8,9 @@ const { analyzeServicePages } = await import("../server/seoAgent");
 test("the rendered service pages expose their title, description, canonical and indexable content", () => {
   const pages = seoPages.map(getSeoPageAuditData);
 
-  assert.equal(pages.length, 3);
+  assert.equal(pages.length, 5);
+  assert.ok(pages.some((page) => page.path === "/services"));
+  assert.ok(pages.some((page) => page.path === "/references"));
   for (const page of pages) {
     assert.ok(page.title.length > 0, `${page.path} has a title`);
     assert.ok(page.description.length > 0, `${page.path} has a description`);

@@ -2791,8 +2791,17 @@ export async function registerRoutes(
 
   // Public server-rendered service pages: crawlable without client-side JavaScript.
   for (const page of seoPages) {
-    app.get(page.path, (_req, res) => {
-      res.status(200).type("html").send(renderSeoPage(page));
+    app.get(page.path, async (_req, res) => {
+      if (page.path === "/references") {
+        try {
+          const references = await storage.getAllReferences();
+          return res.status(200).type("html").send(renderSeoPage({ ...page, references }));
+        } catch (error) {
+          console.error("Render references page error:", error);
+          return res.status(500).type("text").send("Impossible de charger les références.");
+        }
+      }
+      return res.status(200).type("html").send(renderSeoPage(page));
     });
   }
 

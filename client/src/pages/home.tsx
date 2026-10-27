@@ -3,28 +3,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useForceDark } from "@/hooks/use-force-dark";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { 
   Code2, 
   Sparkles, 
-  Palette, 
   Rocket, 
   ArrowRight, 
   Zap,
-  Globe,
   Shield,
-  Bot,
   ChevronRight,
-  Briefcase,
   LogOut,
-  Headphones,
-  Server,
   Mail,
   MessageSquare,
   Send,
   Loader2,
-  ShoppingCart,
-  Check,
   FileText,
   PenTool,
   CheckCircle,
@@ -45,6 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import SiteFooter from "@/components/site-footer";
 
 import heroBg from "@/assets/images/hero-bg.jpg";
 import featuresBg from "@/assets/images/features-bg.jpg";
@@ -63,15 +56,6 @@ export default function Home() {
     message: ""
   });
   const [isSending, setIsSending] = useState(false);
-  const [refsData, setRefsData] = useState<any[]>([]);
-  const [refsTab, setRefsTab] = useState<"vitrine" | "enterprise">("vitrine");
-
-  useEffect(() => {
-    fetch("/api/references")
-      .then(r => r.json())
-      .then(data => { if (Array.isArray(data)) setRefsData(data); })
-      .catch(() => {});
-  }, []);
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
@@ -124,35 +108,6 @@ export default function Home() {
       setIsSending(false);
     }
   };
-
-  const serviceCategories = [
-    {
-      icon: Globe,
-      title: "Site évolutif",
-      href: "/site-evolutif",
-      linkLabel: "Découvrir le site évolutif",
-      description: "Lancez une présence web professionnelle, puis ajoutez de nouvelles pages et fonctionnalités à mesure que votre activité grandit.",
-      items: [
-        { icon: Palette, title: "Une base web sur mesure", description: "Un design clair, des contenus bien organisés et une expérience adaptée au mobile." },
-        { icon: ShoppingCart, title: "Des fonctionnalités qui suivent vos besoins", description: "Réservation, catalogue, espace client ou outils connectés selon vos priorités." },
-        { icon: Headphones, title: "Évolutions et maintenance", description: "Faites avancer votre site par étapes, avec un accompagnement technique disponible." },
-        { icon: Server, title: "Hébergement sécurisé", description: "Certificat SSL, sauvegardes et infrastructure adaptée à votre projet." },
-      ],
-    },
-    {
-      icon: Briefcase,
-      title: "Application web métier",
-      href: "/application-web-entreprise",
-      linkLabel: "Découvrir les applications métier",
-      description: "Quand votre activité en a besoin, transformez vos processus en outils web adaptés à vos équipes et à vos clients.",
-      items: [
-        { icon: Palette, title: "Outils conçus pour vos usages", description: "Espaces internes ou clients, tableaux de bord et gestion de dossiers." },
-        { icon: Bot, title: "Automatisations utiles", description: "Intégrations et intelligence artificielle étudiées selon vos processus." },
-        { icon: Headphones, title: "Déploiement accompagné", description: "Tests, ajustements et support pour faciliter l’adoption par vos équipes." },
-        { icon: Server, title: "Architecture adaptée", description: "Accès, données et hébergement définis en fonction des besoins du projet." },
-      ],
-    },
-  ];
 
   const features = [
     {
@@ -227,7 +182,10 @@ export default function Home() {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+              Accueil
+            </a>
+            <a href="/services" className="text-muted-foreground hover:text-foreground transition-colors">
               Services
             </a>
             <a href="/site-evolutif" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -242,7 +200,7 @@ export default function Home() {
             <a href="#features" onClick={(e) => scrollToSection(e, "features")} className="text-muted-foreground hover:text-foreground transition-colors">
               Avantages
             </a>
-            <a href="#references" onClick={(e) => scrollToSection(e, "references")} className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="/references" className="text-muted-foreground hover:text-foreground transition-colors">
               Références
             </a>
             <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -336,56 +294,6 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
         </div>
 
-        <section id="services" className="py-20 bg-muted/30">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Mes <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">Services</span>
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Des solutions digitales complètes pour accompagner votre croissance
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-              {serviceCategories.map((category, catIndex) => (
-                <Card key={catIndex} className="border border-transparent bg-card overflow-visible transition-shadow duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]" data-testid={`card-service-category-${catIndex}`}>
-                  <CardContent className="p-8 flex flex-col items-center text-center h-full">
-                    <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
-                      <category.icon className="h-7 w-7" />
-                    </div>
-                    <h3 className="text-xl font-bold min-h-[2rem]">{category.title}</h3>
-                    <p className="text-muted-foreground text-sm mt-1 mb-6 min-h-[2.5rem]">{category.description}</p>
-                    <div className="space-y-5 w-full flex-1">
-                      {category.items.map((item, itemIndex) => (
-                        <div key={itemIndex} className="flex items-start gap-3 text-left" data-testid={`service-item-${catIndex}-${itemIndex}`}>
-                          <div className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary/5 text-primary flex-shrink-0 mt-0.5">
-                            <item.icon className="h-5 w-5" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-base">{item.title}</h4>
-                            <p className="text-muted-foreground text-sm mt-0.5">{item.description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <a href={category.href} className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-cyan-300 transition-colors">
-                      {category.linkLabel}
-                      <ArrowRight className="h-4 w-4" />
-                    </a>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <div className="relative h-px">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-md" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
-        </div>
-
         <section id="features" className="relative py-20 overflow-hidden">
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -468,89 +376,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {refsData.length > 0 && (
-          <>
-            <div className="relative h-px">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-md" />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
-            </div>
-
-            <section id="references" className="py-20 bg-muted/30">
-              <div className="container mx-auto px-6">
-                <div className="text-center mb-12">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                    Mes <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">Références</span>
-                  </h2>
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
-                    Découvrez les projets réalisés
-                  </p>
-                </div>
-
-                <div className="flex justify-center gap-2 mb-10">
-                  <Button
-                    variant={refsTab === "vitrine" ? "default" : "outline"}
-                    onClick={() => setRefsTab("vitrine")}
-                    className={refsTab === "vitrine" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-0" : "border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"}
-                    data-testid="button-refs-tab-vitrine"
-                  >
-                    Sites Vitrines
-                  </Button>
-                  <Button
-                    variant={refsTab === "enterprise" ? "default" : "outline"}
-                    onClick={() => setRefsTab("enterprise")}
-                    className={refsTab === "enterprise" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-0" : "border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"}
-                    data-testid="button-refs-tab-enterprise"
-                  >
-                    Produits Web Entreprise
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                  {refsData
-                    .filter((r) => r.category === refsTab)
-                    .map((ref) => (
-                      <a
-                        key={ref.id}
-                        href={ref.url}
-                        target="_blank"
-                        rel="noopener"
-                        className="group block"
-                        data-testid={`card-ref-${ref.id}`}
-                      >
-                        <Card className="border border-transparent bg-card overflow-hidden transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)] hover:scale-[1.02]">
-                          <div className="relative aspect-[16/10] bg-muted overflow-hidden">
-                            <img
-                              src={ref.imageUrl || `https://image.thum.io/get/width/600/crop/400/${ref.url}`}
-                              alt={ref.title}
-                              className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                              loading="lazy"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          </div>
-                          <CardContent className="p-4">
-                            <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">{ref.title}</h3>
-                            {ref.description && (
-                              <p className="text-sm text-muted-foreground line-clamp-2">{ref.description}</p>
-                            )}
-                            <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Globe className="h-3 w-3" />
-                              Visiter le site
-                              <ArrowRight className="h-3 w-3" />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </a>
-                    ))}
-                  {refsData.filter((r) => r.category === refsTab).length === 0 && (
-                    <p className="text-muted-foreground text-center col-span-full py-8">Aucune référence dans cette catégorie pour le moment</p>
-                  )}
-                </div>
-              </div>
-            </section>
-          </>
-        )}
 
         <div className="relative h-px">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
@@ -723,20 +548,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t py-4">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <span className="text-xl font-light tracking-wide bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">
-              Innov Studio
-            </span>
-            <div className="flex flex-col md:flex-row items-center gap-2 text-sm text-muted-foreground">
-              <p>© 2026 Innov Studio By Cyril Allegret · Création de sites web à Toulouse. Tous droits réservés.</p>
-              <span className="hidden md:inline">·</span>
-              <a href="https://www.jesuisnumerique.fr" target="_blank" rel="noopener" className="hover:text-foreground transition-colors" data-testid="link-partenaire-jesuisnumerique">jesuisnumerique.fr</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
