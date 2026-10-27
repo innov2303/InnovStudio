@@ -50,35 +50,74 @@ export type SeoPageAuditData = {
 export const seoPages: SeoPage[] = [
   {
     path: "/site-evolutif",
-    title: "Site internet évolutif professionnel | Innov Studio",
+    title: "Site vitrine professionnel et SEO | Innov Studio",
     description:
-      "Faites créer un site web évolutif, puis ajoutez des outils métier, un espace client et des automatisations à mesure que votre activité grandit.",
-    h1: "Un site web qui grandit avec votre entreprise",
-    h1Accent: "grandit avec votre entreprise",
+      "Un site vitrine professionnel avec des pages adaptées à votre activité, un design responsive et les fondations SEO incluses. Faites-le évoluer selon vos besoins.",
+    h1: "Un site vitrine qui évolue avec votre activité",
+    h1Accent: "évolue avec votre activité",
     intro:
-      "Commencez avec une présence web claire et professionnelle. Faites ensuite évoluer votre site vers des fonctionnalités sur mesure, jusqu’à une véritable application métier, au rythme de vos besoins.",
-    label: "Une base simple aujourd’hui. Une solution plus complète demain.",
+      "Présentez clairement vos services avec un site adapté aux mobiles et aux ordinateurs, structuré pour le référencement naturel et prêt à évoluer vers des fonctionnalités métier.",
+    label: "Une présence professionnelle, visible et prête à grandir.",
     sections: [
       {
-        title: "Étape 1 — Lancer une présence web efficace",
+        title: "Des pages et des contenus adaptés à votre activité",
         paragraphs: [
-          "Votre projet démarre avec les fonctionnalités réellement utiles : présenter votre activité, expliquer vos offres et faciliter les prises de contact. L’objectif est de mettre en ligne une base professionnelle, rapide et adaptée aux mobiles.",
-          "La structure est pensée pour accueillir de nouveaux contenus et services sans devoir repartir de zéro à chaque évolution.",
+          "Un site vitrine doit permettre à vos visiteurs de comprendre rapidement votre activité, vos services et la façon de vous contacter. Les pages sont organisées selon votre offre, vos publics et vos objectifs : accueil, services, réalisations, présentation ou contact.",
+          "Les contenus mettent en valeur vos informations et guident les visiteurs vers l’action utile, qu’il s’agisse de demander un devis, de réserver ou de vous écrire.",
         ],
-        bullets: ["Pages et contenus adaptés à votre activité", "Navigation claire sur mobile et ordinateur", "Fondations techniques et SEO propres"],
-      },
-      {
-        title: "Étape 2 — Ajouter les bons outils",
-        paragraphs: [
-          "Quand votre activité évolue, le site peut intégrer de nouvelles fonctions : prise de rendez-vous, catalogue, formulaires métier, automatisations, espace client ou connexion à vos outils existants.",
-          "Chaque amélioration répond à un besoin identifié. Vous développez votre solution progressivement plutôt que de financer d’emblée un système trop complexe.",
+        bullets: [
+          "Une arborescence organisée autour de vos services",
+          "Des textes et visuels adaptés à votre activité",
+          "Des appels à l’action et coordonnées faciles à trouver",
         ],
       },
       {
-        title: "Étape 3 — Passer à une application métier",
+        title: "Un design responsive sur mobile et ordinateur",
         paragraphs: [
-          "Si vos processus le nécessitent, le projet peut évoluer vers une application web : gestion de dossiers, suivi d’activité, tableaux de bord, rôles utilisateurs ou traitement automatisé de tâches.",
-          "Le périmètre et les intégrations sont définis avec vous avant le développement, selon vos priorités, vos utilisateurs et vos contraintes.",
+          "Votre site s’adapte aux différentes tailles d’écran pour rester agréable à consulter sur téléphone, tablette et ordinateur. La mise en page, les images et la navigation sont pensées pour que chaque visiteur trouve facilement les informations importantes.",
+          "Cette adaptation facilite aussi les demandes de contact depuis un mobile, où de nombreux visiteurs découvrent aujourd’hui les entreprises.",
+        ],
+        bullets: [
+          "Navigation claire sur les petits et grands écrans",
+          "Textes et boutons lisibles et faciles à utiliser",
+          "Présentation cohérente sur mobile et ordinateur",
+        ],
+      },
+      {
+        title: "Pourquoi rendre votre activité visible en ligne ?",
+        paragraphs: [
+          "Une présence en ligne permet aux personnes qui recherchent vos services de découvrir votre activité, de comprendre votre offre et de vérifier comment vous joindre. Votre site devient un point de repère accessible à tout moment, que vous partagiez son adresse directement ou qu’un visiteur le découvre depuis un moteur de recherche.",
+          "Un site clair renforce la présentation de votre activité et aide les visiteurs à passer de la découverte à la prise de contact. La visibilité dépend de plusieurs facteurs et se construit dans le temps.",
+        ],
+        bullets: [
+          "Présenter vos services au-delà de votre réseau immédiat",
+          "Donner des informations utiles avant le premier échange",
+          "Faciliter la prise de contact depuis vos pages",
+        ],
+      },
+      {
+        title: "Les fondations SEO incluses dès la création",
+        paragraphs: [
+          "Le référencement naturel est pris en compte dès la conception : chaque page dispose d’une structure claire, de titres cohérents et de balises adaptées à son contenu. Les URLs, les textes et les images sont organisés pour aider les moteurs de recherche à comprendre les sujets traités.",
+          "Ces fondations facilitent l’exploration et l’indexation du site, sans garantir une position précise dans les résultats. Le classement dépend aussi de la concurrence, de la qualité et de l’évolution des contenus.",
+        ],
+        bullets: [
+          "Balises title et descriptions adaptées à chaque page",
+          "Hiérarchie de titres et URLs lisibles",
+          "Contenus structurés et images renseignées",
+          "Fondations techniques adaptées aux mobiles",
+        ],
+      },
+      {
+        title: "Un site vitrine qui peut évoluer avec votre activité",
+        paragraphs: [
+          "Votre projet peut commencer par les pages et les informations dont vous avez besoin aujourd’hui, puis accueillir de nouvelles fonctions lorsque votre activité évolue : prise de rendez-vous, catalogue, formulaires métier, espace client ou automatisations.",
+          "Si vos besoins deviennent plus complexes, le site peut servir de point de départ vers une application web métier. Les évolutions sont définies selon vos priorités et vos utilisateurs.",
+        ],
+        bullets: [
+          "Ajout de pages et de fonctionnalités au fil des besoins",
+          "Possibilité de créer un espace client ou des outils métier",
+          "Évolution progressive vers une application web",
         ],
       },
       {
@@ -86,7 +125,11 @@ export const seoPages: SeoPage[] = [
         paragraphs: [
           "La conception, le développement, la mise en ligne et la maintenance peuvent être organisés par étapes. Vous gardez une vision claire de ce qui est réalisé et de ce qui peut venir ensuite.",
         ],
-        bullets: ["Évolutions définies selon vos priorités", "Hébergement et maintenance disponibles", "Accompagnement technique après la mise en ligne"],
+        bullets: [
+          "Évolutions définies selon vos priorités",
+          "Hébergement et maintenance disponibles",
+          "Accompagnement technique après la mise en ligne",
+        ],
       },
     ],
     cta: "Parlons de la première étape de votre projet",
@@ -100,6 +143,11 @@ export const seoPages: SeoPage[] = [
         question: "Dois-je prévoir toutes les fonctionnalités dès le départ ?",
         answer:
           "Non. Le projet peut commencer par les besoins prioritaires, puis évoluer par étapes planifiées à mesure que votre activité et vos usages se précisent.",
+      },
+      {
+        question: "Le référencement SEO est-il inclus dans la création du site ?",
+        answer:
+          "Les fondations SEO sont intégrées à la création : structure des pages, titres, descriptions et contenus organisés. Elles aident les moteurs de recherche à comprendre le site, sans garantir une position précise.",
       },
     ],
   },
