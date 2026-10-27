@@ -439,32 +439,6 @@ export function renderSeoPage(page: SeoPage): string {
     escapedAccent,
     `<span class="accent">${escapedAccent}</span>`,
   );
-  const journeyMarkup = page.journey
-    ? `
-      <section class="journey" aria-label="Les étapes de votre solution web">
-        <div class="journey-stage">
-          <div class="journey-stage-top">
-            <span class="journey-number" aria-hidden="true">01</span>
-            <div>
-              <p class="journey-label">${escapeHtml(page.journey.start.label)}</p>
-              <h2>${escapeHtml(page.journey.start.title)}</h2>
-            </div>
-          </div>
-          <p class="journey-description">${escapeHtml(page.journey.start.description)}</p>
-        </div>
-        <span class="journey-connector" aria-hidden="true"></span>
-        <div class="journey-stage journey-stage-next">
-          <div class="journey-stage-top">
-            <span class="journey-number" aria-hidden="true">02</span>
-            <div>
-              <p class="journey-label">${escapeHtml(page.journey.next.label)}</p>
-              <h2>${escapeHtml(page.journey.next.title)}</h2>
-            </div>
-          </div>
-          <p class="journey-description">${escapeHtml(page.journey.next.description)}</p>
-        </div>
-      </section>`
-    : "";
   const sections = page.sections
     .map((section) => {
       const sectionId = section.id
@@ -511,6 +485,37 @@ export function renderSeoPage(page: SeoPage): string {
     : page.references !== undefined
       ? renderReferenceGroups(page.references)
       : `<div class="content-grid${page.featureGrid ? " feature-grid" : ""}">${sections}</div>`;
+  const journeyMarkup = page.journey
+    ? `
+      <section class="journey" aria-label="Les étapes de votre solution web">
+        <div class="journey-option-start">
+          <div class="journey-stage">
+            <div class="journey-stage-top">
+              <span class="journey-number" aria-hidden="true">01</span>
+              <div>
+                <p class="journey-label">${escapeHtml(page.journey.start.label)}</p>
+                <h2>${escapeHtml(page.journey.start.title)}</h2>
+              </div>
+            </div>
+            <p class="journey-description">${escapeHtml(page.journey.start.description)}</p>
+          </div>
+          ${page.featureGrid ? pageContent : ""}
+        </div>
+        <span class="journey-connector" aria-hidden="true"></span>
+        <div class="journey-stage journey-stage-next">
+          <div class="journey-stage-top">
+            <span class="journey-number" aria-hidden="true">02</span>
+            <div>
+              <p class="journey-label">${escapeHtml(page.journey.next.label)}</p>
+              <h2>${escapeHtml(page.journey.next.title)}</h2>
+            </div>
+          </div>
+          <p class="journey-description">${escapeHtml(page.journey.next.description)}</p>
+        </div>
+      </section>`
+    : "";
+  const pageContentMarkup =
+    page.featureGrid && page.journey ? "" : pageContent;
   const ctaMarkup = page.featureGrid
     ? ""
     : `
@@ -634,7 +639,8 @@ export function renderSeoPage(page: SeoPage): string {
       body.site-evolution .page-heading{max-width:980px;margin-bottom:32px}
       body.site-evolution .page-label{display:inline-flex;align-items:center;border:1px solid rgba(14,116,144,.16);border-radius:999px;background:rgba(255,255,255,.86);padding:7px 14px;margin-bottom:16px;color:#0e7490;font-size:13px;box-shadow:0 4px 14px rgba(15,60,90,.04)}
       body.site-evolution .page-heading h1{font-weight:700;letter-spacing:-.04em}
-      body.site-evolution .journey{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);align-items:stretch;gap:14px;max-width:960px;margin:0 auto 30px}
+      body.site-evolution .journey{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);align-items:start;gap:14px;max-width:960px;margin:0 auto 30px}
+      body.site-evolution .journey-option-start{min-width:0}
       body.site-evolution .journey-stage{padding:22px 24px;border:1px solid #dce7ed;border-radius:18px;background:rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(15,60,90,.055);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
       body.site-evolution .journey-stage:hover{transform:translateY(-3px);border-color:rgba(14,116,144,.3);box-shadow:0 15px 30px rgba(15,60,90,.09)}
       body.site-evolution .journey-stage-next{border-color:rgba(37,99,235,.2);background:linear-gradient(130deg,#f0f9fb,#f1f5ff)}
@@ -644,10 +650,11 @@ export function renderSeoPage(page: SeoPage): string {
       body.site-evolution .journey-label{margin:0 0 3px;color:#64788b;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
       body.site-evolution .journey-stage h2{margin:0;font-size:18px;line-height:1.3}
       body.site-evolution .journey-description{margin:14px 0 0;font-size:14px;line-height:1.55}
-      body.site-evolution .journey-connector{position:relative;display:grid;place-items:center;color:#0e7490}
-      body.site-evolution .journey-connector::before{content:"";position:absolute;top:18%;bottom:18%;left:50%;width:1px;background:linear-gradient(transparent,#8cbecb,transparent)}
+      body.site-evolution .journey-connector{position:relative;display:grid;place-items:center;align-self:start;height:34px;margin-top:54px;color:#0e7490}
+      body.site-evolution .journey-connector::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(transparent,#8cbecb,transparent)}
       body.site-evolution .journey-connector::after{content:"→";position:relative;display:grid;place-items:center;width:34px;height:34px;border:1px solid rgba(14,116,144,.16);border-radius:50%;background:#f7fcfd;font-size:19px;line-height:1}
-      body.site-evolution .content-grid.feature-grid{max-width:900px;margin:0 auto;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:56px;row-gap:30px}
+      body.site-evolution .journey-stage-next{align-self:start}
+      body.site-evolution .journey-option-start .content-grid.feature-grid{max-width:none;margin:26px 0 0;grid-template-columns:1fr;gap:22px}
       body.site-evolution .feature-item{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:start;gap:14px;min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;transition:none}
       body.site-evolution .feature-item:hover{transform:none;border-color:transparent;box-shadow:none}
       body.site-evolution .feature-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:10px;background:#eaf2ff;color:#4380e5}
@@ -659,10 +666,10 @@ export function renderSeoPage(page: SeoPage): string {
         body.site-evolution .page-content{padding-top:78px}
         body.site-evolution .journey{grid-template-columns:1fr;gap:9px;margin-bottom:22px}
         body.site-evolution .journey-stage{padding:19px 20px}
-        body.site-evolution .journey-connector{min-height:30px}
+        body.site-evolution .journey-connector{height:30px;min-height:30px;margin-top:0}
         body.site-evolution .journey-connector::before{top:0;bottom:0}
         body.site-evolution .journey-connector::after{content:"↓";width:30px;height:30px;font-size:18px}
-        body.site-evolution .content-grid.feature-grid{grid-template-columns:1fr;gap:23px;max-width:560px}
+        body.site-evolution .journey-option-start .content-grid.feature-grid{max-width:560px;margin:22px auto 0;gap:23px}
         body.site-evolution .feature-item{grid-template-columns:40px minmax(0,1fr);gap:13px}
         body.site-evolution .feature-icon{width:40px;height:40px}
         body.site-evolution .feature-copy h2{font-size:16px}
@@ -692,7 +699,7 @@ export function renderSeoPage(page: SeoPage): string {
             <p class="page-intro">${escapeHtml(page.intro)}</p>
           </div>
           ${journeyMarkup}
-          ${pageContent}
+          ${pageContentMarkup}
           ${ctaMarkup}
           ${faqMarkup}
         </div>

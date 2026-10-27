@@ -29,6 +29,14 @@ test("the evolving service page presents the path to an application on one page"
   assert.match(html, /id="application-metier"/);
   assert.match(html, /class="content-grid feature-grid"/);
   assert.equal((html.match(/class="feature-item"/g) ?? []).length, 4);
+  assert.ok(
+    html.indexOf("Site vitrine professionnel") <
+      html.indexOf('class="content-grid feature-grid"'),
+  );
+  assert.ok(
+    html.indexOf('class="content-grid feature-grid"') <
+      html.indexOf("Quand vos besoins grandissent"),
+  );
   assert.doesNotMatch(html, /Questions fréquentes|Parlons de la première étape/);
   assert.match(html, /href="\/site-evolutif">Site Web Evolutif<\/a>/);
   assert.doesNotMatch(html, /href="\/application-web-entreprise">Application web métier<\/a>/);
