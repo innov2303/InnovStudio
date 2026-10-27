@@ -139,8 +139,8 @@ export async function registerRoutes(
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   }));
   
-  // Rate limiting général
-  app.use(generalLimiter);
+  // Limit API traffic without counting page loads, scripts, stylesheets, or images.
+  app.use("/api", generalLimiter);
   
   app.use(
     session({
@@ -654,7 +654,7 @@ export async function registerRoutes(
   });
 
   // Contact form endpoint (public, rate limited)
-  app.post("/api/contact", generalLimiter, async (req, res) => {
+  app.post("/api/contact", async (req, res) => {
     try {
       const { name, email, phone, subject, message } = req.body;
       
