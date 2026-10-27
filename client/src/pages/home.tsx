@@ -214,7 +214,7 @@ export default function Home() {
               Accueil
             </a>
             <a href="/site-evolutif" className="text-muted-foreground hover:text-foreground transition-colors">
-              Site évolutif
+              Site vitrine
             </a>
             <a href="/application-web-entreprise" className="text-muted-foreground hover:text-foreground transition-colors">
               Application métier
@@ -326,7 +326,7 @@ export default function Home() {
                 </a>
                 <a href="/site-evolutif">
                   <Button size="lg" variant="outline" className="border-cyan-700/40 text-cyan-800 hover:bg-cyan-50 hover:border-cyan-700/60 transition-all duration-300" data-testid="button-discover-services">
-                    Découvrir le site évolutif
+                    Découvrir le site vitrine
                   </Button>
                 </a>
               </div>
@@ -461,7 +461,7 @@ export default function Home() {
                   href="/site-evolutif"
                   className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
                 >
-                  Découvrir le site évolutif <ArrowRight className="h-4 w-4" />
+                  Découvrir le site vitrine <ArrowRight className="h-4 w-4" />
                 </a>
               </article>
 

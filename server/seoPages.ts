@@ -191,7 +191,7 @@ export const seoPages: SeoPage[] = [
         title: "Une solution qui peut s’enrichir",
         paragraphs: [
           "Votre site peut commencer par présenter vos services, puis intégrer de nouvelles pages, des formulaires, des réservations ou des fonctionnalités métier selon les besoins qui apparaissent.",
-          "Découvrez l’approche du <a href=\"/site-evolutif\">site évolutif</a> ou la création d’une <a href=\"/application-web-entreprise\">application web métier</a>.",
+          "Découvrez l’approche du <a href=\"/site-evolutif\">site vitrine</a> ou la création d’une <a href=\"/application-web-entreprise\">application web métier</a>.",
         ],
       },
     ],
@@ -222,9 +222,9 @@ export const seoPages: SeoPage[] = [
     sections: [],
     serviceCards: [
       {
-        title: "Site évolutif",
+        title: "Site vitrine",
         href: "/site-evolutif",
-        linkLabel: "Découvrir le site évolutif",
+        linkLabel: "Découvrir le site vitrine",
         description:
           "Lancez une présence web professionnelle, puis ajoutez de nouvelles pages et fonctionnalités à mesure que votre activité grandit.",
         items: [
@@ -545,7 +545,7 @@ export function renderSeoPage(page: SeoPage): string {
         <a class="brand" href="/">Innov Studio</a>
         <nav aria-label="Navigation principale">
           <a href="/">Accueil</a>
-          <a href="/site-evolutif">Site évolutif</a>
+          <a href="/site-evolutif">Site vitrine</a>
           <a href="/application-web-entreprise">Application métier</a>
           <a href="/references">Références</a>
           <a href="/#contact">Contact</a>
