@@ -524,22 +524,12 @@ export function renderSeoPage(page: SeoPage): string {
       .login span{display:inline-flex;width:16px;justify-content:center;margin-left:4px}
       .login:hover{color:white;filter:brightness(1.08)}
       main{padding:0 0 80px}
-      .hero{position:relative;isolation:isolate;overflow:hidden;width:100%;padding:128px 24px 80px;text-align:center}
-      .hero-bg,.hero-overlay{position:absolute;inset:0;pointer-events:none}
-      .hero-bg{z-index:-2;background:linear-gradient(135deg,#fff 0%,#fff 72%,#f0f9ff 100%)}
-      .hero-overlay{z-index:-1;background:radial-gradient(circle at 16% 24%,rgba(59,130,246,.06),transparent 34%),radial-gradient(circle at 82% 78%,rgba(34,211,238,.08),transparent 38%)}
-      .hero-content{position:relative;max-width:1080px;margin:0 auto}
-      .eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px;font-weight:500;letter-spacing:0;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);padding:8px 16px;margin-bottom:24px}
-      .hero-brand{font-size:clamp(56px,8vw,96px);line-height:1.05;letter-spacing:.02em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent;margin:0 0 20px}
-      .hero h1{max-width:920px;margin:0 auto 18px;font-size:clamp(32px,3.75vw,48px);line-height:1.12;letter-spacing:-.035em}
       .accent{background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
-      .intro{font-size:clamp(18px,2.1vw,20px);color:var(--muted);line-height:1.65;max-width:1080px;margin:0 auto 32px}
-      .page-label{color:var(--cyan);font-weight:600;text-align:center;margin:0 auto 30px}
-      .hero-actions{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap}
-      .hero-actions .button{margin:0;padding:10px 20px;font-size:14px;line-height:20px}
-      .button-secondary{border:1px solid rgba(14,116,144,.35);background:rgba(255,255,255,.85);color:#0e7490;box-shadow:none}
-      .hero-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(14,116,144,.42),transparent)}
-      .page-content{padding-top:40px}
+      .page-content{padding-top:88px}
+      .page-heading{max-width:1080px;margin:0 auto 36px;text-align:center}
+      .page-heading h1{max-width:920px;margin:0 auto 18px;font-size:clamp(32px,3.75vw,48px);line-height:1.12;letter-spacing:-.035em}
+      .page-intro{font-size:clamp(18px,2.1vw,20px);color:var(--muted);line-height:1.65;max-width:1080px;margin:0 auto}
+      .page-label{color:var(--cyan);font-weight:600;text-align:center;margin:0 auto 14px}
       .content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
       #services{scroll-margin-top:80px}
       .service-grid,.reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
@@ -584,7 +574,20 @@ export function renderSeoPage(page: SeoPage): string {
       .footer-copy a{color:var(--muted)}
       @media(min-width:1024px){.nav{grid-template-columns:1fr auto 1fr}}
       @media(max-width:1023px){nav{display:none}}
-      @media(max-width:767px){.wrap{width:calc(100% - 40px)}.nav{height:52px}.brand{font-size:20px}.login{font-size:13px;padding:8px 12px}.hero{padding:118px 20px 56px}.hero-brand{font-size:clamp(52px,14vw,72px);margin-bottom:18px}.hero h1{font-size:clamp(30px,8vw,40px)}.hero-actions{flex-direction:column}.hero-actions .button{width:min(100%,280px)}.page-content{padding-top:28px}.content-grid,.service-grid,.reference-grid{grid-template-columns:1fr;gap:16px}.content-section,.service-card{padding:24px}.cta{padding:30px 20px}.footer-inner{align-items:center;flex-direction:column;text-align:center}.footer-copy{justify-content:center;text-align:center}}
+      @media(max-width:767px){
+        .wrap{width:calc(100% - 40px)}
+        .nav{height:52px}
+        .brand{font-size:20px}
+        .login{font-size:13px;padding:8px 12px}
+        .page-content{padding-top:78px}
+        .page-heading{margin-bottom:28px}
+        .page-heading h1{font-size:clamp(30px,8vw,40px)}
+        .content-grid,.service-grid,.reference-grid{grid-template-columns:1fr;gap:16px}
+        .content-section,.service-card{padding:24px}
+        .cta{padding:30px 20px}
+        .footer-inner{align-items:center;flex-direction:column;text-align:center}
+        .footer-copy{justify-content:center;text-align:center}
+      }
     </style>
   </head>
   <body>
@@ -603,23 +606,12 @@ export function renderSeoPage(page: SeoPage): string {
     </header>
     <main>
       <article>
-        <section class="hero">
-          <div class="hero-bg" aria-hidden="true"></div>
-          <div class="hero-overlay" aria-hidden="true"></div>
-          <div class="hero-content">
-            <div class="eyebrow"><span aria-hidden="true">✧</span> Innovation Web & Intelligence Artificielle</div>
-            <div class="hero-brand" aria-hidden="true">Innov Studio</div>
-            <h1>${headingMarkup}</h1>
-            <p class="intro">${escapeHtml(page.intro)}</p>
-            <div class="hero-actions">
-              <a class="button" href="/#contact">Démarrer un projet <span aria-hidden="true">→</span></a>
-              <a class="button button-secondary" href="/references">Découvrir nos références</a>
-            </div>
-          </div>
-        </section>
-        <div class="hero-divider" aria-hidden="true"></div>
         <div class="wrap page-content">
-          <p class="page-label">${escapeHtml(page.label)}</p>
+          <div class="page-heading">
+            <p class="page-label">${escapeHtml(page.label)}</p>
+            <h1>${headingMarkup}</h1>
+            <p class="page-intro">${escapeHtml(page.intro)}</p>
+          </div>
           ${pageContent}
           <section class="cta">
             <h2>${escapeHtml(page.cta)}</h2>
