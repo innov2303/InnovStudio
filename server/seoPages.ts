@@ -1,10 +1,13 @@
 const SITE_URL = "https://innov-studio.fr";
 
+type FeatureIcon = "pages" | "responsive" | "search" | "evolution";
+
 type SeoSection = {
   title: string;
   paragraphs: string[];
   bullets?: string[];
   id?: string;
+  icon?: FeatureIcon;
 };
 
 type ServiceCard = {
@@ -37,6 +40,7 @@ type SeoPage = {
   faq: { question: string; answer: string }[];
   serviceCards?: ServiceCard[];
   references?: PublicReference[];
+  featureGrid?: boolean;
   journey?: {
     start: { label: string; title: string; description: string };
     next: { label: string; title: string; description: string };
@@ -61,8 +65,9 @@ export const seoPages: SeoPage[] = [
     h1: "Du site vitrine à l’application web métier",
     h1Accent: "application web métier",
     intro:
-      "Commencez par un site vitrine clair et bien référencé, puis ajoutez les fonctionnalités métier utiles à votre activité, jusqu’à une application web sur mesure.",
+      "Commencez par un site vitrine, puis faites-le évoluer vers une application web métier à votre rythme.",
     label: "Une solution web qui évolue au rythme de votre activité.",
+    featureGrid: true,
     journey: {
       start: {
         label: "Point de départ",
@@ -79,99 +84,37 @@ export const seoPages: SeoPage[] = [
     },
     sections: [
       {
-        title: "Des pages et des contenus adaptés à votre activité",
+        icon: "pages",
+        title: "Des pages adaptées à votre activité",
         paragraphs: [
-          "Un site vitrine doit permettre à vos visiteurs de comprendre rapidement votre activité, vos services et la façon de vous contacter. Les pages sont organisées selon votre offre, vos publics et vos objectifs : accueil, services, réalisations, présentation ou contact.",
-          "Les contenus mettent en valeur vos informations et guident les visiteurs vers l’action utile, qu’il s’agisse de demander un devis, de réserver ou de vous écrire.",
-        ],
-        bullets: [
-          "Une arborescence organisée autour de vos services",
-          "Des textes et visuels adaptés à votre activité",
-          "Des appels à l’action et coordonnées faciles à trouver",
+          "Présentez clairement vos services et aidez vos visiteurs à vous contacter.",
         ],
       },
       {
-        title: "Un design responsive sur mobile et ordinateur",
+        icon: "responsive",
+        title: "Une expérience claire sur tous les écrans",
         paragraphs: [
-          "Votre site s’adapte aux différentes tailles d’écran pour rester agréable à consulter sur téléphone, tablette et ordinateur. La mise en page, les images et la navigation sont pensées pour que chaque visiteur trouve facilement les informations importantes.",
-          "Cette adaptation facilite aussi les demandes de contact depuis un mobile, où de nombreux visiteurs découvrent aujourd’hui les entreprises.",
-        ],
-        bullets: [
-          "Navigation claire sur les petits et grands écrans",
-          "Textes et boutons lisibles et faciles à utiliser",
-          "Présentation cohérente sur mobile et ordinateur",
+          "Une navigation agréable sur mobile, tablette et ordinateur.",
         ],
       },
       {
-        title: "Pourquoi rendre votre activité visible en ligne ?",
+        icon: "search",
+        title: "Des bases SEO dès la création",
         paragraphs: [
-          "Une présence en ligne permet aux personnes qui recherchent vos services de découvrir votre activité, de comprendre votre offre et de vérifier comment vous joindre. Votre site devient un point de repère accessible à tout moment, que vous partagiez son adresse directement ou qu’un visiteur le découvre depuis un moteur de recherche.",
-          "Un site clair renforce la présentation de votre activité et aide les visiteurs à passer de la découverte à la prise de contact. La visibilité dépend de plusieurs facteurs et se construit dans le temps.",
-        ],
-        bullets: [
-          "Présenter vos services au-delà de votre réseau immédiat",
-          "Donner des informations utiles avant le premier échange",
-          "Faciliter la prise de contact depuis vos pages",
+          "Des titres et contenus structurés pour aider les moteurs à comprendre vos pages.",
         ],
       },
       {
-        title: "Les fondations SEO incluses dès la création",
-        paragraphs: [
-          "Le référencement naturel est pris en compte dès la conception : chaque page dispose d’une structure claire, de titres cohérents et de balises adaptées à son contenu. Les URLs, les textes et les images sont organisés pour aider les moteurs de recherche à comprendre les sujets traités.",
-          "Ces fondations facilitent l’exploration et l’indexation du site, sans garantir une position précise dans les résultats. Le classement dépend aussi de la concurrence, de la qualité et de l’évolution des contenus.",
-        ],
-        bullets: [
-          "Balises title et descriptions adaptées à chaque page",
-          "Hiérarchie de titres et URLs lisibles",
-          "Contenus structurés et images renseignées",
-          "Fondations techniques adaptées aux mobiles",
-        ],
-      },
-      {
+        icon: "evolution",
         id: "application-metier",
-        title: "Du site vitrine à l’application web métier, étape par étape",
+        title: "Votre site prêt à évoluer",
         paragraphs: [
-          "Vous pouvez commencer par un site vitrine professionnel : des pages adaptées à votre activité, une présentation claire de vos services et des bases SEO solides. C’est un point de départ pour vous rendre visible et faciliter les prises de contact.",
-          "Quand vos besoins grandissent, ajoutez progressivement des fonctions utiles : réservation, catalogue, formulaires connectés, espace client, comptes utilisateurs, suivi de dossiers, tableaux de bord ou automatisations.",
-          "Lorsque ces fonctions deviennent centrales dans votre activité, le projet peut évoluer vers une application web métier conçue autour de vos processus. Selon le site existant et ses données, nous définissons ce qui peut être conservé et les étapes à construire. Vous pouvez aussi démarrer directement par l’application si c’est votre besoin prioritaire.",
-        ],
-        bullets: [
-          "Commencer par un site vitrine professionnel et bien structuré",
-          "Ajouter des fonctionnalités au rythme de vos besoins",
-          "Faire évoluer le projet vers une application web métier sur mesure",
-          "Planifier chaque étape selon vos usages et vos priorités",
-        ],
-      },
-      {
-        title: "Un accompagnement dans la durée",
-        paragraphs: [
-          "La conception, le développement, la mise en ligne et la maintenance peuvent être organisés par étapes. Vous gardez une vision claire de ce qui est réalisé et de ce qui peut venir ensuite.",
-        ],
-        bullets: [
-          "Évolutions définies selon vos priorités",
-          "Hébergement et maintenance disponibles",
-          "Accompagnement technique après la mise en ligne",
+          "Ajoutez des fonctionnalités et passez, si besoin, du site vitrine à l’application web métier.",
         ],
       },
     ],
     cta: "Parlons de la première étape de votre projet",
-    faq: [
-      {
-        question: "Peut-on passer d’un site vitrine à une application web métier ?",
-        answer:
-          "Oui, selon la structure du site, ses données et les fonctionnalités souhaitées. Une première analyse permet de déterminer ce qui peut être conservé et de planifier les évolutions.",
-      },
-      {
-        question: "Dois-je prévoir toutes les fonctionnalités dès le départ ?",
-        answer:
-          "Non. Le projet peut commencer par les besoins prioritaires, puis évoluer par étapes planifiées à mesure que votre activité et vos usages se précisent.",
-      },
-      {
-        question: "Le référencement SEO est-il inclus dans la création du site ?",
-        answer:
-          "Les fondations SEO sont intégrées à la création : structure des pages, titres, descriptions et contenus organisés. Elles aident les moteurs de recherche à comprendre le site, sans garantir une position précise.",
-      },
-    ],
+    faq: [],
   },
   {
     path: "/application-web-entreprise",
@@ -468,7 +411,25 @@ function jsonLd(page: SeoPage): string {
       acceptedAnswer: { "@type": "Answer", text: answer },
     })),
   };
-  return `<script type="application/ld+json">${JSON.stringify(schema)}</script><script type="application/ld+json">${JSON.stringify(faq)}</script>`;
+  const faqScript = page.faq.length
+    ? `<script type="application/ld+json">${JSON.stringify(faq)}</script>`
+    : "";
+  return `<script type="application/ld+json">${JSON.stringify(schema)}</script>${faqScript}`;
+}
+
+function renderFeatureIcon(icon?: FeatureIcon): string {
+  const icons: Record<FeatureIcon, string> = {
+    pages:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M7 3.5h7l4.5 4.5v12A1.5 1.5 0 0 1 17 21.5H7A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5Z"/><path d="M14 3.5V8h4.5M9 12h6M9 15.5h6"/></svg>',
+    responsive:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="2.8" y="4" width="14.2" height="11.5" rx="1.5"/><path d="M7.5 19.5h4.8m-2.4-4v4"/><rect x="17.5" y="8" width="4" height="11.5" rx="1.2"/><path d="M19 17h1"/></svg>',
+    search:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m15.5 15.5 4.2 4.2M8.3 10.8h5"/></svg>',
+    evolution:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18M7 6h.01M10 6h.01m1 7h6m-2.5-2.5L17 13l-2.5 2.5"/></svg>',
+  };
+
+  return icon ? icons[icon] : "";
 }
 
 export function renderSeoPage(page: SeoPage): string {
@@ -505,9 +466,25 @@ export function renderSeoPage(page: SeoPage): string {
       </section>`
     : "";
   const sections = page.sections
-    .map(
-      (section) => `
-        <section class="content-section"${section.id ? ` id="${escapeHtml(section.id)}"` : ""}>
+    .map((section) => {
+      const sectionId = section.id
+        ? ` id="${escapeHtml(section.id)}"`
+        : "";
+
+      if (page.featureGrid) {
+        return `
+          <section class="feature-item"${sectionId}>
+            <span class="feature-icon" aria-hidden="true">${renderFeatureIcon(section.icon)}</span>
+            <div class="feature-copy">
+              <h2>${escapeHtml(section.title)}</h2>
+              ${section.paragraphs.map(renderParagraph).join("")}
+            </div>
+          </section>
+        `;
+      }
+
+      return `
+        <section class="content-section"${sectionId}>
           <h2>${escapeHtml(section.title)}</h2>
           ${section.paragraphs.map(renderParagraph).join("")}
           ${
@@ -516,8 +493,8 @@ export function renderSeoPage(page: SeoPage): string {
               : ""
           }
         </section>
-      `,
-    )
+      `;
+    })
     .join("");
   const faq = page.faq
     .map(
@@ -533,7 +510,22 @@ export function renderSeoPage(page: SeoPage): string {
     ? renderServiceCards(page.serviceCards)
     : page.references !== undefined
       ? renderReferenceGroups(page.references)
-      : `<div class="content-grid">${sections}</div>`;
+      : `<div class="content-grid${page.featureGrid ? " feature-grid" : ""}">${sections}</div>`;
+  const ctaMarkup = page.featureGrid
+    ? ""
+    : `
+      <section class="cta">
+        <h2>${escapeHtml(page.cta)}</h2>
+        <p>Présentez votre activité, votre objectif et les besoins que vous souhaitez traiter en premier.</p>
+        <a class="button" href="/#contact">Parler de mon projet</a>
+      </section>`;
+  const faqMarkup = page.faq.length
+    ? `
+      <section class="faq">
+        <h2>Questions fréquentes</h2>
+        ${faq}
+      </section>`
+    : "";
 
   return `<!doctype html>
 <html lang="fr">
@@ -655,24 +647,14 @@ export function renderSeoPage(page: SeoPage): string {
       body.site-evolution .journey-connector{position:relative;display:grid;place-items:center;color:#0e7490}
       body.site-evolution .journey-connector::before{content:"";position:absolute;top:18%;bottom:18%;left:50%;width:1px;background:linear-gradient(transparent,#8cbecb,transparent)}
       body.site-evolution .journey-connector::after{content:"→";position:relative;display:grid;place-items:center;width:34px;height:34px;border:1px solid rgba(14,116,144,.16);border-radius:50%;background:#f7fcfd;font-size:19px;line-height:1}
-      body.site-evolution .content-grid{counter-reset:evolution-section;gap:20px}
-      body.site-evolution .content-section{position:relative;overflow:hidden;border-radius:18px;padding:30px 30px 28px;border-color:#dce7ed;box-shadow:0 9px 24px rgba(15,60,90,.045);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
-      body.site-evolution .content-section:hover{transform:translateY(-3px);border-color:rgba(14,116,144,.32);box-shadow:0 15px 32px rgba(15,60,90,.085)}
-      body.site-evolution .content-section:not(#application-metier){counter-increment:evolution-section}
-      body.site-evolution .content-section:not(#application-metier)::before{content:counter(evolution-section,decimal-leading-zero);display:grid;place-items:center;width:38px;height:38px;margin-bottom:16px;border-radius:11px;background:#eaf5f8;color:#0e7490;font-size:12px;font-weight:700}
-      body.site-evolution .content-section h2{font-size:21px;letter-spacing:-.02em}
-      body.site-evolution .content-section ul{margin-top:15px}
-      body.site-evolution .content-section li{padding:4px 0}
-      body.site-evolution .content-section#application-metier{grid-column:1/-1;border-color:rgba(14,116,144,.23);background:linear-gradient(135deg,#eff8fb 0%,#fff 52%,#f1f5ff 100%);box-shadow:0 12px 30px rgba(15,60,90,.06);scroll-margin-top:88px}
-      body.site-evolution .content-section#application-metier h2{font-size:25px}
-      body.site-evolution .content-section#application-metier h2::before{content:"Parcours évolutif";display:table;align-items:center;margin:0 0 12px;padding:5px 10px;border-radius:999px;background:#e2f3f4;color:#0e7490;font-size:10px;letter-spacing:.07em;text-transform:uppercase}
-      body.site-evolution .content-section#application-metier ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
-      body.site-evolution .cta{border-radius:18px;box-shadow:0 10px 26px rgba(15,60,90,.045)}
-      body.site-evolution .button{transition:transform .2s ease,filter .2s ease}
-      body.site-evolution .button:hover{transform:translateY(-2px)}
-      body.site-evolution .faq summary{position:relative;padding-right:36px}
-      body.site-evolution .faq summary::after{content:"+";position:absolute;right:4px;top:10px;color:#0e7490;font-size:22px;font-weight:400;transition:transform .2s ease}
-      body.site-evolution .faq details[open] summary::after{transform:rotate(45deg)}
+      body.site-evolution .content-grid.feature-grid{max-width:900px;margin:0 auto;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:56px;row-gap:30px}
+      body.site-evolution .feature-item{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:start;gap:14px;min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;transition:none}
+      body.site-evolution .feature-item:hover{transform:none;border-color:transparent;box-shadow:none}
+      body.site-evolution .feature-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:10px;background:#eaf2ff;color:#4380e5}
+      body.site-evolution .feature-icon svg{display:block;width:21px;height:21px}
+      body.site-evolution .feature-copy h2{margin:1px 0 5px;font-size:17px;line-height:1.35;font-weight:650;letter-spacing:-.015em}
+      body.site-evolution .feature-copy p{margin:0;color:#64748b;font-size:14px;line-height:1.5}
+      body.site-evolution .feature-item#application-metier{scroll-margin-top:88px}
       @media(max-width:767px){
         body.site-evolution .page-content{padding-top:78px}
         body.site-evolution .journey{grid-template-columns:1fr;gap:9px;margin-bottom:22px}
@@ -680,9 +662,11 @@ export function renderSeoPage(page: SeoPage): string {
         body.site-evolution .journey-connector{min-height:30px}
         body.site-evolution .journey-connector::before{top:0;bottom:0}
         body.site-evolution .journey-connector::after{content:"↓";width:30px;height:30px;font-size:18px}
-        body.site-evolution .content-grid{grid-template-columns:1fr;gap:14px}
-        body.site-evolution .content-section{padding:24px}
-        body.site-evolution .content-section#application-metier ul{grid-template-columns:1fr}
+        body.site-evolution .content-grid.feature-grid{grid-template-columns:1fr;gap:23px;max-width:560px}
+        body.site-evolution .feature-item{grid-template-columns:40px minmax(0,1fr);gap:13px}
+        body.site-evolution .feature-icon{width:40px;height:40px}
+        body.site-evolution .feature-copy h2{font-size:16px}
+        body.site-evolution .feature-copy p{font-size:14px}
       }
     </style>
   </head>
@@ -709,15 +693,8 @@ export function renderSeoPage(page: SeoPage): string {
           </div>
           ${journeyMarkup}
           ${pageContent}
-          <section class="cta">
-            <h2>${escapeHtml(page.cta)}</h2>
-            <p>Présentez votre activité, votre objectif et les besoins que vous souhaitez traiter en premier.</p>
-            <a class="button" href="/#contact">Parler de mon projet</a>
-          </section>
-          <section class="faq">
-            <h2>Questions fréquentes</h2>
-            ${faq}
-          </section>
+          ${ctaMarkup}
+          ${faqMarkup}
         </div>
       </article>
     </main>
