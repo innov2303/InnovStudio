@@ -128,24 +128,28 @@ export default function Home() {
   const serviceCategories = [
     {
       icon: Globe,
-      title: "Sites Vitrines",
-      description: "Des sites web élégants et performants qui mettent en valeur votre activité et captent l'attention de vos visiteurs.",
+      title: "Site évolutif",
+      href: "/site-evolutif",
+      linkLabel: "Découvrir le site évolutif",
+      description: "Lancez une présence web professionnelle, puis ajoutez de nouvelles pages et fonctionnalités à mesure que votre activité grandit.",
       items: [
-        { icon: Palette, title: "Design UI/UX", description: "Interfaces modernes et intuitives conçues pour une expérience utilisateur optimale." },
-        { icon: ShoppingCart, title: "Intégration E-commerce", description: "Boutique en ligne, catalogue produits et paiement sécurisé pour vendre directement sur votre site." },
-        { icon: Headphones, title: "Support & Maintenance 7/7J", description: "Mises à jour régulières, corrections de bugs et support technique réactif." },
-        { icon: Server, title: "Hébergement", description: "Hébergement sécurisé avec certificat SSL, sauvegardes automatiques et disponibilité optimale." },
+        { icon: Palette, title: "Une base web sur mesure", description: "Un design clair, des contenus bien organisés et une expérience adaptée au mobile." },
+        { icon: ShoppingCart, title: "Des fonctionnalités qui suivent vos besoins", description: "Réservation, catalogue, espace client ou outils connectés selon vos priorités." },
+        { icon: Headphones, title: "Évolutions et maintenance", description: "Faites avancer votre site par étapes, avec un accompagnement technique disponible." },
+        { icon: Server, title: "Hébergement sécurisé", description: "Certificat SSL, sauvegardes et infrastructure adaptée à votre projet." },
       ],
     },
     {
       icon: Briefcase,
-      title: "Solutions Web Entreprise",
-      description: "Solutions sur mesure pour digitaliser vos processus métier et optimiser votre productivité.",
+      title: "Application web métier",
+      href: "/application-web-entreprise",
+      linkLabel: "Découvrir les applications métier",
+      description: "Quand votre activité en a besoin, transformez vos processus en outils web adaptés à vos équipes et à vos clients.",
       items: [
-        { icon: Palette, title: "Design UI/UX", description: "Interfaces professionnelles et ergonomiques adaptées à vos processus métier." },
-        { icon: Bot, title: "Intégration IA", description: "Exploitez la puissance de l'intelligence artificielle pour automatiser et enrichir vos services." },
-        { icon: Headphones, title: "Support & Maintenance 7/7J", description: "Accompagnement continu et support technique dédié pour garantir la pérennité de votre solution." },
-        { icon: Server, title: "Hébergement", description: "Infrastructure performante et sécurisée pour vos applications critiques." },
+        { icon: Palette, title: "Outils conçus pour vos usages", description: "Espaces internes ou clients, tableaux de bord et gestion de dossiers." },
+        { icon: Bot, title: "Automatisations utiles", description: "Intégrations et intelligence artificielle étudiées selon vos processus." },
+        { icon: Headphones, title: "Déploiement accompagné", description: "Tests, ajustements et support pour faciliter l’adoption par vos équipes." },
+        { icon: Server, title: "Architecture adaptée", description: "Accès, données et hébergement définis en fonction des besoins du projet." },
       ],
     },
   ];
@@ -226,6 +230,15 @@ export default function Home() {
             <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-muted-foreground hover:text-foreground transition-colors">
               Services
             </a>
+            <a href="/site-evolutif" className="text-muted-foreground hover:text-foreground transition-colors">
+              Site évolutif
+            </a>
+            <a href="/application-web-entreprise" className="text-muted-foreground hover:text-foreground transition-colors">
+              Application métier
+            </a>
+            <a href="/creation-site-web-toulouse" className="text-muted-foreground hover:text-foreground transition-colors">
+              À Toulouse
+            </a>
             <a href="#features" onClick={(e) => scrollToSection(e, "features")} className="text-muted-foreground hover:text-foreground transition-colors">
               Avantages
             </a>
@@ -292,13 +305,12 @@ export default function Home() {
               </h2>
               
               <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-                Créons ensemble votre{" "}
-                <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">projet Web</span> de demain
+                Un site web évolutif{" "}
+                <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">pour votre activité</span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-                Studio de production web basé à Toulouse, spécialisé dans la création de sites vitrines 
-                et d'applications entreprise sur mesure, enrichis par l'intelligence artificielle.
+                Studio web basé à Toulouse : démarrez avec un site professionnel et faites-le évoluer vers les outils numériques dont votre activité a besoin.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -308,9 +320,9 @@ export default function Home() {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </a>
-                <a href="#services" onClick={(e) => scrollToSection(e, "services")}>
+                <a href="/site-evolutif">
                   <Button size="lg" variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 hover:border-cyan-500/60 transition-all duration-300" data-testid="button-discover-services">
-                    Découvrir mes services
+                    Découvrir le site évolutif
                   </Button>
                 </a>
               </div>
@@ -357,6 +369,10 @@ export default function Home() {
                         </div>
                       ))}
                     </div>
+                    <a href={category.href} className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-cyan-300 transition-colors">
+                      {category.linkLabel}
+                      <ArrowRight className="h-4 w-4" />
+                    </a>
                   </CardContent>
                 </Card>
               ))}

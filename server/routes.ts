@@ -16,6 +16,7 @@ import PDFDocument from "pdfkit";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { renderSeoPage, renderSitemap, seoPages } from "./seoPages";
 
 // Helper pour obtenir l'IP réelle
 function getClientIp(req: Request): string {
@@ -2786,6 +2787,17 @@ export async function registerRoutes(
       console.error("Delete subscription error:", error);
       res.status(500).json({ message: "Erreur serveur" });
     }
+  });
+
+  // Public server-rendered service pages: crawlable without client-side JavaScript.
+  for (const page of seoPages) {
+    app.get(page.path, (_req, res) => {
+      res.status(200).type("html").send(renderSeoPage(page));
+    });
+  }
+
+  app.get("/sitemap.xml", (_req, res) => {
+    res.status(200).type("application/xml").send(renderSitemap());
   });
 
   return httpServer;

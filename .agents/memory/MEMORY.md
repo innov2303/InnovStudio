@@ -1,0 +1,1 @@
+- [Positionnement de l’offre](seo-positioning.md) — présenter les services comme un site web évolutif, du lancement à l’application métier.
