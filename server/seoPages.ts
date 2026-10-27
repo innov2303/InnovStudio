@@ -7,6 +7,7 @@ type FeatureIcon =
   | "evolution"
   | "administration"
   | "custom"
+  | "dashboard"
   | "ai";
 
 type SeoSection = {
@@ -103,8 +104,12 @@ export const seoPages: SeoPage[] = [
         title: "Fonctionnalités sur mesure",
         paragraphs: [
           "Suivez et gérez vos commandes, clients et documents",
-          "Dashboard selon vos besoins",
         ],
+      },
+      {
+        icon: "dashboard",
+        title: "Dashboard selon vos besoins",
+        paragraphs: [],
       },
       {
         icon: "ai",
@@ -463,6 +468,8 @@ function renderFeatureIcon(icon?: FeatureIcon): string {
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.4-3 2.5-5 5.5-5 1.3 0 2.4.4 3.3 1M16.5 8.5l1.5 1.5 3-3"/><path d="M17 14v2m0 4v.01m-3-2h2m4 0h1"/></svg>',
     custom:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="4" rx="1.5"/><rect x="13" y="10" width="8" height="10" rx="1.5"/><path d="M3 14h8m-4-3v9"/></svg>',
+    dashboard:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 16v-2m5 2v-4m5 4v-6"/></svg>',
     ai:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15ZM5 3l.6 1.4L7 5l-1.4.6L5 7l-.6-1.4L3 5l1.4-.6L5 3Z"/></svg>',
   };
