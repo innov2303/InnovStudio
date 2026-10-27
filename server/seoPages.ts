@@ -316,6 +316,7 @@ export function renderSeoPage(page: SeoPage): string {
       .intro{font-size:clamp(18px,2.1vw,21px);color:var(--muted);line-height:1.65;max-width:800px;margin:0 auto}
       .hero-label{color:var(--cyan);font-weight:600;margin:22px 0 0}
       .content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+      #services{scroll-margin-top:80px}
       .content-section{background:var(--panel);border:1px solid transparent;border-radius:12px;padding:30px;transition:border-color .25s ease,box-shadow .25s ease}
       .content-section:hover{border-color:rgba(34,211,238,.5);box-shadow:0 0 18px rgba(0,200,255,.12)}
       h2{font-size:22px;line-height:1.3;margin:0 0 14px}
@@ -342,7 +343,7 @@ export function renderSeoPage(page: SeoPage): string {
       <div class="wrap nav">
         <a class="brand" href="/">Innov Studio</a>
         <nav aria-label="Navigation principale">
-          <a href="/#services">Services</a>
+          <a href="#services">Services</a>
           <a href="/site-evolutif">Site évolutif</a>
           <a href="/application-web-entreprise">Application métier</a>
           <a href="/creation-site-web-toulouse">À Toulouse</a>
@@ -362,7 +363,7 @@ export function renderSeoPage(page: SeoPage): string {
           <p class="intro">${escapeHtml(page.intro)}</p>
           <p class="hero-label">${escapeHtml(page.label)}</p>
         </section>
-        <div class="content-grid">${sections}</div>
+        <div class="content-grid" id="services">${sections}</div>
         <section class="cta">
           <h2>${escapeHtml(page.cta)}</h2>
           <p>Présentez votre activité, votre objectif et les besoins que vous souhaitez traiter en premier.</p>
