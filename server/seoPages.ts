@@ -11,6 +11,7 @@ type SeoPage = {
   title: string;
   description: string;
   h1: string;
+  h1Accent: string;
   intro: string;
   label: string;
   sections: SeoSection[];
@@ -25,6 +26,7 @@ export const seoPages: SeoPage[] = [
     description:
       "Faites créer un site web évolutif à Toulouse, puis ajoutez des outils métier, un espace client et des automatisations à mesure que votre activité grandit.",
     h1: "Un site web qui grandit avec votre entreprise",
+    h1Accent: "grandit avec votre entreprise",
     intro:
       "Commencez avec une présence web claire et professionnelle. Faites ensuite évoluer votre site vers des fonctionnalités sur mesure, jusqu’à une véritable application métier, au rythme de vos besoins.",
     label: "Une base simple aujourd’hui. Une solution plus complète demain.",
@@ -79,6 +81,7 @@ export const seoPages: SeoPage[] = [
     description:
       "Applications web métier sur mesure : outils internes, espaces clients, tableaux de bord et automatisations adaptés aux processus de votre entreprise.",
     h1: "Une application web adaptée à vos façons de travailler",
+    h1Accent: "application web",
     intro:
       "Quand les tableurs, les tâches répétitives ou les outils dispersés freinent votre activité, une application web sur mesure peut réunir vos processus dans un outil plus adapté.",
     label: "Des outils numériques conçus autour de vos besoins métier.",
@@ -131,6 +134,7 @@ export const seoPages: SeoPage[] = [
     description:
       "Création de site internet à Toulouse pour indépendants et entreprises : design adapté, navigation mobile et contenus clairs, avec un référencement local soigné.",
     h1: "Création de site web à Toulouse, pensé pour votre activité",
+    h1Accent: "site web à Toulouse",
     intro:
       "Innov Studio accompagne les indépendants et les entreprises de Toulouse et d’Occitanie dans la création ou l’évolution de leur présence web, avec une approche adaptée à leurs objectifs.",
     label: "Un site professionnel, utile à vos clients et prêt à évoluer.",
@@ -226,6 +230,12 @@ function jsonLd(page: SeoPage): string {
 }
 
 export function renderSeoPage(page: SeoPage): string {
+  const escapedHeading = escapeHtml(page.h1);
+  const escapedAccent = escapeHtml(page.h1Accent);
+  const headingMarkup = escapedHeading.replace(
+    escapedAccent,
+    `<span class="accent">${escapedAccent}</span>`,
+  );
   const sections = page.sections
     .map(
       (section) => `
@@ -270,40 +280,52 @@ export function renderSeoPage(page: SeoPage): string {
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="${escapeHtml(page.title)}">
     <meta name="twitter:description" content="${escapeHtml(page.description)}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     ${jsonLd(page)}
     <style>
-      :root{color-scheme:dark;--bg:#070b14;--panel:#101827;--text:#eef4ff;--muted:#a8b4c7;--cyan:#44d6ff;--blue:#438bff;--line:#223148}
+      :root{color-scheme:dark;--bg:#080b12;--panel:#111722;--text:#f5f7fb;--muted:#9aa4b2;--cyan:#22d3ee;--blue:#3b82f6;--line:rgba(148,163,184,.18)}
       *{box-sizing:border-box}
-      body{margin:0;background:radial-gradient(ellipse at 50% -25%,#15304d 0,transparent 55%),var(--bg);color:var(--text);font:16px/1.7 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-      a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
-      .wrap{width:min(1060px,calc(100% - 40px));margin:auto}
-      header{border-bottom:1px solid var(--line);background:#070b14e8}
-      .nav{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-      .brand{font-size:22px;letter-spacing:.04em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan));background-clip:text;color:transparent}
-      nav{display:flex;gap:20px;flex-wrap:wrap;font-size:14px}
-      nav a{color:#d5e1f3}
-      main{padding:42px 0 80px}
-      .crumbs{font-size:13px;color:var(--muted);margin:0 0 34px}
-      .hero{padding:36px 0 56px;max-width:850px}
-      .eyebrow{color:var(--cyan);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
-      h1{font-size:clamp(36px,6vw,64px);line-height:1.08;letter-spacing:-.035em;margin:14px 0 20px}
-      .intro{font-size:clamp(18px,2.4vw,22px);color:#c4d0e1;line-height:1.6;max-width:780px}
-      .hero-label{color:var(--cyan);font-weight:600;margin-top:26px}
-      .content-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-      .content-section{background:linear-gradient(145deg,#111b2c,#0b111d);border:1px solid var(--line);border-radius:16px;padding:26px}
-      h2{font-size:22px;line-height:1.25;margin:0 0 14px}
-      p{color:#bdc9db;margin:0 0 14px}p:last-child{margin-bottom:0}
+      body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+      a{color:inherit;text-decoration:none}a:hover{color:var(--cyan)}
+      .wrap{width:min(1280px,calc(100% - 48px));margin:auto}
+      header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid var(--line);background:rgba(8,11,18,.82);backdrop-filter:blur(14px)}
+      .nav{height:60px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+      .brand{flex:none;font-size:22px;letter-spacing:.04em;font-weight:300;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
+      nav{display:flex;align-items:center;justify-content:center;gap:clamp(12px,1.5vw,24px);font-size:14px;white-space:nowrap}
+      nav a{color:var(--muted);transition:color .2s ease}nav a:hover{color:var(--text)}
+      .login{flex:none;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(34,211,238,.18)}
+      .login:hover{color:white;filter:brightness(1.08)}
+      main{padding:60px 0 80px}
+      .crumbs{font-size:13px;color:var(--muted);margin:24px 0 0}
+      .crumbs a{color:var(--cyan)}
+      .hero{padding:74px 0 70px;max-width:920px;margin:0 auto;text-align:center}
+      .eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:14px;font-weight:500;letter-spacing:0;border:1px solid var(--line);border-radius:999px;background:rgba(15,23,42,.5);padding:8px 16px}
+      h1{font-size:clamp(36px,5.4vw,64px);line-height:1.12;letter-spacing:-.035em;margin:28px 0 22px}
+      .accent{background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
+      .intro{font-size:clamp(18px,2.1vw,21px);color:var(--muted);line-height:1.65;max-width:800px;margin:0 auto}
+      .hero-label{color:var(--cyan);font-weight:600;margin:22px 0 0}
+      .content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+      .content-section{background:var(--panel);border:1px solid transparent;border-radius:12px;padding:30px;transition:border-color .25s ease,box-shadow .25s ease}
+      .content-section:hover{border-color:rgba(34,211,238,.5);box-shadow:0 0 18px rgba(0,200,255,.12)}
+      h2{font-size:22px;line-height:1.3;margin:0 0 14px}
+      p{color:var(--muted);margin:0 0 14px}p:last-child{margin-bottom:0}
       ul{color:#dbe6f5;padding-left:20px;margin:12px 0 0}li{padding:3px 0}
-      .cta{margin:34px 0;padding:32px;border:1px solid #176785;border-radius:18px;background:linear-gradient(115deg,#0e2637,#10172a);text-align:center}
+      .cta{margin:48px 0;padding:40px 28px;border:1px solid rgba(34,211,238,.32);border-radius:12px;background:linear-gradient(115deg,rgba(14,38,55,.75),rgba(16,23,42,.85));text-align:center}
       .cta h2{font-size:26px}
-      .button{display:inline-block;margin-top:8px;padding:12px 20px;border-radius:10px;background:linear-gradient(90deg,#168fc6,#326be3);color:white;font-weight:700}
-      .faq{margin-top:48px}.faq h2{margin-bottom:18px}
+      .cta p{max-width:620px;margin:0 auto 14px}
+      .button{display:inline-flex;align-items:center;justify-content:center;margin-top:8px;padding:12px 20px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-weight:600;box-shadow:0 8px 24px rgba(34,211,238,.18);transition:filter .2s ease}
+      .button:hover{color:white;filter:brightness(1.1)}
+      .faq{margin:54px auto 0;max-width:900px}.faq h2{margin-bottom:18px}
       details{padding:17px 0;border-bottom:1px solid var(--line)}
       summary{cursor:pointer;font-weight:650}
       details p{margin:10px 0 0}
       footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:13px}
       footer .links{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
-      @media(max-width:720px){.nav{align-items:flex-start;flex-direction:column;padding:16px 0}nav{gap:12px 18px}.content-grid{grid-template-columns:1fr}.hero{padding-top:20px}.content-section{padding:22px}main{padding-top:28px}}
+      @media(max-width:1000px){nav{gap:12px;font-size:12px}.login{padding:8px 12px}}
+      @media(max-width:900px){nav{display:none}}
+      @media(max-width:767px){.wrap{width:calc(100% - 40px)}.nav{height:56px}.brand{font-size:20px}.login{font-size:13px;padding:8px 12px}main{padding-top:56px}.crumbs{margin-top:18px}.hero{padding:58px 0 48px}.content-grid{grid-template-columns:1fr;gap:16px}.content-section{padding:24px}.cta{padding:30px 20px}}
     </style>
   </head>
   <body>
@@ -311,21 +333,23 @@ export function renderSeoPage(page: SeoPage): string {
       <div class="wrap nav">
         <a class="brand" href="/">Innov Studio</a>
         <nav aria-label="Navigation principale">
-          <a href="/">Accueil</a>
+          <a href="/#services">Services</a>
           <a href="/site-evolutif">Site évolutif</a>
           <a href="/application-web-entreprise">Application métier</a>
-          <a href="/creation-site-web-toulouse">Création à Toulouse</a>
-          <a href="/#references">Réalisations</a>
+          <a href="/creation-site-web-toulouse">À Toulouse</a>
+          <a href="/#features">Avantages</a>
+          <a href="/#references">Références</a>
           <a href="/#contact">Contact</a>
         </nav>
+        <a class="login" href="/login">Connexion <span aria-hidden="true">›</span></a>
       </div>
     </header>
     <main class="wrap">
       <div class="crumbs"><a href="/">Accueil</a> <span aria-hidden="true">›</span> ${escapeHtml(page.h1)}</div>
       <article>
         <section class="hero">
-          <div class="eyebrow">Innov Studio · Toulouse</div>
-          <h1>${escapeHtml(page.h1)}</h1>
+          <div class="eyebrow"><span aria-hidden="true">✧</span> Innovation Web & Intelligence Artificielle</div>
+          <h1>${headingMarkup}</h1>
           <p class="intro">${escapeHtml(page.intro)}</p>
           <p class="hero-label">${escapeHtml(page.label)}</p>
         </section>
