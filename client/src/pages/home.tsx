@@ -44,6 +44,7 @@ import projectTracking from "@/assets/images/project-tracking.png";
 const homeSections = [
   { id: "home-hero", label: "Accueil" },
   { id: "features", label: "Présentation" },
+  { id: "services", label: "Mes services" },
   { id: "contact", label: "Contact" },
 ];
 
@@ -414,6 +415,82 @@ export default function Home() {
                   {workflowSteps[activeStep].description}
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="relative h-px">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-md" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
+        </div>
+
+        <section id="services" className="relative flex min-h-[100svh] items-center overflow-hidden bg-white py-20">
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-sky-50" />
+          <div className="container relative mx-auto px-6">
+            <div className="mx-auto mb-12 max-w-2xl text-center">
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-cyan-700">
+                Des solutions adaptées à vos besoins
+              </p>
+              <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+                Mes{" "}
+                <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">
+                  services
+                </span>
+              </h2>
+              <p className="text-muted-foreground">
+                Du site vitrine à l’application Web Entreprise, construisons une solution numérique qui correspond à votre activité.
+              </p>
+            </div>
+
+            <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
+              <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Code2 className="h-6 w-6" />
+                </div>
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
+                  Présence en ligne
+                </p>
+                <h3 className="mb-3 text-2xl font-bold text-slate-900">Site vitrine</h3>
+                <p className="mb-6 text-muted-foreground">
+                  Présentez votre activité et vos services avec un site professionnel, adapté aux mobiles et conçu pour faciliter les prises de contact.
+                </p>
+                <ul className="mb-8 space-y-2 text-sm text-slate-600">
+                  <li>• Pages et contenus adaptés à votre activité</li>
+                  <li>• Design responsive pour mobile et ordinateur</li>
+                  <li>• Une base que vous pourrez faire évoluer</li>
+                </ul>
+                <a
+                  href="/site-evolutif"
+                  className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
+                >
+                  Découvrir le site évolutif <ArrowRight className="h-4 w-4" />
+                </a>
+              </article>
+
+              <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Layers className="h-6 w-6" />
+                </div>
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
+                  Outil métier sur mesure
+                </p>
+                <h3 className="mb-3 text-2xl font-bold text-slate-900">Application Web Entreprise</h3>
+                <p className="mb-6 text-muted-foreground">
+                  Simplifiez vos processus avec une application web pensée selon vos usages : espace client, suivi d’activité, tableaux de bord ou automatisations.
+                </p>
+                <ul className="mb-8 space-y-2 text-sm text-slate-600">
+                  <li>• Fonctionnalités définies selon vos priorités</li>
+                  <li>• Outils réunis autour de vos processus</li>
+                  <li>• Évolutions possibles au rythme de votre activité</li>
+                </ul>
+                <a
+                  href="/application-web-entreprise"
+                  className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
+                >
+                  Découvrir les applications métier <ArrowRight className="h-4 w-4" />
+                </a>
+              </article>
             </div>
           </div>
         </section>
