@@ -50,9 +50,9 @@ export type SeoPageAuditData = {
 export const seoPages: SeoPage[] = [
   {
     path: "/site-evolutif",
-    title: "Site internet évolutif professionnel à Toulouse | Innov Studio",
+    title: "Site internet évolutif professionnel | Innov Studio",
     description:
-      "Faites créer un site web évolutif à Toulouse, puis ajoutez des outils métier, un espace client et des automatisations à mesure que votre activité grandit.",
+      "Faites créer un site web évolutif, puis ajoutez des outils métier, un espace client et des automatisations à mesure que votre activité grandit.",
     h1: "Un site web qui grandit avec votre entreprise",
     h1Accent: "grandit avec votre entreprise",
     intro:
@@ -157,14 +157,14 @@ export const seoPages: SeoPage[] = [
     ],
   },
   {
-    path: "/creation-site-web-toulouse",
-    title: "Création de site internet à Toulouse | Innov Studio",
+    path: "/creation-site-web",
+    title: "Création de site internet professionnel | Innov Studio",
     description:
-      "Création de site internet à Toulouse pour indépendants et entreprises : design adapté, navigation mobile et contenus clairs, avec un référencement local soigné.",
-    h1: "Création de site web à Toulouse, pensé pour votre activité",
-    h1Accent: "site web à Toulouse",
+      "Création de site internet pour indépendants et entreprises : design adapté, navigation mobile et contenus clairs, avec des bases SEO soignées.",
+    h1: "Création de site web pensée pour votre activité",
+    h1Accent: "site web",
     intro:
-      "Innov Studio accompagne les indépendants et les entreprises de Toulouse et d’Occitanie dans la création ou l’évolution de leur présence web, avec une approche adaptée à leurs objectifs.",
+      "Innov Studio accompagne les indépendants et les entreprises dans la création ou l’évolution de leur présence web, avec une approche adaptée à leurs objectifs.",
     label: "Un site professionnel, utile à vos clients et prêt à évoluer.",
     sections: [
       {
@@ -183,7 +183,7 @@ export const seoPages: SeoPage[] = [
       {
         title: "Des bases SEO propres",
         paragraphs: [
-          "Chaque page doit répondre à une intention de recherche précise. Les titres, descriptions, liens internes, contenus et données structurées sont préparés en cohérence avec votre activité et votre zone de chalandise.",
+          "Chaque page doit répondre à une intention de recherche précise. Les titres, descriptions, liens internes, contenus et données structurées sont préparés en cohérence avec votre activité, vos clients et votre marché.",
           "Le référencement dépend aussi de la concurrence, de la qualité du contenu et de la réputation du site : aucun classement précis ne peut être garanti.",
         ],
       },
@@ -195,12 +195,12 @@ export const seoPages: SeoPage[] = [
         ],
       },
     ],
-    cta: "Échangeons sur votre site web à Toulouse",
+    cta: "Échangeons sur votre projet de site web",
     faq: [
       {
-        question: "Intervenez-vous uniquement à Toulouse ?",
+        question: "Comment se déroule le premier échange ?",
         answer:
-          "Innov Studio est basé à Toulouse et peut échanger avec des clients à distance, selon les besoins et l’organisation du projet.",
+          "Nous clarifions vos objectifs, votre activité et les fonctionnalités prioritaires avant de proposer une première approche.",
       },
       {
         question: "Le site sera-t-il optimisé pour les moteurs de recherche ?",
@@ -213,7 +213,7 @@ export const seoPages: SeoPage[] = [
     path: "/services",
     title: "Services web et applications métier | Innov Studio",
     description:
-      "Découvrez les services web évolutifs d’Innov Studio : création de sites professionnels, fonctionnalités sur mesure et applications métier à Toulouse.",
+      "Découvrez les services web évolutifs d’Innov Studio : création de sites professionnels, fonctionnalités sur mesure et applications métier.",
     h1: "Des services web qui évoluent avec votre activité",
     h1Accent: "évoluent avec votre activité",
     intro:
@@ -537,7 +537,7 @@ export function renderSeoPage(page: SeoPage): string {
           <a href="/services">Services</a>
           <a href="/site-evolutif">Site évolutif</a>
           <a href="/application-web-entreprise">Application métier</a>
-          <a href="/creation-site-web-toulouse">À Toulouse</a>
+          <a href="/creation-site-web">Création de site</a>
           <a href="/#features">Avantages</a>
           <a href="/references">Références</a>
           <a href="/#contact">Contact</a>
@@ -570,7 +570,7 @@ export function renderSeoPage(page: SeoPage): string {
       <div class="wrap footer-inner">
         <a class="footer-brand" href="/">Innov Studio</a>
         <div class="footer-copy">
-          <p>© ${new Date().getFullYear()} Innov Studio By Cyril Allegret · Création de sites web à Toulouse. Tous droits réservés.</p>
+          <p>© ${new Date().getFullYear()} Innov Studio By Cyril Allegret · Création de sites web & applications sur mesure. Tous droits réservés.</p>
           <span aria-hidden="true">·</span>
           <a href="https://www.jesuisnumerique.fr" target="_blank" rel="noopener noreferrer">jesuisnumerique.fr</a>
         </div>

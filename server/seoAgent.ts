@@ -27,22 +27,22 @@ interface SeoAnalysisResult {
 }
 
 const CURRENT_META = {
-  title: "Création de sites web évolutifs à Toulouse | Innov Studio",
+  title: "Sites web et applications sur mesure | Innov Studio",
   description:
-    "Créez un site web professionnel à Toulouse et faites-le évoluer vers vos outils métier ou une application web sur mesure, au rythme de votre entreprise.",
+    "Créez un site web professionnel et faites-le évoluer vers des fonctionnalités métier ou une application web sur mesure, au rythme de votre entreprise.",
   keywords:
-    "création site web Toulouse, développeur web Toulouse, création site internet Toulouse, application web entreprise Toulouse, site vitrine Toulouse, développeur freelance Toulouse, agence web Toulouse, intégration IA, agent IA pour site vitrine, automatisation site web IA, React, Node.js, développement sur mesure, Progressive Web App Toulouse, Haute-Garonne, Occitanie, refonte site web professionnel, maintenance site web Toulouse, création site web Toulouse 2026",
+    "création site web professionnel, développeur web freelance, agence web sur mesure, site internet professionnel, application web métier, intégration IA, agent IA pour site web, automatisation web IA, React, Node.js, développement sur mesure, Progressive Web App, refonte site web, maintenance site web",
 };
 
-// Trending keywords for web dev / Toulouse — updated monthly by the agent
+// Trending keywords for web development — updated monthly by the agent
 const TRENDING_KEYWORD_POOL: string[][] = [
-  // Lot A — high intent local
+  // Lot A — high-intent web projects
   [
-    "création site web Toulouse 2025",
-    "développeur web freelance Toulouse",
-    "agence web Toulouse pas cher",
-    "site vitrine professionnel Toulouse",
-    "développement application web Toulouse",
+    "création site web professionnel",
+    "développeur web freelance",
+    "agence web sur mesure",
+    "site internet professionnel",
+    "développement application web sur mesure",
   ],
   // Lot B — IA / tech
   [
@@ -54,19 +54,19 @@ const TRENDING_KEYWORD_POOL: string[][] = [
   ],
   // Lot C — métiers
   [
-    "site web artisan Toulouse",
-    "site web restaurant Toulouse",
-    "site web PME Occitanie",
+    "site web pour artisan",
+    "site web pour restaurant",
+    "site web pour PME",
     "refonte site web professionnel",
-    "maintenance site web Toulouse",
+    "maintenance site web",
   ],
   // Lot D — tech stack
   [
     "site web React performant",
-    "application Next.js Toulouse",
+    "application Next.js sur mesure",
     "développement Node.js freelance France",
     "site web rapide optimisé SEO",
-    "Progressive Web App Toulouse",
+    "Progressive Web App",
   ],
 ];
 
@@ -114,7 +114,7 @@ function analyzeTitle(title: string, trending: string[]): SeoSuggestion[] {
       type: "title",
       priority: "low",
       current: title,
-      suggested: title.replace("Toulouse", `Toulouse ${currentYear}`),
+      suggested: title.replace(" | Innov Studio", ` ${currentYear} | Innov Studio`),
       reason: `Ajouter l'année "${currentYear}" dans le titre améliore le CTR (taux de clic).`,
       field: "title",
     });
@@ -203,7 +203,7 @@ function analyzeKeywords(keywords: string, trending: string[]): SeoSuggestion[] 
       type: "keywords",
       priority: "low",
       current: keywords,
-      suggested: keywords + `, création site web Toulouse ${currentYear}`,
+      suggested: keywords + `, création site web professionnel ${currentYear}`,
       reason: `Ajouter des mots-clés avec l'année en cours cible les recherches récentes.`,
       field: "keywords",
     });

@@ -194,8 +194,8 @@ export default function Home() {
             <a href="/application-web-entreprise" className="text-muted-foreground hover:text-foreground transition-colors">
               Application métier
             </a>
-            <a href="/creation-site-web-toulouse" className="text-muted-foreground hover:text-foreground transition-colors">
-              À Toulouse
+            <a href="/creation-site-web" className="text-muted-foreground hover:text-foreground transition-colors">
+              Création de site
             </a>
             <a href="#features" onClick={(e) => scrollToSection(e, "features")} className="text-muted-foreground hover:text-foreground transition-colors">
               Avantages
@@ -268,7 +268,7 @@ export default function Home() {
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-                Studio web basé à Toulouse : démarrez avec un site professionnel et faites-le évoluer vers les outils numériques dont votre activité a besoin.
+                Démarrez avec un site professionnel et faites-le évoluer vers les outils numériques dont votre activité a besoin.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

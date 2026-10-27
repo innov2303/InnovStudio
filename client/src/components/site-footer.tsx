@@ -10,7 +10,7 @@ export default function SiteFooter() {
             Innov Studio
           </a>
           <div className="flex flex-col md:flex-row items-center gap-2 text-sm text-muted-foreground text-center">
-            <p>© {new Date().getFullYear()} Innov Studio By Cyril Allegret · Création de sites web à Toulouse. Tous droits réservés.</p>
+            <p>© {new Date().getFullYear()} Innov Studio By Cyril Allegret · Création de sites web & applications sur mesure. Tous droits réservés.</p>
             <span className="hidden md:inline">·</span>
             <a
               href="https://www.jesuisnumerique.fr"

@@ -2811,6 +2811,11 @@ export async function registerRoutes(
     });
   }
 
+  // Preserve the old local SEO URL without keeping it in public navigation or metadata.
+  app.get("/creation-site-web-toulouse", (_req, res) => {
+    res.redirect(301, "/creation-site-web");
+  });
+
   app.get("/sitemap.xml", (_req, res) => {
     res.status(200).type("application/xml").send(renderSitemap());
   });

@@ -16,7 +16,17 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://innov-studio.fr/creation-site-web-toulouse</loc>
+    <loc>https://innov-studio.fr/creation-site-web</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://innov-studio.fr/services</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://innov-studio.fr/references</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

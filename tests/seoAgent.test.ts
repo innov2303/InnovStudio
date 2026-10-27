@@ -70,7 +70,7 @@ test("identical recommendations across pages are grouped while retaining each UR
 
 test("the report creates page-specific recommendations for every configured service page", () => {
   const pages = seoPages.map(getSeoPageAuditData);
-  const suggestions = analyzeServicePages(pages, ["création site web Toulouse"]);
+  const suggestions = analyzeServicePages(pages, ["création de site web professionnel"]);
   const suggestedUrls = new Set(suggestions.flatMap((suggestion) => suggestion.urls));
 
   for (const page of pages) {
