@@ -82,7 +82,27 @@ export default function Home() {
     );
 
     sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+    const requestedSectionId = window.location.hash.slice(1);
+    const hashScrollFrame = requestedSectionId
+      ? window.requestAnimationFrame(() => {
+          const target = document.getElementById(requestedSectionId);
+          if (!target) return;
+
+          const headerOffset = 70;
+          const targetPosition = target.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({
+            top: Math.max(0, targetPosition - headerOffset),
+            behavior: "smooth",
+          });
+        })
+      : undefined;
+
+    return () => {
+      observer.disconnect();
+      if (hashScrollFrame !== undefined) {
+        window.cancelAnimationFrame(hashScrollFrame);
+      }
+    };
   }, []);
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
