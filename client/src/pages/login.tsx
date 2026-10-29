@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useLocation } from "wouter";
@@ -28,12 +28,17 @@ export default function Login() {
   useForceLight();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, user, isLoading } = useAuth();
   const googleError = new URLSearchParams(window.location.search).get("google_error");
   const [error, setError] = useState<string | null>(
     googleError ? googleErrorMessages[googleError] || googleErrorMessages.oauth_failed : null,
   );
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (isLoading || !user || googleError === "admin_account") return;
+    setLocation(user.mustChangePassword ? "/change-password" : "/dashboard");
+  }, [googleError, isLoading, setLocation, user]);
 
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),

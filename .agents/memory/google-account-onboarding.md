@@ -7,6 +7,8 @@ Les nouveaux utilisateurs qui s'inscrivent avec Google doivent compléter les in
 
 Les données mises en cache dans le navigateur doivent être supprimées lors d'une déconnexion ou d'un changement d'utilisateur afin qu'elles ne puissent pas apparaître dans le compte suivant.
 
-**Why:** l'authentification Google ne fournit pas les coordonnées d'entreprise et de facturation demandées; l'association automatique d'une adresse d'administrateur peut ouvrir des données internes, et le cache client peut conserver les données du compte précédent.
+Après la finalisation du profil Google, invalider les vérifications d'authentification déjà en cours : la vérification initiale peut avoir commencé avant la création de session et renvoyer ensuite un 401 obsolète, qui effacerait l'utilisateur connecté et le renverrait à la page de connexion.
 
-**How to apply:** collecter le profil avant l'accès aux pages privées, vérifier le rôle avant toute liaison et vider les caches utilisateur lors des transitions de session.
+**Why:** l'authentification Google ne fournit pas les coordonnées d'entreprise et de facturation demandées; l'association automatique d'une adresse d'administrateur peut ouvrir des données internes, le cache client peut conserver les données du compte précédent, et une réponse d'authentification obsolète peut écraser une session nouvellement créée.
+
+**How to apply:** collecter le profil avant l'accès aux pages privées, vérifier le rôle avant toute liaison, vider les caches utilisateur et invalider les vérifications d'identité en cours lors des transitions de session.
