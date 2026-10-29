@@ -705,7 +705,7 @@ export function renderSeoPage(page: SeoPage): string {
     ${jsonLd(page)}
     ${getSpaAssetMarkup()}
     <style id="public-seo-page-styles">
-      :root{color-scheme:light;--bg:#f8fafc;--panel:#fff;--text:#0f172a;--muted:#475569;--cyan:#0e7490;--blue:#2563eb;--line:rgba(15,23,42,.12)}
+      :root{color-scheme:light;--bg:#f8fafc;--panel:#fff;--text:#0f172a;--muted:#475569;--cyan:#0e7490;--blue:#2563eb;--line:rgba(15,23,42,.12);--border:220 13% 91%}
       *{box-sizing:border-box}
       body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
       a{color:inherit;text-decoration:none}a:hover{color:var(--cyan)}
