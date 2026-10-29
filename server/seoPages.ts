@@ -1,4 +1,31 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 const SITE_URL = "https://innov-studio.fr";
+
+let spaAssetMarkup: string | undefined;
+
+function getSpaAssetMarkup(): string {
+  if (spaAssetMarkup !== undefined) return spaAssetMarkup;
+  if (process.env.NODE_ENV !== "production") {
+    spaAssetMarkup = '<script type="module" src="/src/main.tsx"></script>';
+    return spaAssetMarkup;
+  }
+
+  const indexPath = resolve(process.cwd(), "dist/public/index.html");
+  if (!existsSync(indexPath)) {
+    throw new Error(`Client entry not found: ${indexPath}`);
+  }
+
+  const indexHtml = readFileSync(indexPath, "utf8");
+  const modulePreloads = indexHtml.match(/<link rel="modulepreload"[^>]*>/g) ?? [];
+  const stylesheets = indexHtml.match(/<link rel="stylesheet"[^>]*>/g) ?? [];
+  const moduleEntry = indexHtml.match(/<script type="module"[^>]*><\/script>/)?.[0];
+  if (!moduleEntry) throw new Error("Client module entry not found in built index.html");
+
+  spaAssetMarkup = [...modulePreloads, ...stylesheets, moduleEntry].join("\n");
+  return spaAssetMarkup;
+}
 
 type FeatureIcon =
   | "pages"
@@ -676,6 +703,7 @@ export function renderSeoPage(page: SeoPage): string {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     ${jsonLd(page)}
+    ${getSpaAssetMarkup()}
     <style>
       :root{color-scheme:light;--bg:#f8fafc;--panel:#fff;--text:#0f172a;--muted:#475569;--cyan:#0e7490;--blue:#2563eb;--line:rgba(15,23,42,.12)}
       *{box-sizing:border-box}
@@ -815,6 +843,7 @@ export function renderSeoPage(page: SeoPage): string {
     </style>
   </head>
   <body class="${page.path === "/site-evolutif" ? "site-evolution" : ""}">
+    <div id="root">
     <header>
       <div class="wrap nav">
         <a class="brand" href="/">Innov Studio</a>
@@ -852,6 +881,7 @@ export function renderSeoPage(page: SeoPage): string {
         </div>
       </div>
     </footer>
+    </div>
     ${referenceTabsScript}
   </body>
 </html>`;
