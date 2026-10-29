@@ -710,7 +710,7 @@ export function renderSeoPage(page: SeoPage): string {
       body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
       a{color:inherit;text-decoration:none}a:hover{color:var(--cyan)}
       .wrap{width:min(1280px,calc(100% - 48px));margin:auto}
-      .nav.wrap,footer .wrap{width:min(1488px,calc(100% - 48px))}
+      .nav.wrap,footer .wrap{width:100%;max-width:none;padding-left:24px;padding-right:24px}
       header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid hsl(var(--border));background:rgba(255,255,255,.8);backdrop-filter:blur(12px)}
       .nav{height:52px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px}
       .brand{justify-self:start;flex:none;font-size:24px;line-height:32px;letter-spacing:.025em;font-weight:300;white-space:nowrap;background:linear-gradient(90deg,var(--blue),#22d3ee,var(--blue));background-clip:text;color:transparent}
@@ -778,6 +778,11 @@ export function renderSeoPage(page: SeoPage): string {
       .footer-copy span{display:none}
       .footer-copy a{color:var(--muted)}
       @media(min-width:1024px){.nav{grid-template-columns:1fr auto 1fr}}
+      @media(min-width:640px){.nav.wrap,footer .wrap{max-width:640px}}
+      @media(min-width:768px){.nav.wrap,footer .wrap{max-width:768px}}
+      @media(min-width:1024px){.nav.wrap,footer .wrap{max-width:1024px}}
+      @media(min-width:1280px){.nav.wrap,footer .wrap{max-width:1280px}}
+      @media(min-width:1536px){.nav.wrap,footer .wrap{max-width:1536px}}
       @media(min-width:768px){
         .footer-inner{flex-direction:row;text-align:left}
         .footer-copy{flex-direction:row;justify-content:flex-end;flex-wrap:wrap;text-align:right}
