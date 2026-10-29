@@ -162,8 +162,20 @@ function Router() {
 
       const path = anchor.pathname;
       if (path !== "/" && !publicPagePaths.has(path)) return;
-      if (path === window.location.pathname && !anchor.hash) return;
-      if (path === window.location.pathname && anchor.hash) return;
+      if (path === window.location.pathname) {
+        if (anchor.hash) return;
+
+        event.preventDefault();
+        if (window.location.hash) {
+          window.history.replaceState(
+            window.history.state,
+            "",
+            `${path}${anchor.search}`,
+          );
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
 
       event.preventDefault();
       navigate(path);
