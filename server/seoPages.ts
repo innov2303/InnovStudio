@@ -710,10 +710,10 @@ export function renderSeoPage(page: SeoPage): string {
       body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
       a{color:inherit;text-decoration:none}a:hover{color:var(--cyan)}
       .wrap{width:min(1280px,calc(100% - 48px));margin:auto}
-      header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid var(--line);background:rgba(255,255,255,.8);backdrop-filter:blur(12px)}
+      header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid hsl(var(--border));background:rgba(255,255,255,.8);backdrop-filter:blur(12px)}
       .nav{height:54px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px}
-      .brand{justify-self:start;flex:none;font-size:24px;letter-spacing:.025em;font-weight:300;white-space:nowrap;background:linear-gradient(90deg,var(--blue),#22d3ee,var(--blue));background-clip:text;color:transparent}
-      nav{justify-self:center;display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;white-space:nowrap}
+      .brand{justify-self:start;flex:none;font-size:24px;line-height:32px;letter-spacing:.025em;font-weight:300;white-space:nowrap;background:linear-gradient(90deg,var(--blue),#22d3ee,var(--blue));background-clip:text;color:transparent}
+      nav{justify-self:center;display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;line-height:24px;white-space:nowrap}
       nav a{color:var(--muted);transition:color .2s ease}nav a:hover{color:var(--blue)}
       .login{justify-self:end;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 16px;border-radius:6px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:500;line-height:20px;white-space:nowrap;box-shadow:0 8px 24px rgba(34,211,238,.18);transition:all .3s ease}
       .login span{display:inline-flex;width:16px;justify-content:center;margin-left:4px}
@@ -769,10 +769,10 @@ export function renderSeoPage(page: SeoPage): string {
       details{padding:17px 0;border-bottom:1px solid var(--line)}
       summary{cursor:pointer;font-weight:650}
       details p{margin:10px 0 0}
-      footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted);font-size:14px}
+      footer{border-top:1px solid hsl(var(--border));padding:16px 0;color:var(--muted);font-size:14px}
       .footer-inner{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:16px;text-align:center}
-      .footer-brand{font-size:20px;font-weight:300;letter-spacing:.025em;background:linear-gradient(90deg,var(--blue),#22d3ee,var(--blue));background-clip:text;color:transparent}
-      .footer-copy{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-size:14px}
+      .footer-brand{font-size:20px;line-height:28px;font-weight:300;letter-spacing:.025em;background:linear-gradient(90deg,var(--blue),#22d3ee,var(--blue));background-clip:text;color:transparent}
+      .footer-copy{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-size:14px;line-height:20px}
       .footer-copy p{margin:0;font-size:14px;line-height:20px}
       .footer-copy span{display:none}
       .footer-copy a{color:var(--muted)}
@@ -788,6 +788,7 @@ export function renderSeoPage(page: SeoPage): string {
         .nav{height:54px}
         .brand{font-size:20px}
         .nav.wrap,footer .wrap{width:min(1280px,calc(100% - 48px))}
+        .brand{line-height:28px}
         .page-content{padding-top:78px}
         .page-heading{margin-bottom:28px}
         .page-heading h1{font-size:clamp(30px,8vw,40px)}
