@@ -23,58 +23,116 @@ const publicPagePaths = new Set([
   "/references",
 ]);
 
+type PublicPageData = {
+  html: string;
+  title: string;
+  bodyClass: string;
+  description: string | null;
+  canonical: string | null;
+  styles: string | null;
+};
+
+const publicPageCache = new Map<string, PublicPageData>();
+const publicPageRequests = new Map<string, Promise<PublicPageData>>();
+
+function loadPublicPage(path: string): Promise<PublicPageData> {
+  const cached = publicPageCache.get(path);
+  if (cached) return Promise.resolve(cached);
+
+  const pending = publicPageRequests.get(path);
+  if (pending) return pending;
+
+  const request = fetch(path, { headers: { Accept: "text/html" } })
+    .then(async (response) => {
+      if (!response.ok) throw new Error(`Page indisponible (${response.status})`);
+      return new DOMParser().parseFromString(await response.text(), "text/html");
+    })
+    .then((page) => {
+      const root = page.querySelector("#root");
+      if (!root) throw new Error("Contenu de page introuvable");
+
+      const pageData: PublicPageData = {
+        html: root.innerHTML,
+        title: page.title,
+        bodyClass: page.body.className,
+        description: page.querySelector('meta[name="description"]')?.getAttribute("content") ?? null,
+        canonical: page.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? null,
+        styles: page.querySelector("#public-seo-page-styles")?.textContent ?? null,
+      };
+      publicPageCache.set(path, pageData);
+      return pageData;
+    })
+    .finally(() => publicPageRequests.delete(path));
+
+  publicPageRequests.set(path, request);
+  return request;
+}
+
+function applyPublicPageChrome(page: PublicPageData) {
+  if (page.styles !== null) {
+    let activePageStyles = document.getElementById("public-seo-page-styles");
+    if (!activePageStyles) {
+      activePageStyles = document.createElement("style");
+      activePageStyles.id = "public-seo-page-styles";
+      document.head.append(activePageStyles);
+    }
+    activePageStyles.textContent = page.styles;
+  }
+
+  document.title = page.title;
+  document.body.className = page.bodyClass;
+  if (page.description) {
+    document.querySelector('meta[name="description"]')?.setAttribute("content", page.description);
+  }
+  if (page.canonical) {
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", page.canonical);
+  }
+}
+
 function PublicSeoPage() {
   const [location] = useLocation();
   const bootstrap = (window as any).__PUBLIC_PAGE_BOOTSTRAP__ as
     | { path: string; html: string; bodyClass: string }
     | undefined;
   const [pageHtml, setPageHtml] = useState(
-    bootstrap?.path === location ? bootstrap.html : "",
+    bootstrap?.path === location
+      ? bootstrap.html
+      : publicPageCache.get(location)?.html ?? "",
   );
 
   useEffect(() => {
     let isCurrent = true;
 
     if (bootstrap?.path === location) {
-      document.body.className = bootstrap.bodyClass;
+      const initialPage: PublicPageData = {
+        html: bootstrap.html,
+        title: document.title,
+        bodyClass: bootstrap.bodyClass,
+        description: document.querySelector('meta[name="description"]')?.getAttribute("content") ?? null,
+        canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? null,
+        styles: document.getElementById("public-seo-page-styles")?.textContent ?? null,
+      };
+      publicPageCache.set(location, initialPage);
+      applyPublicPageChrome(initialPage);
       (window as any).__PUBLIC_PAGE_BOOTSTRAP__ = undefined;
       return;
     }
 
-    setPageHtml("");
-    fetch(location, { headers: { Accept: "text/html" } })
-      .then(async (response) => {
-        if (!response.ok) throw new Error(`Page indisponible (${response.status})`);
-        return new DOMParser().parseFromString(await response.text(), "text/html");
-      })
+    const cachedPage = publicPageCache.get(location);
+    if (cachedPage) {
+      applyPublicPageChrome(cachedPage);
+      setPageHtml(cachedPage.html);
+      window.scrollTo({ top: 0, behavior: "auto" });
+      return () => {
+        isCurrent = false;
+      };
+    }
+
+    loadPublicPage(location)
       .then((page) => {
         if (!isCurrent) return;
-        const root = page.querySelector("#root");
-        if (!root) throw new Error("Contenu de page introuvable");
-
-        const nextPageStyles = page.querySelector("#public-seo-page-styles");
-        if (nextPageStyles) {
-          let activePageStyles = document.getElementById("public-seo-page-styles");
-          if (!activePageStyles) {
-            activePageStyles = document.createElement("style");
-            activePageStyles.id = "public-seo-page-styles";
-            document.head.append(activePageStyles);
-          }
-          activePageStyles.textContent = nextPageStyles.textContent;
-        }
-
-        document.title = page.title;
-        document.body.className = page.body.className;
-        const description = page.querySelector('meta[name="description"]')?.getAttribute("content");
-        if (description) {
-          document.querySelector('meta[name="description"]')?.setAttribute("content", description);
-        }
-        const canonical = page.querySelector('link[rel="canonical"]')?.getAttribute("href");
-        if (canonical) {
-          document.querySelector('link[rel="canonical"]')?.setAttribute("href", canonical);
-        }
-
-        setPageHtml(root.innerHTML);
+        applyPublicPageChrome(page);
+        setPageHtml(page.html);
         window.scrollTo({ top: 0, behavior: "auto" });
       })
       .catch((error) => {
@@ -153,6 +211,19 @@ function Router() {
   const [location, navigate] = useLocation();
 
   useEffect(() => {
+    let latestNavigation = 0;
+
+    const prefetchPublicNavigation = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+
+      const path = anchor.pathname;
+      if (!publicPagePaths.has(path) || path === window.location.pathname) return;
+      void loadPublicPage(path).catch(() => {});
+    };
+
     const handleInternalNavigation = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const target = event.target;
@@ -178,16 +249,39 @@ function Router() {
       }
 
       event.preventDefault();
-      navigate(path);
-      if (anchor.hash) {
-        window.history.replaceState(window.history.state, "", `${path}${anchor.search}${anchor.hash}`);
+      const navigationId = ++latestNavigation;
+      const completeNavigation = (page?: PublicPageData) => {
+        if (navigationId !== latestNavigation) return;
+        navigate(path);
+        if (page) applyPublicPageChrome(page);
+        if (anchor.hash) {
+          window.history.replaceState(window.history.state, "", `${path}${anchor.search}${anchor.hash}`);
+        } else {
+          window.scrollTo({ top: 0, behavior: "auto" });
+        }
+      };
+
+      if (publicPagePaths.has(path)) {
+        void loadPublicPage(path)
+          .then((page) => completeNavigation(page))
+          .catch((error) => {
+            if (navigationId !== latestNavigation) return;
+            console.error("Navigation publique impossible:", error);
+            window.location.assign(anchor.href);
+          });
       } else {
-        window.scrollTo({ top: 0, behavior: "auto" });
+        completeNavigation();
       }
     };
 
+    document.addEventListener("pointerover", prefetchPublicNavigation);
+    document.addEventListener("focusin", prefetchPublicNavigation);
     document.addEventListener("click", handleInternalNavigation);
-    return () => document.removeEventListener("click", handleInternalNavigation);
+    return () => {
+      document.removeEventListener("pointerover", prefetchPublicNavigation);
+      document.removeEventListener("focusin", prefetchPublicNavigation);
+      document.removeEventListener("click", handleInternalNavigation);
+    };
   }, [navigate]);
 
   useEffect(() => {
