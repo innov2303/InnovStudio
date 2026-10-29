@@ -712,11 +712,11 @@ export function renderSeoPage(page: SeoPage): string {
       .wrap{width:min(1280px,calc(100% - 48px));margin:auto}
       .nav.wrap,footer .wrap{width:min(1488px,calc(100% - 48px))}
       header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid hsl(var(--border));background:rgba(255,255,255,.8);backdrop-filter:blur(12px)}
-      .nav{height:54px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px}
+      .nav{height:52px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px}
       .brand{justify-self:start;flex:none;font-size:24px;line-height:32px;letter-spacing:.025em;font-weight:300;white-space:nowrap;background:linear-gradient(90deg,var(--blue),#22d3ee,var(--blue));background-clip:text;color:transparent}
       nav{justify-self:center;display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;line-height:24px;white-space:nowrap}
       nav a{color:var(--muted);transition:color .2s ease}nav a:hover{color:var(--blue)}
-      .login{justify-self:end;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 16px;border-radius:6px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:500;line-height:20px;white-space:nowrap;box-shadow:0 8px 24px rgba(34,211,238,.18);transition:all .3s ease}
+      .login{justify-self:end;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:8px 16px;border-radius:6px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:500;line-height:20px;white-space:nowrap;box-shadow:0 8px 24px rgba(34,211,238,.18);transition:all .3s ease}
       .login span{display:inline-flex;width:16px;justify-content:center;margin-left:4px}
       .login:hover{color:white;filter:brightness(1.08);transform:scale(1.05)}
       main{padding:0 0 80px}
@@ -786,7 +786,7 @@ export function renderSeoPage(page: SeoPage): string {
       @media(max-width:1023px){nav{display:none}}
       @media(max-width:767px){
         .wrap{width:calc(100% - 40px)}
-        .nav{height:54px}
+        .nav{height:52px}
         .brand{font-size:20px}
         .brand{line-height:28px}
         .page-content{padding-top:78px}
