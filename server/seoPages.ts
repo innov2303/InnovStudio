@@ -704,7 +704,7 @@ export function renderSeoPage(page: SeoPage): string {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     ${jsonLd(page)}
     ${getSpaAssetMarkup()}
-    <style>
+    <style id="public-seo-page-styles">
       :root{color-scheme:light;--bg:#f8fafc;--panel:#fff;--text:#0f172a;--muted:#475569;--cyan:#0e7490;--blue:#2563eb;--line:rgba(15,23,42,.12)}
       *{box-sizing:border-box}
       body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}

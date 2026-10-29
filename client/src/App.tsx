@@ -52,6 +52,17 @@ function PublicSeoPage() {
         const root = page.querySelector("#root");
         if (!root) throw new Error("Contenu de page introuvable");
 
+        const nextPageStyles = page.querySelector("#public-seo-page-styles");
+        if (nextPageStyles) {
+          let activePageStyles = document.getElementById("public-seo-page-styles");
+          if (!activePageStyles) {
+            activePageStyles = document.createElement("style");
+            activePageStyles.id = "public-seo-page-styles";
+            document.head.append(activePageStyles);
+          }
+          activePageStyles.textContent = nextPageStyles.textContent;
+        }
+
         document.title = page.title;
         document.body.className = page.body.className;
         const description = page.querySelector('meta[name="description"]')?.getAttribute("content");
@@ -168,7 +179,10 @@ function Router() {
   }, [navigate]);
 
   useEffect(() => {
-    if (location === "/") document.body.classList.remove("site-evolution");
+    if (location === "/") {
+      document.body.classList.remove("site-evolution");
+      document.getElementById("public-seo-page-styles")?.remove();
+    }
   }, [location]);
 
   return (
