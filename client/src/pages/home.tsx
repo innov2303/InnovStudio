@@ -11,6 +11,7 @@ import {
   ArrowRight, 
   Zap,
   Shield,
+  House,
   ChevronRight,
   LogOut,
   Mail,
@@ -42,10 +43,10 @@ import SiteFooter from "@/components/site-footer";
 import projectTracking from "@/assets/images/project-tracking.png";
 
 const homeSections = [
-  { id: "home-hero", label: "Accueil" },
-  { id: "features", label: "Présentation" },
-  { id: "services", label: "Mes services" },
-  { id: "contact", label: "Contact" },
+  { id: "home-hero", label: "Accueil", icon: House },
+  { id: "features", label: "Présentation", icon: Sparkles },
+  { id: "services", label: "Mes services", icon: Layers },
+  { id: "contact", label: "Contact", icon: Mail },
 ];
 
 export default function Home() {
@@ -281,7 +282,7 @@ export default function Home() {
         aria-label="Navigation entre les sections"
         className="fixed right-2 sm:right-4 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-2"
       >
-        {homeSections.map(({ id, label }) => {
+        {homeSections.map(({ id, label, icon: SectionIcon }) => {
           const isActive = activeSection === id;
           return (
             <button
@@ -299,7 +300,11 @@ export default function Home() {
                   : "border-slate-300 bg-white/95 text-slate-600 hover:border-cyan-500 hover:text-cyan-700"
               }`}
             >
-              <span className={`h-2 w-2 rounded-full ${isActive ? "bg-white" : "bg-current"}`} />
+              <SectionIcon
+                aria-hidden="true"
+                className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
+                strokeWidth={isActive ? 2.3 : 1.8}
+              />
               <span className="pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
                 {label}
               </span>
