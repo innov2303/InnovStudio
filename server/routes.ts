@@ -303,6 +303,11 @@ export async function registerRoutes(
       const existingUser = await storage.getUserByNormalizedEmail(pendingSignup.email);
 
       if (existingUser) {
+        if (existingUser.role === "admin") {
+          await logSecurityEvent("google_login_failed", req, pendingSignup.email, existingUser.id, "Admin accounts cannot be linked automatically");
+          return res.redirect("/login?google_error=admin_account");
+        }
+
         await storage.verifyUserEmail(existingUser.id);
         const authenticatedUser = await storage.getUser(existingUser.id) ?? existingUser;
         await regenerateSession(req);
@@ -355,6 +360,14 @@ export async function registerRoutes(
 
       const existingUser = await storage.getUserByNormalizedEmail(pending.email);
       if (existingUser) {
+        if (existingUser.role === "admin") {
+          delete req.session.pendingGoogleSignup;
+          await saveSession(req);
+          return res.status(409).json({
+            message: "Cette adresse correspond à un compte administrateur. Connectez-vous avec sa méthode habituelle.",
+          });
+        }
+
         await storage.verifyUserEmail(existingUser.id);
         await regenerateSession(req);
         req.session.userId = existingUser.id;

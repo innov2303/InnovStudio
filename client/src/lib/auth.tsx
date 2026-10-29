@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { User } from "@shared/schema";
+import { queryClient } from "@/lib/queryClient";
 
 interface AuthContextType {
   user: User | null;
@@ -37,11 +38,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser();
   }, []);
 
-  const login = (user: User) => {
-    setUser(user);
+  const login = (nextUser: User) => {
+    if (user?.id !== nextUser.id) {
+      queryClient.removeQueries();
+    }
+    setUser(nextUser);
   };
 
   const logout = () => {
+    queryClient.removeQueries();
     setUser(null);
   };
 

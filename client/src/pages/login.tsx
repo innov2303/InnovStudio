@@ -21,6 +21,7 @@ const googleErrorMessages: Record<string, string> = {
   unverified_email: "Google n'a pas confirmé votre adresse e-mail.",
   not_configured: "La connexion Google n'est pas encore configurée.",
   oauth_failed: "La connexion avec Google a échoué. Réessayez.",
+  admin_account: "Connectez-vous à ce compte administrateur avec sa méthode habituelle.",
 };
 
 export default function Login() {
