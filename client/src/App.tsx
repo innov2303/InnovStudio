@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import GoogleCompleteProfile from "@/pages/google-complete-profile";
 import Dashboard from "@/pages/dashboard";
 import ChangePassword from "@/pages/change-password";
 import VerifyEmail from "@/pages/verify-email";
@@ -186,7 +187,7 @@ function PageTracker() {
   useEffect(() => {
     if (isLoading) return;
     if (user) return;
-    const privatePaths = ["/dashboard", "/change-password", "/reset-password", "/confirm-email-change", "/verify-email"];
+    const privatePaths = ["/dashboard", "/change-password", "/reset-password", "/confirm-email-change", "/verify-email", "/google-complete-profile"];
     if (privatePaths.some(p => location.startsWith(p))) return;
     if (location === lastTracked.current) return;
     const timer = setTimeout(() => {
@@ -300,6 +301,7 @@ function Router() {
       <Route path="/references" component={PublicSeoPage} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/google-complete-profile" component={GoogleCompleteProfile} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/change-password" component={ChangePassword} />
       <Route path="/verify-email" component={VerifyEmail} />

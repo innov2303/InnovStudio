@@ -70,6 +70,31 @@ export const registerSchema = insertUserSchema.extend({
   sameAsBilling: z.boolean().optional(),
 }).omit({ username: true });
 
+export const googleProfileSchema = z.object({
+  firstName: z.string().trim().min(1, "Prénom requis"),
+  lastName: z.string().trim().min(1, "Nom requis"),
+  company: z.string().trim().min(1, "Entreprise requise"),
+  address: z.string().trim().min(1, "Adresse requise"),
+  postalCode: z.string().trim().min(1, "Code postal requis"),
+  city: z.string().trim().min(1, "Ville requise"),
+  sameAsBilling: z.boolean().default(true),
+  billingAddress: z.string().trim().optional(),
+  billingPostalCode: z.string().trim().optional(),
+  billingCity: z.string().trim().optional(),
+}).superRefine((data, ctx) => {
+  if (data.sameAsBilling) return;
+
+  if (!data.billingAddress) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["billingAddress"], message: "Adresse de facturation requise" });
+  }
+  if (!data.billingPostalCode) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["billingPostalCode"], message: "Code postal requis" });
+  }
+  if (!data.billingCity) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["billingCity"], message: "Ville requise" });
+  }
+});
+
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Mot de passe actuel requis"),
   newPassword: z.string().min(6, "Minimum 6 caractères"),
@@ -107,6 +132,7 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;
+export type GoogleProfileData = z.infer<typeof googleProfileSchema>;
 export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 export type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordData = z.infer<typeof resetPasswordSchema>;

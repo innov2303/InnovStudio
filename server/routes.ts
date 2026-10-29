@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import session from "express-session";
 import crypto from "crypto";
 import { storage } from "./storage";
-import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema, createFeatureSchema, forgotPasswordSchema, resetPasswordSchema } from "@shared/schema";
+import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema, createFeatureSchema, forgotPasswordSchema, resetPasswordSchema, googleProfileSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import { pool, db } from "./db";
 import { sql } from "drizzle-orm";
@@ -17,6 +17,7 @@ import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClie
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { renderSeoPage, renderSitemap, seoPages } from "./seoPages";
+import { OAuth2Client } from "google-auth-library";
 
 // Helper pour obtenir l'IP réelle
 function getClientIp(req: Request): string {
@@ -76,10 +77,59 @@ const upload = multer({
 declare module "express-session" {
   interface SessionData {
     userId: string;
+    googleOAuthAttempt?: {
+      state: string;
+      nonce: string;
+      codeVerifier: string;
+      createdAt: number;
+    };
+    pendingGoogleSignup?: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      createdAt: number;
+    };
   }
 }
 
 const PgSession = connectPgSimple(session);
+const GOOGLE_OAUTH_ATTEMPT_TTL_MS = 10 * 60 * 1000;
+const GOOGLE_SIGNUP_TTL_MS = 15 * 60 * 1000;
+
+function getGoogleOAuthConfig() {
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI?.trim();
+  if (!clientId || !clientSecret || !redirectUri) return null;
+
+  try {
+    const callback = new URL(redirectUri);
+    const isLocalHttp = callback.protocol === "http:" && ["localhost", "127.0.0.1"].includes(callback.hostname);
+    if (callback.protocol !== "https:" && !isLocalHttp) return null;
+    if (callback.pathname !== "/api/auth/google/callback") return null;
+    return { clientId, clientSecret, redirectUri: callback.toString() };
+  } catch {
+    return null;
+  }
+}
+
+function safeTokenEquals(expected: string, received: string) {
+  const expectedBytes = Buffer.from(expected);
+  const receivedBytes = Buffer.from(received);
+  return expectedBytes.length === receivedBytes.length && crypto.timingSafeEqual(expectedBytes, receivedBytes);
+}
+
+function saveSession(req: Request) {
+  return new Promise<void>((resolve, reject) => {
+    req.session.save((error) => error ? reject(error) : resolve());
+  });
+}
+
+function regenerateSession(req: Request) {
+  return new Promise<void>((resolve, reject) => {
+    req.session.regenerate((error) => error ? reject(error) : resolve());
+  });
+}
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.session.userId) {
@@ -162,6 +212,190 @@ export async function registerRoutes(
   );
 
   await storage.initializeAdmin();
+
+  app.get("/api/auth/google/status", (req, res) => {
+    res.json({ enabled: Boolean(getGoogleOAuthConfig()) });
+  });
+
+  app.get("/api/auth/google", authLimiter, async (req, res) => {
+    const config = getGoogleOAuthConfig();
+    if (!config) return res.redirect("/login?google_error=not_configured");
+
+    try {
+      const state = crypto.randomBytes(32).toString("base64url");
+      const nonce = crypto.randomBytes(32).toString("base64url");
+      const codeVerifier = crypto.randomBytes(48).toString("base64url");
+      const codeChallenge = crypto.createHash("sha256").update(codeVerifier).digest("base64url");
+
+      req.session.googleOAuthAttempt = { state, nonce, codeVerifier, createdAt: Date.now() };
+      await saveSession(req);
+
+      const authorizationUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+      authorizationUrl.search = new URLSearchParams({
+        client_id: config.clientId,
+        redirect_uri: config.redirectUri,
+        response_type: "code",
+        scope: "openid email profile",
+        state,
+        nonce,
+        code_challenge: codeChallenge,
+        code_challenge_method: "S256",
+        prompt: "select_account",
+      }).toString();
+      res.redirect(authorizationUrl.toString());
+    } catch (error) {
+      console.error("Google OAuth start error:", error);
+      res.redirect("/login?google_error=oauth_failed");
+    }
+  });
+
+  app.get("/api/auth/google/callback", authLimiter, async (req, res) => {
+    const attempt = req.session.googleOAuthAttempt;
+    delete req.session.googleOAuthAttempt;
+
+    try {
+      await saveSession(req);
+      if (typeof req.query.error === "string") {
+        return res.redirect("/login?google_error=cancelled");
+      }
+
+      const code = typeof req.query.code === "string" ? req.query.code : "";
+      const receivedState = typeof req.query.state === "string" ? req.query.state : "";
+      if (
+        !attempt ||
+        Date.now() - attempt.createdAt > GOOGLE_OAUTH_ATTEMPT_TTL_MS ||
+        !code ||
+        !safeTokenEquals(attempt.state, receivedState)
+      ) {
+        await logSecurityEvent("google_login_failed", req, undefined, undefined, "Invalid or expired OAuth state");
+        return res.redirect("/login?google_error=invalid_state");
+      }
+
+      const config = getGoogleOAuthConfig();
+      if (!config) return res.redirect("/login?google_error=not_configured");
+
+      const googleClient = new OAuth2Client(config.clientId, config.clientSecret, config.redirectUri);
+      const { tokens } = await googleClient.getToken({ code, codeVerifier: attempt.codeVerifier });
+      if (!tokens.id_token) throw new Error("Google n'a pas fourni de jeton d'identité");
+
+      const ticket = await googleClient.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: config.clientId,
+      });
+      const identity = ticket.getPayload();
+      if (
+        !identity?.sub ||
+        !identity.email ||
+        identity.email_verified !== true ||
+        !identity.nonce ||
+        !safeTokenEquals(attempt.nonce, identity.nonce)
+      ) {
+        await logSecurityEvent("google_login_failed", req, identity?.email, undefined, "Google identity was incomplete or unverified");
+        return res.redirect("/login?google_error=unverified_email");
+      }
+
+      const pendingSignup = {
+        email: identity.email.trim().toLowerCase(),
+        firstName: identity.given_name?.trim() || "",
+        lastName: identity.family_name?.trim() || "",
+        createdAt: Date.now(),
+      };
+      const existingUser = await storage.getUserByNormalizedEmail(pendingSignup.email);
+
+      if (existingUser) {
+        await storage.verifyUserEmail(existingUser.id);
+        const authenticatedUser = await storage.getUser(existingUser.id) ?? existingUser;
+        await regenerateSession(req);
+        req.session.userId = authenticatedUser.id;
+        await saveSession(req);
+        if (authenticatedUser.role === "admin") {
+          res.cookie("_innov_no_track", "1", {
+            maxAge: 365 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            sameSite: "lax",
+            path: "/",
+          });
+        }
+        await logSecurityEvent("google_login_success", req, pendingSignup.email, authenticatedUser.id);
+        return res.redirect(authenticatedUser.mustChangePassword ? "/change-password" : "/dashboard");
+      }
+
+      await regenerateSession(req);
+      req.session.pendingGoogleSignup = pendingSignup;
+      await saveSession(req);
+      return res.redirect("/google-complete-profile");
+    } catch (error) {
+      console.error("Google OAuth callback error:", error);
+      await logSecurityEvent("google_login_failed", req, undefined, undefined, "OAuth callback processing failed");
+      if (!res.headersSent) res.redirect("/login?google_error=oauth_failed");
+    }
+  });
+
+  app.get("/api/auth/google/pending", (req, res) => {
+    const pending = req.session.pendingGoogleSignup;
+    if (!pending || Date.now() - pending.createdAt > GOOGLE_SIGNUP_TTL_MS) {
+      delete req.session.pendingGoogleSignup;
+      return res.status(401).json({ message: "Votre connexion Google a expiré. Recommencez." });
+    }
+    res.json({ email: pending.email, firstName: pending.firstName, lastName: pending.lastName });
+  });
+
+  app.post("/api/auth/google/complete-profile", authLimiter, async (req, res) => {
+    try {
+      const pending = req.session.pendingGoogleSignup;
+      if (!pending || Date.now() - pending.createdAt > GOOGLE_SIGNUP_TTL_MS) {
+        delete req.session.pendingGoogleSignup;
+        return res.status(401).json({ message: "Votre connexion Google a expiré. Recommencez." });
+      }
+
+      const result = googleProfileSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: result.error.errors[0]?.message || "Informations invalides" });
+      }
+
+      const existingUser = await storage.getUserByNormalizedEmail(pending.email);
+      if (existingUser) {
+        await storage.verifyUserEmail(existingUser.id);
+        await regenerateSession(req);
+        req.session.userId = existingUser.id;
+        await saveSession(req);
+        const { password: _password, ...userWithoutPassword } = existingUser;
+        return res.json({ user: userWithoutPassword });
+      }
+
+      const profile = result.data;
+      const usernameBase = pending.email.split("@")[0].replace(/[^a-zA-Z0-9._-]/g, "").slice(0, 32) || "google";
+      const username = `${usernameBase}_g_${crypto.randomBytes(6).toString("hex")}`;
+      const password = crypto.randomBytes(48).toString("base64url");
+      const user = await storage.createUser({
+        username,
+        email: pending.email,
+        password,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        company: profile.company,
+        address: profile.address,
+        postalCode: profile.postalCode,
+        city: profile.city,
+        billingAddress: profile.sameAsBilling ? profile.address : (profile.billingAddress || profile.address),
+        billingPostalCode: profile.sameAsBilling ? profile.postalCode : (profile.billingPostalCode || profile.postalCode),
+        billingCity: profile.sameAsBilling ? profile.city : (profile.billingCity || profile.city),
+        sameAsBilling: profile.sameAsBilling,
+        role: "user",
+        emailVerified: true,
+      });
+
+      await regenerateSession(req);
+      req.session.userId = user.id;
+      await saveSession(req);
+      await logSecurityEvent("google_register", req, pending.email, user.id);
+      const { password: _password, ...userWithoutPassword } = user;
+      return res.status(201).json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error("Google profile completion error:", error);
+      res.status(500).json({ message: "Impossible de créer le compte pour le moment." });
+    }
+  });
 
   app.post("/api/auth/login", authLimiter, async (req, res) => {
     try {

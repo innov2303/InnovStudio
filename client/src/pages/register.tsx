@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForceLight } from "@/hooks/use-force-light";
 import { registerSchema, type RegisterData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import GoogleAuthButton from "@/components/google-auth-button";
 import { ArrowLeft, Loader2, Mail, CheckCircle, Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
@@ -175,6 +176,7 @@ export default function Register() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <GoogleAuthButton />
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   {error && (

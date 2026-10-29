@@ -7,9 +7,10 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByNormalizedEmail(email: string): Promise<User | undefined>;
   getUserByVerificationToken(token: string): Promise<User | undefined>;
   getUserByPasswordResetToken(token: string): Promise<User | undefined>;
-  createUser(user: InsertUser & { role?: string; mustChangePassword?: boolean; verificationToken?: string }): Promise<User>;
+  createUser(user: InsertUser & { role?: string; mustChangePassword?: boolean; verificationToken?: string; emailVerified?: boolean }): Promise<User>;
   verifyUserEmail(userId: string): Promise<void>;
   updateUserVerificationToken(userId: string, token: string): Promise<void>;
   updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
@@ -107,6 +108,15 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByNormalizedEmail(email: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(sql`lower(${users.email}) = ${email.trim().toLowerCase()}`)
+      .limit(1);
+    return user;
+  }
+
   async getUserByVerificationToken(token: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.verificationToken, token));
     return user;
@@ -131,7 +141,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId));
   }
 
-  async createUser(insertUser: InsertUser & { role?: string; mustChangePassword?: boolean; verificationToken?: string }): Promise<User> {
+  async createUser(insertUser: InsertUser & { role?: string; mustChangePassword?: boolean; verificationToken?: string; emailVerified?: boolean }): Promise<User> {
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
     const [user] = await db
       .insert(users)

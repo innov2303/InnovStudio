@@ -12,14 +12,26 @@ import { useAuth } from "@/lib/auth";
 import { useForceLight } from "@/hooks/use-force-light";
 import { loginSchema, type LoginData } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import GoogleAuthButton from "@/components/google-auth-button";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
+
+const googleErrorMessages: Record<string, string> = {
+  cancelled: "La connexion Google a été annulée.",
+  invalid_state: "La demande de connexion a expiré. Réessayez.",
+  unverified_email: "Google n'a pas confirmé votre adresse e-mail.",
+  not_configured: "La connexion Google n'est pas encore configurée.",
+  oauth_failed: "La connexion avec Google a échoué. Réessayez.",
+};
 
 export default function Login() {
   useForceLight();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { login } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const googleError = new URLSearchParams(window.location.search).get("google_error");
+  const [error, setError] = useState<string | null>(
+    googleError ? googleErrorMessages[googleError] || googleErrorMessages.oauth_failed : null,
+  );
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginData>({
@@ -90,6 +102,7 @@ export default function Login() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <GoogleAuthButton />
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   {error && (
