@@ -710,6 +710,7 @@ export function renderSeoPage(page: SeoPage): string {
       body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
       a{color:inherit;text-decoration:none}a:hover{color:var(--cyan)}
       .wrap{width:min(1280px,calc(100% - 48px));margin:auto}
+      .nav.wrap,footer .wrap{width:min(1488px,calc(100% - 48px))}
       header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid hsl(var(--border));background:rgba(255,255,255,.8);backdrop-filter:blur(12px)}
       .nav{height:54px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px}
       .brand{justify-self:start;flex:none;font-size:24px;line-height:32px;letter-spacing:.025em;font-weight:300;white-space:nowrap;background:linear-gradient(90deg,var(--blue),#22d3ee,var(--blue));background-clip:text;color:transparent}
@@ -787,7 +788,6 @@ export function renderSeoPage(page: SeoPage): string {
         .wrap{width:calc(100% - 40px)}
         .nav{height:54px}
         .brand{font-size:20px}
-        .nav.wrap,footer .wrap{width:min(1280px,calc(100% - 48px))}
         .brand{line-height:28px}
         .page-content{padding-top:78px}
         .page-heading{margin-bottom:28px}
