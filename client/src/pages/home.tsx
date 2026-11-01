@@ -22,9 +22,11 @@ import {
   PenTool,
   CheckCircle,
   Layers,
+  Menu,
   Settings,
   CreditCard,
-  Trophy
+  Trophy,
+  X
 } from "lucide-react";
 import {
   Dialog,
@@ -58,6 +60,7 @@ export default function Home() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState(homeSections[0].id);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: "",
@@ -119,6 +122,12 @@ export default function Home() {
       const offsetPosition = elementPosition - headerOffset;
       window.scrollTo({ top: offsetPosition, behavior: "smooth" });
     }
+  };
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    logout();
+    window.location.href = "/";
   };
 
   const handleContactSubmit = async (e: React.FormEvent) => {
@@ -249,29 +258,36 @@ export default function Home() {
             </a>
           </nav>
           <div className="flex items-center justify-self-end gap-2">
+            <button
+              type="button"
+              aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-primary-navigation"
+              data-testid="button-mobile-menu"
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-sky-50 lg:hidden"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
             {user ? (
-              <>
+              <div className="hidden items-center gap-2 lg:flex">
                 <Link href="/dashboard">
                   <Button data-testid="button-dashboard">
                     Dashboard
                     <ChevronRight className="ml-1 h-4 w-4" />
                   </Button>
                 </Link>
-                <Button 
-                  variant="outline" 
-                  onClick={async () => {
-                    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-                    logout();
-                    window.location.href = "/";
-                  }}
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
                   data-testid="button-logout-home"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
                   Déconnexion
                 </Button>
-              </>
+              </div>
             ) : (
-              <Link href="/login">
+              <Link href="/login" className="hidden sm:block">
                 <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 border-0" data-testid="button-login">
                   Connexion
                   <ChevronRight className="ml-1 h-4 w-4" />
@@ -280,6 +296,53 @@ export default function Home() {
             )}
           </div>
         </div>
+        {isMobileMenuOpen && (
+          <nav
+            id="mobile-primary-navigation"
+            aria-label="Navigation principale"
+            className="absolute inset-x-0 top-full border-b border-slate-200 bg-white/95 shadow-lg backdrop-blur lg:hidden"
+          >
+            <div className="container mx-auto px-6 py-3">
+              <div className="flex flex-col gap-1">
+                <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-sky-50 hover:text-cyan-800">
+                  Accueil
+                </Link>
+                <Link href="/site-evolutif" onClick={() => setIsMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-sky-50 hover:text-cyan-800">
+                  Site Web Evolutif
+                </Link>
+                <Link href="/references" onClick={() => setIsMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-sky-50 hover:text-cyan-800">
+                  Références
+                </Link>
+                <a
+                  href="#contact"
+                  onClick={(event) => {
+                    scrollToSection(event, "contact");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-sky-50 hover:text-cyan-800"
+                >
+                  Contact
+                </a>
+              </div>
+              {user ? (
+                <div className="mt-3 flex flex-col gap-1 border-t border-slate-200 pt-3">
+                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-sky-50 hover:text-cyan-800">
+                    Tableau de bord
+                  </Link>
+                  <button type="button" onClick={handleLogout} className="rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-sky-50 hover:text-cyan-800">
+                    Déconnexion
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-3 border-t border-slate-200 pt-3 sm:hidden">
+                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-semibold text-cyan-800 transition-colors hover:bg-sky-50">
+                    Connexion
+                  </Link>
+                </div>
+              )}
+            </div>
+          </nav>
+        )}
       </header>
 
       <nav
@@ -345,26 +408,6 @@ export default function Home() {
               className="absolute bottom-[7%] right-[5%] hidden w-48 opacity-90 drop-shadow-xl xl:block 2xl:w-56"
             />
 
-            <img
-              src={webDevelopmentIllustration}
-              alt=""
-              className="absolute left-2 top-[7%] h-16 w-16 object-contain opacity-75 drop-shadow-lg sm:h-20 sm:w-20 xl:hidden"
-            />
-            <img
-              src={webHostingIllustration}
-              alt=""
-              className="absolute right-12 top-[7%] h-16 w-16 object-contain opacity-75 drop-shadow-lg sm:h-20 sm:w-20 xl:hidden"
-            />
-            <img
-              src={clientRelationshipIllustration}
-              alt=""
-              className="absolute bottom-[4%] left-2 h-20 w-20 object-contain opacity-75 drop-shadow-lg sm:h-24 sm:w-24 xl:hidden"
-            />
-            <img
-              src={webAiAgentIllustration}
-              alt=""
-              className="absolute bottom-[4%] right-12 h-20 w-20 object-contain opacity-75 drop-shadow-lg sm:right-16 sm:h-24 sm:w-24 xl:hidden"
-            />
           </div>
           
           <div className="container relative mx-auto px-6">
