@@ -44,6 +44,7 @@ import projectTracking from "@/assets/images/project-tracking.png";
 import webDevelopmentIllustration from "@/assets/images/hero/web-development.webp";
 import webHostingIllustration from "@/assets/images/hero/web-hosting.webp";
 import clientRelationshipIllustration from "@/assets/images/hero/client-relationship.webp";
+import webAiAgentIllustration from "@/assets/images/hero/web-ai-agent.webp";
 
 const homeSections = [
   { id: "home-hero", label: "Accueil", icon: House },
@@ -338,6 +339,11 @@ export default function Home() {
               alt=""
               className="absolute bottom-[7%] left-[5%] hidden w-48 opacity-90 drop-shadow-xl xl:block 2xl:w-56"
             />
+            <img
+              src={webAiAgentIllustration}
+              alt=""
+              className="absolute bottom-[7%] right-[5%] hidden w-48 opacity-90 drop-shadow-xl xl:block 2xl:w-56"
+            />
 
             <img
               src={webDevelopmentIllustration}
@@ -353,6 +359,11 @@ export default function Home() {
               src={clientRelationshipIllustration}
               alt=""
               className="absolute bottom-[4%] left-2 h-20 w-20 object-contain opacity-75 drop-shadow-lg sm:h-24 sm:w-24 xl:hidden"
+            />
+            <img
+              src={webAiAgentIllustration}
+              alt=""
+              className="absolute bottom-[4%] right-12 h-20 w-20 object-contain opacity-75 drop-shadow-lg sm:right-16 sm:h-24 sm:w-24 xl:hidden"
             />
           </div>
           
