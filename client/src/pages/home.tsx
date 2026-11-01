@@ -410,8 +410,8 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
         </div>
 
-        <section id="features" className="relative flex min-h-[100svh] items-center py-20 overflow-hidden bg-slate-50">
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50" />
+        <section id="features" className="relative flex min-h-[100svh] items-center py-20 overflow-hidden bg-white">
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-white via-white to-sky-50" />
           <div className="container relative mx-auto px-6">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -568,14 +568,8 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-xl opacity-50" />
         </div>
 
-        <section id="contact" className="relative flex min-h-[100svh] items-center overflow-hidden py-20">
-          <div className="absolute inset-0">
-            <img
-              src="/images/contact-theme-bg-v2.webp"
-              alt=""
-              className="h-full w-full object-cover object-[65%_center] md:object-center"
-            />
-          </div>
+        <section id="contact" className="relative flex min-h-[100svh] items-center overflow-hidden bg-white py-20">
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-white via-white to-sky-50" />
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
