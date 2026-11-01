@@ -571,11 +571,10 @@ export default function Home() {
         <section id="contact" className="relative flex min-h-[100svh] items-center overflow-hidden py-20">
           <div className="absolute inset-0">
             <img
-              src="/images/contact-ai-bg-v3.webp"
+              src="/images/contact-theme-bg.webp"
               alt=""
-              className="h-full w-full object-cover object-[80%_center] md:object-center"
+              className="h-full w-full object-cover object-[65%_center] md:object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/20 to-white/10" />
           </div>
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-12">
