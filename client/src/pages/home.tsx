@@ -575,7 +575,7 @@ export default function Home() {
               alt=""
               className="h-full w-full object-cover object-[80%_center] md:object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/45 via-white/65 to-white/45" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/35 to-white/20" />
           </div>
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-12">
