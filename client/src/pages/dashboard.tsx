@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -30,7 +31,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
-import { useForceLight } from "@/hooks/use-force-light";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
@@ -287,7 +287,6 @@ function SeoAgentSection() {
 }
 
 export default function Dashboard() {
-  useForceLight();
   const [, setLocation] = useLocation();
   const { user, logout, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -1347,6 +1346,7 @@ export default function Dashboard() {
             {menuItems.find(m => m.id === activeSection)?.label || "Tableau de bord"}
           </h1>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9">
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm">

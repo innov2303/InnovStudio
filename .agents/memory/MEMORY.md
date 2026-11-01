@@ -1,4 +1,4 @@
 - [Positionnement de l’offre](seo-positioning.md) — présenter les services comme un site web évolutif, du lancement à l’application métier.
-- [Cohérence visuelle des pages](shared-page-design.md) — garder une base claire et cohérente entre le site public et le back-office.
+- [Cohérence visuelle des pages](shared-page-design.md) — conserver la même base graphique sur l’accueil et les pages publiques.
 - [Dépendances post-merge](post-merge-dependencies.md) — si npm ci est bloqué par une version vulnérable verrouillée, mettre à jour sa dépendance directe et le lockfile.
 - [Inscription Google](google-account-onboarding.md) — collecter le profil avant le tableau de bord; ne jamais lier automatiquement un compte administrateur.
