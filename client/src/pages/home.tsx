@@ -41,6 +41,9 @@ import { useToast } from "@/hooks/use-toast";
 import SiteFooter from "@/components/site-footer";
 
 import projectTracking from "@/assets/images/project-tracking.png";
+import webDevelopmentIllustration from "@/assets/images/hero/web-development.webp";
+import webHostingIllustration from "@/assets/images/hero/web-hosting.webp";
+import clientRelationshipIllustration from "@/assets/images/hero/client-relationship.webp";
 
 const homeSections = [
   { id: "home-hero", label: "Accueil", icon: House },
@@ -320,72 +323,37 @@ export default function Home() {
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-100/70 rounded-full blur-3xl" />
 
           <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-            <div className="absolute left-[7%] top-[24%] hidden -rotate-6 xl:block">
-              <div className="w-40 rounded-xl border border-sky-100/90 bg-white/80 p-3 shadow-xl shadow-sky-100/50 backdrop-blur-sm">
-                <div className="flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-rose-300/80" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-300/80" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/80" />
-                  <span className="ml-1 text-[8px] font-medium text-slate-400">mon-site.fr</span>
-                </div>
-                <div className="mt-2 flex h-14 items-end rounded-lg bg-gradient-to-br from-cyan-100 to-blue-100 p-2">
-                  <div className="space-y-1">
-                    <div className="h-1.5 w-12 rounded-full bg-blue-500/60" />
-                    <div className="h-1 w-16 rounded-full bg-white/80" />
-                  </div>
-                </div>
-                <div className="mt-2 grid grid-cols-3 gap-1">
-                  <div className="h-5 rounded bg-sky-50" />
-                  <div className="h-5 rounded bg-cyan-50" />
-                  <div className="h-5 rounded bg-blue-50" />
-                </div>
-              </div>
-            </div>
+            <img
+              src={webDevelopmentIllustration}
+              alt=""
+              className="absolute left-[5%] top-[20%] hidden w-44 opacity-90 drop-shadow-xl xl:block 2xl:w-52"
+            />
+            <img
+              src={webHostingIllustration}
+              alt=""
+              className="absolute right-[5%] top-[15%] hidden w-44 opacity-90 drop-shadow-xl xl:block 2xl:w-52"
+            />
+            <img
+              src={clientRelationshipIllustration}
+              alt=""
+              className="absolute bottom-[7%] left-[5%] hidden w-48 opacity-90 drop-shadow-xl xl:block 2xl:w-56"
+            />
 
-            <div className="absolute right-[8%] top-[27%] hidden rotate-6 xl:block">
-              <div className="w-40 rounded-xl border border-blue-100/90 bg-white/80 p-3 shadow-xl shadow-blue-100/50 backdrop-blur-sm">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-[8px] font-medium text-slate-400">app.tsx</span>
-                  <Code2 className="h-3.5 w-3.5 text-blue-400" />
-                </div>
-                <div className="space-y-2 rounded-lg bg-slate-50/90 p-2.5">
-                  <div className="h-1 w-14 rounded-full bg-blue-300/80" />
-                  <div className="ml-2 h-1 w-20 rounded-full bg-cyan-200" />
-                  <div className="ml-2 h-1 w-16 rounded-full bg-violet-200" />
-                  <div className="h-1 w-10 rounded-full bg-sky-200" />
-                  <div className="ml-2 h-1 w-20 rounded-full bg-blue-200" />
-                </div>
-                <div className="mt-2 flex items-center gap-1.5 text-[8px] text-slate-400">
-                  <Layers className="h-3 w-3 text-cyan-500/70" />
-                  Interface responsive
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute bottom-[13%] left-[16%] hidden rotate-3 2xl:block">
-              <div className="flex h-24 w-40 items-center gap-2 rounded-xl border border-cyan-100/90 bg-white/80 p-3 shadow-xl shadow-cyan-100/50 backdrop-blur-sm">
-                <div className="flex h-full flex-1 flex-col justify-between rounded-md bg-gradient-to-br from-sky-50 to-cyan-100 p-2">
-                  <div className="h-1.5 w-9 rounded-full bg-cyan-500/50" />
-                  <div className="space-y-1">
-                    <div className="h-1 w-full rounded-full bg-white" />
-                    <div className="h-1 w-3/4 rounded-full bg-white/80" />
-                  </div>
-                  <div className="h-3 w-8 rounded bg-blue-400/50" />
-                </div>
-                <div className="flex h-[4.5rem] w-8 flex-col items-center rounded-md border border-slate-200 bg-white p-1">
-                  <div className="mt-1 h-1 w-4 rounded-full bg-slate-200" />
-                  <div className="mt-2 h-5 w-full rounded-sm bg-gradient-to-b from-cyan-100 to-blue-100" />
-                  <div className="mt-1 h-1 w-4 rounded-full bg-slate-100" />
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute left-5 top-[8%] grid h-9 w-9 place-items-center rounded-xl border border-sky-100 bg-white/60 text-sky-400/60 shadow-sm xl:hidden">
-              <Code2 className="h-4 w-4" />
-            </div>
-            <div className="absolute bottom-[7%] right-5 grid h-9 w-9 place-items-center rounded-xl border border-cyan-100 bg-white/60 text-cyan-500/60 shadow-sm xl:hidden">
-              <Layers className="h-4 w-4" />
-            </div>
+            <img
+              src={webDevelopmentIllustration}
+              alt=""
+              className="absolute left-2 top-[7%] h-16 w-16 object-contain opacity-75 drop-shadow-lg sm:h-20 sm:w-20 xl:hidden"
+            />
+            <img
+              src={webHostingIllustration}
+              alt=""
+              className="absolute right-12 top-[7%] h-16 w-16 object-contain opacity-75 drop-shadow-lg sm:h-20 sm:w-20 xl:hidden"
+            />
+            <img
+              src={clientRelationshipIllustration}
+              alt=""
+              className="absolute bottom-[4%] left-2 h-20 w-20 object-contain opacity-75 drop-shadow-lg sm:h-24 sm:w-24 xl:hidden"
+            />
           </div>
           
           <div className="container relative mx-auto px-6">
