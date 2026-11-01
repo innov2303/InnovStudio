@@ -511,11 +511,12 @@ export default function Home() {
             </div>
 
             <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
-              <article className="group relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
+              <article className="group relative isolate flex h-full flex-col overflow-visible rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
                 <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-2xl">
-                  <div className="absolute -top-20 left-1/2 h-56 w-[85%] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.32)_0%,rgba(191,219,254,0.15)_42%,transparent_78%)] opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
-                  <div className="absolute -top-2 left-1/2 h-44 w-[62%] -translate-x-1/2 bg-gradient-to-b from-cyan-200/40 via-cyan-100/20 to-transparent [clip-path:polygon(38%_0,62%_0,100%_100%,0_100%)] blur-sm" />
-                  <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
+                  <div className="absolute -top-5 left-1/2 h-12 w-52 -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(103,232,249,0.68)_0%,rgba(186,230,253,0.42)_45%,transparent_78%)] opacity-80 blur-xl transition-all duration-500 group-hover:scale-110 group-hover:opacity-100" />
+                  <div className="absolute -top-1 left-1/2 h-[3px] w-24 -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_18px_rgba(34,211,238,0.75)] transition-shadow duration-500 group-hover:shadow-[0_0_28px_rgba(34,211,238,0.9)]" />
+                  <div className="absolute inset-x-0 top-0 h-36 rounded-t-2xl bg-gradient-to-b from-cyan-100/65 via-cyan-50/25 to-transparent" />
+                  <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
                 </div>
                 <div className="relative z-10 flex h-full flex-col">
                   <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -542,11 +543,12 @@ export default function Home() {
                 </div>
               </article>
 
-              <article className="group relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
+              <article className="group relative isolate flex h-full flex-col overflow-visible rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
                 <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-2xl">
-                  <div className="absolute -top-20 left-1/2 h-56 w-[85%] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.26)_0%,rgba(103,232,249,0.16)_42%,transparent_78%)] opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
-                  <div className="absolute -top-2 left-1/2 h-44 w-[62%] -translate-x-1/2 bg-gradient-to-b from-blue-200/35 via-sky-100/20 to-transparent [clip-path:polygon(38%_0,62%_0,100%_100%,0_100%)] blur-sm" />
-                  <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/80 to-transparent" />
+                  <div className="absolute -top-5 left-1/2 h-12 w-52 -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(129,140,248,0.58)_0%,rgba(103,232,249,0.38)_45%,transparent_78%)] opacity-80 blur-xl transition-all duration-500 group-hover:scale-110 group-hover:opacity-100" />
+                  <div className="absolute -top-1 left-1/2 h-[3px] w-24 -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent via-blue-300 to-transparent shadow-[0_0_18px_rgba(59,130,246,0.72)] transition-shadow duration-500 group-hover:shadow-[0_0_28px_rgba(59,130,246,0.9)]" />
+                  <div className="absolute inset-x-0 top-0 h-36 rounded-t-2xl bg-gradient-to-b from-blue-100/65 via-sky-50/25 to-transparent" />
+                  <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/80 to-transparent" />
                 </div>
                 <div className="relative z-10 flex h-full flex-col">
                   <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
