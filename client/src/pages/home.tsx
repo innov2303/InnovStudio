@@ -575,7 +575,7 @@ export default function Home() {
               alt=""
               className="h-full w-full object-cover object-[80%_center] md:object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/35 to-white/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/20 to-white/10" />
           </div>
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-12">
@@ -587,7 +587,7 @@ export default function Home() {
               </p>
             </div>
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              <Card className="border border-transparent bg-card overflow-visible transition-shadow duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
+              <Card className="overflow-visible border border-slate-300 bg-white shadow-xl shadow-slate-900/10 transition-shadow duration-500 hover:border-cyan-500/60 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
                 <CardContent className="p-6 text-center flex flex-col items-center h-full">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
                   <Rocket className="h-6 w-6" />
@@ -625,7 +625,7 @@ export default function Home() {
               </CardContent>
               </Card>
 
-              <Card className="border border-transparent bg-card overflow-visible transition-shadow duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
+              <Card className="overflow-visible border border-slate-300 bg-white shadow-xl shadow-slate-900/10 transition-shadow duration-500 hover:border-cyan-500/60 hover:shadow-[0_0_15px_rgba(0,200,255,0.15),0_0_30px_rgba(0,200,255,0.08)]">
                 <CardContent className="p-6 text-center flex flex-col items-center h-full">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
                   <MessageSquare className="h-6 w-6" />
