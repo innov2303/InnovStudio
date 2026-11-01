@@ -511,70 +511,52 @@ export default function Home() {
             </div>
 
             <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
-              <article className="group relative isolate flex h-full flex-col overflow-visible rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
-                <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-2xl">
-                  <div className="absolute -top-6 left-1/2 h-14 w-64 -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(34,211,238,0.46)_0%,rgba(96,165,250,0.28)_42%,transparent_78%)] opacity-80 blur-xl transition-all duration-500 group-hover:scale-110 group-hover:opacity-100" />
-                  <div className="absolute -top-1 left-[29%] h-1.5 w-9 rounded-full bg-gradient-to-r from-cyan-200 via-white to-cyan-400 shadow-[0_0_16px_rgba(34,211,238,0.8)] transition-all duration-500 group-hover:scale-x-125 group-hover:shadow-[0_0_24px_rgba(34,211,238,0.95)]" />
-                  <div className="absolute -top-1 right-[29%] h-1.5 w-9 rounded-full bg-gradient-to-r from-cyan-300 via-sky-100 to-blue-300 shadow-[0_0_16px_rgba(56,189,248,0.72)] transition-all duration-500 group-hover:scale-x-125 group-hover:shadow-[0_0_24px_rgba(56,189,248,0.9)]" />
-                  <div className="absolute inset-x-0 top-0 h-36 rounded-t-2xl bg-gradient-to-b from-cyan-100/60 via-sky-50/25 to-transparent" />
-                  <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
+              <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Code2 className="h-6 w-6" />
                 </div>
-                <div className="relative z-10 flex h-full flex-col">
-                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Code2 className="h-6 w-6" />
-                  </div>
-                  <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
-                    Présence en ligne
-                  </p>
-                  <h3 className="mb-3 text-2xl font-bold text-slate-900">Site Web Evolutif</h3>
-                  <p className="mb-6 text-muted-foreground">
-                    Présentez votre activité et vos services avec un site professionnel, adapté aux mobiles et conçu pour faciliter les prises de contact.
-                  </p>
-                  <ul className="mb-8 space-y-2 text-sm text-slate-600">
-                    <li>• Pages et contenus adaptés à votre activité</li>
-                    <li>• Design responsive pour mobile et ordinateur</li>
-                    <li>• Une base que vous pourrez faire évoluer</li>
-                  </ul>
-                  <a
-                    href="/site-evolutif"
-                    className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
-                  >
-                    Découvrir le site web évolutif <ArrowRight className="h-4 w-4" />
-                  </a>
-                </div>
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
+                  Présence en ligne
+                </p>
+                <h3 className="mb-3 text-2xl font-bold text-slate-900">Site Web Evolutif</h3>
+                <p className="mb-6 text-muted-foreground">
+                  Présentez votre activité et vos services avec un site professionnel, adapté aux mobiles et conçu pour faciliter les prises de contact.
+                </p>
+                <ul className="mb-8 space-y-2 text-sm text-slate-600">
+                  <li>• Pages et contenus adaptés à votre activité</li>
+                  <li>• Design responsive pour mobile et ordinateur</li>
+                  <li>• Une base que vous pourrez faire évoluer</li>
+                </ul>
+                <a
+                  href="/site-evolutif"
+                  className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
+                >
+                  Découvrir le site web évolutif <ArrowRight className="h-4 w-4" />
+                </a>
               </article>
 
-              <article className="group relative isolate flex h-full flex-col overflow-visible rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
-                <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-2xl">
-                  <div className="absolute -top-6 left-1/2 h-14 w-64 -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(99,102,241,0.38)_0%,rgba(56,189,248,0.3)_42%,transparent_78%)] opacity-80 blur-xl transition-all duration-500 group-hover:scale-110 group-hover:opacity-100" />
-                  <div className="absolute -top-1 left-[29%] h-1.5 w-9 rounded-full bg-gradient-to-r from-blue-200 via-white to-indigo-400 shadow-[0_0_16px_rgba(99,102,241,0.75)] transition-all duration-500 group-hover:scale-x-125 group-hover:shadow-[0_0_24px_rgba(99,102,241,0.95)]" />
-                  <div className="absolute -top-1 right-[29%] h-1.5 w-9 rounded-full bg-gradient-to-r from-sky-300 via-cyan-100 to-blue-300 shadow-[0_0_16px_rgba(56,189,248,0.72)] transition-all duration-500 group-hover:scale-x-125 group-hover:shadow-[0_0_24px_rgba(56,189,248,0.9)]" />
-                  <div className="absolute inset-x-0 top-0 h-36 rounded-t-2xl bg-gradient-to-b from-blue-100/60 via-sky-50/25 to-transparent" />
-                  <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/80 to-transparent" />
+              <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg md:p-9">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Layers className="h-6 w-6" />
                 </div>
-                <div className="relative z-10 flex h-full flex-col">
-                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Layers className="h-6 w-6" />
-                  </div>
-                  <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
-                    Outil métier sur mesure
-                  </p>
-                  <h3 className="mb-3 text-2xl font-bold text-slate-900">Application web métier</h3>
-                  <p className="mb-6 text-muted-foreground">
-                    Créez votre application métier adaptée ou faites évoluer votre site vitrine existant avec les fonctionnalités métier dont vous avez besoin.
-                  </p>
-                  <ul className="mb-8 space-y-2 text-sm text-slate-600">
-                    <li>• Création de votre application web entreprise</li>
-                    <li>• Évolution possible d’un site vitrine existant</li>
-                    <li>• Espace client, suivi, tableaux de bord ou automatisations</li>
-                  </ul>
-                  <a
-                    href="/site-evolutif#application-metier"
-                    className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
-                  >
-                    Voir l’évolution vers une application métier <ArrowRight className="h-4 w-4" />
-                  </a>
-                </div>
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-cyan-700">
+                  Outil métier sur mesure
+                </p>
+                <h3 className="mb-3 text-2xl font-bold text-slate-900">Application web métier</h3>
+                <p className="mb-6 text-muted-foreground">
+                  Créez votre application métier adaptée ou faites évoluer votre site vitrine existant avec les fonctionnalités métier dont vous avez besoin.
+                </p>
+                <ul className="mb-8 space-y-2 text-sm text-slate-600">
+                  <li>• Création de votre application web entreprise</li>
+                  <li>• Évolution possible d’un site vitrine existant</li>
+                  <li>• Espace client, suivi, tableaux de bord ou automatisations</li>
+                </ul>
+                <a
+                  href="/site-evolutif#application-metier"
+                  className="mt-auto inline-flex items-center gap-2 font-semibold text-cyan-800 transition-colors hover:text-blue-700"
+                >
+                  Voir l’évolution vers une application métier <ArrowRight className="h-4 w-4" />
+                </a>
               </article>
             </div>
           </div>
