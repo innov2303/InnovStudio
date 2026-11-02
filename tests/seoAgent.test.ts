@@ -150,6 +150,8 @@ test("references use category tabs and keep two cards per row when over two proj
     /Découvrez une sélection de sites et de solutions web réalisés par Innov Studio\./,
   );
   assert.match(html, /<h1[^>]*>Mes[\s\S]*?projets réalisés[\s\S]*?<\/h1>/);
+  assert.match(html, /Site vitrine professionnel/);
+  assert.match(html, /Application web métier/);
   assert.match(html, /data-reference-tabs hidden/);
   assert.equal((html.match(/data-reference-tab="/g) ?? []).length, 3);
   assert.equal((html.match(/class="reference-card"/g) ?? []).length, 3);

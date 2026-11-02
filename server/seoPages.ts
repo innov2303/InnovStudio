@@ -366,11 +366,11 @@ export const seoPages: SeoPage[] = [
     label: "Des projets conçus pour répondre à des besoins concrets.",
     sections: [
       {
-        title: "Sites vitrine",
+        title: "Site vitrine professionnel",
         paragraphs: ["Des sites conçus pour présenter une activité et faciliter la prise de contact."],
       },
       {
-        title: "Produits web d’entreprise",
+        title: "Application web métier",
         paragraphs: ["Des outils numériques développés pour les besoins des équipes et des entreprises."],
       },
     ],
@@ -430,8 +430,8 @@ function renderServiceCards(cards: ServiceCard[]): string {
 
 function renderReferenceGroups(references: PublicReference[]): string {
   const groups = [
-    { category: "vitrine", title: "Sites vitrine" },
-    { category: "enterprise", title: "Produits web d’entreprise" },
+    { category: "vitrine", title: "Site vitrine professionnel" },
+    { category: "enterprise", title: "Application web métier" },
   ];
   const categories = groups.map((group) => ({
     ...group,

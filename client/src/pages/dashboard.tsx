@@ -4475,8 +4475,8 @@ export default function Dashboard() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="vitrine">Site Vitrine</SelectItem>
-                          <SelectItem value="enterprise">Produit Web Entreprise</SelectItem>
+                          <SelectItem value="vitrine">Site vitrine professionnel</SelectItem>
+                          <SelectItem value="enterprise">Application web métier</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -4511,7 +4511,7 @@ export default function Dashboard() {
                     return (
                       <div key={cat} className="space-y-3">
                         <h3 className="text-lg font-semibold">
-                          {cat === "vitrine" ? "Sites Vitrines" : "Produits Web Entreprise"}
+                          {cat === "vitrine" ? "Site vitrine professionnel" : "Application web métier"}
                           <Badge variant="secondary" className="ml-2">{refs.length}</Badge>
                         </h3>
                         {refs.length === 0 ? (
