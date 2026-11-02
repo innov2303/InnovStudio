@@ -35,7 +35,8 @@ type FeatureIcon =
   | "administration"
   | "custom"
   | "dashboard"
-  | "ai";
+  | "ai"
+  | "maintenance";
 
 type SeoSection = {
   title: string;
@@ -147,6 +148,13 @@ export const seoPages: SeoPage[] = [
           "Analyse des connexions au site, Agent SEO Dynamique et autre modules IA selon vos besoins",
         ],
       },
+      {
+        icon: "maintenance",
+        title: "Maintenance 7j/7",
+        paragraphs: [
+          "Je gère les pannes, les bugs et les mises à jour de sécurité pour vous, si besoin.",
+        ],
+      },
     ],
     sections: [
       {
@@ -176,6 +184,13 @@ export const seoPages: SeoPage[] = [
         title: "Votre site prêt à évoluer",
         paragraphs: [
           "Ajoutez des fonctionnalités et passez, si besoin, du site vitrine à l’application web métier.",
+        ],
+      },
+      {
+        icon: "maintenance",
+        title: "Maintenance 7j/7",
+        paragraphs: [
+          "Je gère les pannes, les bugs et les mises à jour de sécurité pour vous, si besoin.",
         ],
       },
     ],
@@ -532,6 +547,8 @@ function renderFeatureIcon(icon?: FeatureIcon): string {
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 16v-2m5 2v-4m5 4v-6"/></svg>',
     ai:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15ZM5 3l.6 1.4L7 5l-1.4.6L5 7l-.6-1.4L3 5l1.4-.6L5 3Z"/></svg>',
+    maintenance:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 3 20 6v5c0 5-3.4 8-8 10-4.6-2-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-4.8"/></svg>',
   };
 
   return icon ? icons[icon] : "";

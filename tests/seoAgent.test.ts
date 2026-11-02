@@ -41,7 +41,7 @@ test("the evolving service page presents the path to an application on one page"
   assert.match(html, /id="application-metier"/);
   assert.match(html, /class="content-grid feature-grid"/);
   assert.match(html, /class="content-grid feature-grid application-feature-grid"/);
-  assert.equal((html.match(/class="feature-item"/g) ?? []).length, 8);
+  assert.equal((html.match(/class="feature-item"/g) ?? []).length, 10);
   const startGridIndex = html.indexOf('class="content-grid feature-grid"');
   const applicationStageIndex = html.indexOf(
     'class="journey-stage journey-stage-next"',
@@ -52,7 +52,7 @@ test("the evolving service page presents the path to an application on one page"
   const applicationFeatures = html.slice(applicationGridIndex);
   assert.equal(
     (applicationFeatures.match(/class="feature-item"/g) ?? []).length,
-    4,
+    5,
   );
   assert.ok(
     html.indexOf("Site vitrine professionnel") <
@@ -78,6 +78,11 @@ test("the evolving service page presents the path to an application on one page"
   assert.match(
     html,
     /Analyse des connexions au site, Agent SEO Dynamique et autre modules IA selon vos besoins/,
+  );
+  assert.equal((html.match(/Maintenance 7j\/7/g) ?? []).length, 2);
+  assert.equal(
+    (html.match(/Je gère les pannes, les bugs et les mises à jour de sécurité pour vous, si besoin\./g) ?? []).length,
+    2,
   );
   assert.doesNotMatch(html, /Questions fréquentes|Parlons de la première étape/);
   assert.match(html, /href="\/site-evolutif">Site Web Evolutif<\/a>/);
