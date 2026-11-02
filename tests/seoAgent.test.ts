@@ -89,6 +89,30 @@ test("the evolving service page presents the path to an application on one page"
   assert.match(servicesHtml, /href="\/site-evolutif#application-metier"/);
 });
 
+test("the evolving service formulas have distinct styled cards on desktop and mobile", () => {
+  const page = seoPages.find((candidate) => candidate.path === "/site-evolutif");
+  assert.ok(page);
+
+  const html = renderSeoPage(page);
+  assert.match(
+    html,
+    /body\.site-evolution \.journey-stage\{position:relative;isolation:isolate;overflow:hidden;min-height:202px/,
+  );
+  assert.match(
+    html,
+    /background:linear-gradient\(140deg,#fff 0%,#f4faff 48%,#eaf5ff 100%\)/,
+  );
+  assert.match(
+    html,
+    /body\.site-evolution \.journey-stage-next\{border-color:#c6d5f0;background:linear-gradient\(140deg,#effbff 0%,#f0f5ff 52%,#e8edff 100%\)\}/,
+  );
+  assert.match(html, /journey-stage-next \.journey-number\{border-color:transparent;background:linear-gradient\(145deg,#12a9b8,#3768d5\)/);
+  assert.match(
+    html,
+    /body\.site-evolution \.journey\{grid-template-columns:1fr;gap:9px;margin-bottom:22px\}/,
+  );
+});
+
 test("references use category tabs and keep two cards per row when over two projects", () => {
   const page = seoPages.find((candidate) => candidate.path === "/references");
   assert.ok(page);

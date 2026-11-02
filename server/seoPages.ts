@@ -827,21 +827,26 @@ export function renderSeoPage(page: SeoPage): string {
       body.site-evolution .page-heading{max-width:980px;margin-bottom:32px}
       body.site-evolution .page-label{display:inline-flex;align-items:center;border:1px solid rgba(14,116,144,.16);border-radius:999px;background:rgba(255,255,255,.86);padding:7px 14px;margin-bottom:16px;color:#0e7490;font-size:13px;box-shadow:0 4px 14px rgba(15,60,90,.04)}
       body.site-evolution .page-heading h1{font-weight:700;letter-spacing:-.04em}
-      body.site-evolution .journey{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);align-items:start;gap:14px;max-width:960px;margin:0 auto 30px}
+      body.site-evolution .journey{display:grid;grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr);align-items:stretch;gap:14px;max-width:960px;margin:0 auto 30px}
       body.site-evolution .journey-option-start{min-width:0}
       body.site-evolution .journey-option-next{min-width:0}
-      body.site-evolution .journey-stage{padding:22px 24px;border:1px solid #dce7ed;border-radius:18px;background:rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(15,60,90,.055);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
-      body.site-evolution .journey-stage:hover{transform:translateY(-3px);border-color:rgba(14,116,144,.3);box-shadow:0 15px 30px rgba(15,60,90,.09)}
-      body.site-evolution .journey-stage-next{border-color:rgba(37,99,235,.2);background:linear-gradient(130deg,#f0f9fb,#f1f5ff)}
-      body.site-evolution .journey-stage-top{display:flex;align-items:center;gap:13px}
-      body.site-evolution .journey-number{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:12px;background:#e7f4f7;color:#0e7490;font-weight:700;font-size:14px}
-      body.site-evolution .journey-stage-next .journey-number{background:#e9efff;color:#2563eb}
-      body.site-evolution .journey-label{margin:0 0 3px;color:#64788b;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-      body.site-evolution .journey-stage h2{margin:0;font-size:18px;line-height:1.3}
-      body.site-evolution .journey-description{margin:14px 0 0;font-size:14px;line-height:1.55}
-      body.site-evolution .journey-connector{position:relative;display:grid;place-items:center;align-self:start;height:34px;margin-top:54px;color:#0e7490}
-      body.site-evolution .journey-connector::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(transparent,#8cbecb,transparent)}
-      body.site-evolution .journey-connector::after{content:"→";position:relative;display:grid;place-items:center;width:34px;height:34px;border:1px solid rgba(14,116,144,.16);border-radius:50%;background:#f7fcfd;font-size:19px;line-height:1}
+      body.site-evolution .journey-stage{position:relative;isolation:isolate;overflow:hidden;min-height:202px;padding:27px 27px 25px;border:1px solid #cfe1ef;border-radius:21px;background:linear-gradient(140deg,#fff 0%,#f4faff 48%,#eaf5ff 100%);box-shadow:0 14px 36px rgba(24,71,110,.10),inset 0 1px 0 rgba(255,255,255,.95);transition:transform .24s ease,border-color .24s ease,box-shadow .24s ease}
+      body.site-evolution .journey-stage::before{content:"";position:absolute;z-index:0;top:20px;bottom:20px;left:0;width:4px;border-radius:0 4px 4px 0;background:linear-gradient(180deg,#24b8c7,#4b80e7)}
+      body.site-evolution .journey-stage::after{content:"";position:absolute;z-index:0;top:-76px;right:-58px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(74,158,229,.17),rgba(74,158,229,0) 70%);pointer-events:none}
+      body.site-evolution .journey-stage:hover{transform:translateY(-4px);border-color:rgba(14,116,144,.38);box-shadow:0 20px 42px rgba(24,71,110,.14),inset 0 1px 0 rgba(255,255,255,.95)}
+      body.site-evolution .journey-stage-next{border-color:#c6d5f0;background:linear-gradient(140deg,#effbff 0%,#f0f5ff 52%,#e8edff 100%)}
+      body.site-evolution .journey-stage-next::before{background:linear-gradient(180deg,#10a9b6,#3468d3)}
+      body.site-evolution .journey-stage-next::after{top:auto;right:-46px;bottom:-105px;width:230px;height:230px;background:radial-gradient(circle,rgba(75,110,225,.17),rgba(75,110,225,0) 70%)}
+      body.site-evolution .journey-stage-top{position:relative;z-index:1;display:flex;align-items:center;gap:15px}
+      body.site-evolution .journey-number{display:grid;place-items:center;flex:0 0 50px;width:50px;height:50px;border:1px solid rgba(23,121,161,.14);border-radius:15px;background:linear-gradient(145deg,#dcf5fa,#e4edff);color:#116e91;box-shadow:0 7px 16px rgba(24,100,142,.13);font-weight:800;font-size:15px;letter-spacing:-.03em}
+      body.site-evolution .journey-stage-next .journey-number{border-color:transparent;background:linear-gradient(145deg,#12a9b8,#3768d5);color:#fff;box-shadow:0 8px 18px rgba(47,103,207,.25)}
+      body.site-evolution .journey-label{display:inline-flex;align-items:center;min-height:23px;margin:0 0 5px;padding:3px 9px;border:1px solid rgba(14,116,144,.12);border-radius:999px;background:rgba(255,255,255,.78);color:#0e7490;font-size:9px;font-weight:800;letter-spacing:.09em;line-height:1.2;text-transform:uppercase}
+      body.site-evolution .journey-stage-next .journey-label{border-color:rgba(55,104,213,.13);color:#3263c6}
+      body.site-evolution .journey-stage h2{margin:0;color:#10263b;font-size:20px;font-weight:750;letter-spacing:-.035em;line-height:1.25}
+      body.site-evolution .journey-description{position:relative;z-index:1;max-width:390px;margin:17px 0 0 65px;color:#50677c;font-size:14px;line-height:1.65}
+      body.site-evolution .journey-connector{position:relative;display:grid;place-items:center;align-self:start;height:42px;margin-top:80px;color:#fff}
+      body.site-evolution .journey-connector::before{content:"";position:absolute;right:-7px;left:-7px;height:1px;background:linear-gradient(90deg,rgba(25,150,177,.06),rgba(25,150,177,.45),rgba(55,104,213,.3),rgba(55,104,213,.05))}
+      body.site-evolution .journey-connector::after{content:"→";position:relative;display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(37,99,235,.18);border-radius:50%;background:linear-gradient(145deg,#fff,#eaf5ff);color:#167f9e;box-shadow:0 8px 19px rgba(25,89,131,.12);font-size:20px;line-height:1}
       body.site-evolution .journey-stage-next{align-self:start}
       body.site-evolution .journey-option-start .content-grid.feature-grid,body.site-evolution .journey-option-next .content-grid.feature-grid{max-width:none;margin:26px 0 0;grid-template-columns:1fr;gap:22px}
       body.site-evolution .feature-item{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:start;gap:14px;min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;transition:none}
@@ -854,10 +859,14 @@ export function renderSeoPage(page: SeoPage): string {
       @media(max-width:767px){
         body.site-evolution .page-content{padding-top:78px}
         body.site-evolution .journey{grid-template-columns:1fr;gap:9px;margin-bottom:22px}
-        body.site-evolution .journey-stage{padding:19px 20px}
-        body.site-evolution .journey-connector{height:30px;min-height:30px;margin-top:0}
-        body.site-evolution .journey-connector::before{top:0;bottom:0}
-        body.site-evolution .journey-connector::after{content:"↓";width:30px;height:30px;font-size:18px}
+        body.site-evolution .journey-stage{min-height:0;padding:22px 20px 21px}
+        body.site-evolution .journey-stage-top{gap:12px}
+        body.site-evolution .journey-number{flex-basis:44px;width:44px;height:44px;border-radius:13px}
+        body.site-evolution .journey-stage h2{font-size:18px}
+        body.site-evolution .journey-description{margin:13px 0 0 56px;font-size:13px}
+        body.site-evolution .journey-connector{height:38px;min-height:38px;margin:0}
+        body.site-evolution .journey-connector::before{top:-5px;right:auto;bottom:-5px;left:50%;width:1px;height:auto;background:linear-gradient(transparent,rgba(25,150,177,.45),rgba(55,104,213,.3),transparent)}
+        body.site-evolution .journey-connector::after{content:"↓";width:32px;height:32px;font-size:17px}
         body.site-evolution .journey-option-start .content-grid.feature-grid,body.site-evolution .journey-option-next .content-grid.feature-grid{max-width:560px;margin:22px auto 0;gap:23px}
         body.site-evolution .feature-item{grid-template-columns:40px minmax(0,1fr);gap:13px}
         body.site-evolution .feature-icon{width:40px;height:40px}
