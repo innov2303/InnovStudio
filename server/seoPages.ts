@@ -714,11 +714,24 @@ export function renderSeoPage(page: SeoPage): string {
       header{position:fixed;inset:0 0 auto;z-index:50;border-bottom:1px solid hsl(var(--border));background:rgba(255,255,255,.8);backdrop-filter:blur(12px)}
       .nav{height:52px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px}
       .brand{justify-self:start;flex:none;font-size:24px;line-height:32px;letter-spacing:.025em;font-weight:300;white-space:nowrap;background:linear-gradient(90deg,var(--blue),#22d3ee,var(--blue));background-clip:text;color:transparent}
-      nav{justify-self:center;display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;line-height:24px;white-space:nowrap}
-      nav a{color:var(--muted);transition:color .2s ease}nav a:hover{color:var(--blue)}
+      .desktop-nav{justify-self:center;display:flex;align-items:center;justify-content:center;gap:24px;font-size:16px;line-height:24px;white-space:nowrap}
+      .desktop-nav a{color:var(--muted);transition:color .2s ease}.desktop-nav a:hover{color:var(--blue)}
+      .nav-actions{justify-self:end;display:flex;align-items:center;gap:10px}
       .login{justify-self:end;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:8px 16px;border-radius:6px;background:linear-gradient(90deg,#06b6d4,#2563eb);color:white;font-size:14px;font-weight:500;line-height:20px;white-space:nowrap;box-shadow:0 8px 24px rgba(34,211,238,.18);transition:all .3s ease}
       .login span{display:inline-flex;width:16px;justify-content:center;margin-left:4px}
       .login:hover{color:white;filter:brightness(1.08);transform:scale(1.05)}
+      .mobile-menu{position:relative;display:none;padding:0;border:0}
+      .mobile-menu>summary{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#334155;cursor:pointer;font-size:22px;line-height:1;list-style:none}
+      .mobile-menu>summary::-webkit-details-marker{display:none}
+      .mobile-menu>summary::marker{content:""}
+      .mobile-menu>summary:focus-visible{outline:2px solid rgba(37,99,235,.55);outline-offset:2px}
+      .menu-close{display:none}
+      .mobile-menu[open] .menu-open{display:none}
+      .mobile-menu[open] .menu-close{display:inline}
+      .mobile-panel{position:absolute;top:calc(100% + 10px);right:0;z-index:60;width:min(280px,calc(100vw - 40px));padding:8px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 14px 35px rgba(15,23,42,.14);backdrop-filter:blur(12px)}
+      .mobile-panel a{display:block;padding:10px 12px;border-radius:8px;color:var(--muted);font-size:15px;line-height:22px;white-space:normal;transition:background .2s ease,color .2s ease}
+      .mobile-panel a:hover,.mobile-panel a:focus-visible{background:#f0f9ff;color:var(--cyan);outline:none}
+      .mobile-panel .mobile-login{margin-top:4px;border-top:1px solid var(--line);border-radius:0;padding-top:12px;color:var(--cyan);font-weight:600}
       main{padding:0 0 80px}
       .accent{background:linear-gradient(90deg,var(--blue),var(--cyan),var(--blue));background-clip:text;color:transparent}
       .page-content{padding-top:88px}
@@ -788,7 +801,7 @@ export function renderSeoPage(page: SeoPage): string {
         .footer-copy{flex-direction:row;justify-content:flex-end;flex-wrap:wrap;text-align:right}
         .footer-copy span{display:inline}
       }
-      @media(max-width:1023px){nav{display:none}}
+      @media(max-width:1023px){.desktop-nav{display:none}.mobile-menu{display:block}}
       @media(max-width:767px){
         .wrap{width:calc(100% - 40px)}
         .nav{height:52px}
@@ -808,6 +821,7 @@ export function renderSeoPage(page: SeoPage): string {
         .content-section,.service-card{padding:24px}
         .cta{padding:30px 20px}
       }
+      @media(max-width:639px){.desktop-login{display:none}}
       body.site-evolution{background:linear-gradient(180deg,#fff 0,#f5fbff 310px,#f8fafc 760px)}
       body.site-evolution .page-content{padding-top:88px}
       body.site-evolution .page-heading{max-width:980px;margin-bottom:32px}
@@ -857,13 +871,28 @@ export function renderSeoPage(page: SeoPage): string {
     <header>
       <div class="wrap nav">
         <a class="brand" href="/">Innov Studio</a>
-        <nav aria-label="Navigation principale">
+        <nav class="desktop-nav" aria-label="Navigation principale">
           <a href="/">Accueil</a>
           <a href="/site-evolutif">Site Web Evolutif</a>
           <a href="/references">Références</a>
           <a href="/#contact">Contact</a>
         </nav>
-        <a class="login" href="/login">Connexion<span aria-hidden="true">›</span></a>
+        <div class="nav-actions">
+          <details class="mobile-menu">
+            <summary aria-label="Afficher ou masquer le menu de navigation" aria-controls="mobile-page-navigation">
+              <span class="menu-open" aria-hidden="true">☰</span>
+              <span class="menu-close" aria-hidden="true">×</span>
+            </summary>
+            <nav id="mobile-page-navigation" class="mobile-panel" aria-label="Navigation mobile">
+              <a href="/">Accueil</a>
+              <a href="/site-evolutif">Site Web Evolutif</a>
+              <a href="/references">Références</a>
+              <a href="/#contact">Contact</a>
+              <a class="mobile-login" href="/login">Connexion</a>
+            </nav>
+          </details>
+          <a class="login desktop-login" href="/login">Connexion<span aria-hidden="true">›</span></a>
+        </div>
       </div>
     </header>
     <main>

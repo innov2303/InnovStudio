@@ -20,6 +20,18 @@ test("the rendered service pages expose their title, description, canonical and 
   }
 });
 
+test("public SEO pages include a responsive mobile navigation menu", () => {
+  for (const page of seoPages) {
+    const html = renderSeoPage(page);
+
+    assert.match(html, /<nav class="desktop-nav" aria-label="Navigation principale">/);
+    assert.match(html, /<details class="mobile-menu">/);
+    assert.match(html, /id="mobile-page-navigation" class="mobile-panel"/);
+    assert.match(html, /@media\(max-width:1023px\)\{\.desktop-nav\{display:none\}\.mobile-menu\{display:block\}\}/);
+    assert.match(html, /<a href="\/#contact">Contact<\/a>/);
+  }
+});
+
 test("the evolving service page presents the path to an application on one page", () => {
   const page = seoPages.find((candidate) => candidate.path === "/site-evolutif");
   assert.ok(page);
