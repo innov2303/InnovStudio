@@ -359,10 +359,10 @@ export const seoPages: SeoPage[] = [
     title: "Références et réalisations web | Innov Studio",
     description:
       "Consultez les réalisations d’Innov Studio : sites web, produits numériques et applications conçus pour des activités et des besoins variés.",
-    h1: "Références et projets réalisés",
+    h1: "Mes projets réalisés",
     h1Accent: "projets réalisés",
     intro:
-      "Découvrez une sélection de sites et de produits web réalisés par Innov Studio.",
+      "Découvrez une sélection de sites et de solutions web réalisés par Innov Studio.",
     label: "Des projets conçus pour répondre à des besoins concrets.",
     sections: [
       {
