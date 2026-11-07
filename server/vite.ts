@@ -5,6 +5,8 @@ import viteConfig from "../vite.config";
 import fs from "fs";
 import path from "path";
 import { nanoid } from "nanoid";
+import { applyHomeSeoMetadata } from "./seoPages";
+import { getAppliedSeoMetadataOverrides } from "./seoAgent";
 
 const viteLogger = createLogger();
 
@@ -29,6 +31,30 @@ export async function setupVite(server: Server, app: Express) {
     appType: "custom",
   });
 
+  app.get("/", async (req, res, next) => {
+    const url = req.originalUrl;
+    try {
+      const clientTemplate = path.resolve(
+        import.meta.dirname,
+        "..",
+        "client",
+        "index.html",
+      );
+      let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      template = template.replace(
+        `src="/src/main.tsx"`,
+        `src="/src/main.tsx?v=${nanoid()}"`,
+      );
+      const overrides = await getAppliedSeoMetadataOverrides();
+      template = applyHomeSeoMetadata(template, overrides["/"]);
+      const page = await vite.transformIndexHtml(url, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (error) {
+      vite.ssrFixStacktrace(error as Error);
+      next(error);
+    }
+  });
+
   app.use(vite.middlewares);
 
   app.use("/{*path}", async (req, res, next) => {
@@ -48,6 +74,8 @@ export async function setupVite(server: Server, app: Express) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
+      const overrides = await getAppliedSeoMetadataOverrides();
+      template = applyHomeSeoMetadata(template, overrides["/"]);
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {

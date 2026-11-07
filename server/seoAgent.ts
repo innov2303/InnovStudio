@@ -1,13 +1,20 @@
 import cron from "node-cron";
+import { randomUUID } from "node:crypto";
 import { db } from "./db";
 import { seoReports, pageVisits, references } from "../shared/schema";
-import { desc, gte, sql } from "drizzle-orm";
+import { desc, eq, gte, sql } from "drizzle-orm";
 import { sendSeoReportEmail } from "./email";
-import { getSeoPageAuditData, seoPages, type SeoPageAuditData } from "./seoPages";
+import {
+  getSeoPageAuditData,
+  seoPages,
+  withSeoMetadata,
+  type SeoMetadataOverride,
+  type SeoPageAuditData,
+} from "./seoPages";
 
 // ─── SEO scoring helpers ────────────────────────────────────────────────────
 
-interface SeoSuggestion {
+export interface SeoSuggestion {
   id: string;
   type: "title" | "description" | "keywords" | "structure" | "performance" | "content" | "canonical" | "indexability";
   priority: "high" | "medium" | "low";
@@ -34,6 +41,186 @@ const CURRENT_META = {
     "création site web professionnel, développeur web freelance, agence web sur mesure, site internet professionnel, application web métier, intégration IA, agent IA pour site web, automatisation web IA, React, Node.js, développement sur mesure, Progressive Web App, refonte site web, maintenance site web",
 };
 
+export type SeoAppliedChange = {
+  applicationId: string;
+  suggestionId: string;
+  url: string;
+  field: "title" | "description";
+  value: string;
+  previousValue: string;
+  appliedAt: string;
+  undoneAt?: string;
+};
+
+export function parseAppliedSeoChanges(raw: unknown): SeoAppliedChange[] {
+  if (typeof raw !== "string") return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is SeoAppliedChange => {
+      return (
+        item !== null &&
+        typeof item === "object" &&
+        typeof item.applicationId === "string" &&
+        typeof item.suggestionId === "string" &&
+        typeof item.url === "string" &&
+        (item.field === "title" || item.field === "description") &&
+        typeof item.value === "string" &&
+        typeof item.previousValue === "string" &&
+        typeof item.appliedAt === "string" &&
+        (item.undoneAt === undefined || typeof item.undoneAt === "string")
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
+export function getActiveSeoMetadataOverrides(
+  changes: SeoAppliedChange[],
+): Record<string, SeoMetadataOverride> {
+  const overrides = Object.create(null) as Record<string, SeoMetadataOverride>;
+  for (const change of changes) {
+    if (change.undoneAt) continue;
+    overrides[change.url] ??= {};
+    overrides[change.url][change.field] = change.value;
+  }
+  return overrides;
+}
+
+export async function getAppliedSeoMetadataOverrides() {
+  try {
+    const report = await getLatestReport();
+    return getActiveSeoMetadataOverrides(parseAppliedSeoChanges(report?.appliedSuggestions));
+  } catch (error) {
+    console.error("[SEO Agent] Unable to load applied metadata overrides:", error);
+    return {};
+  }
+}
+
+function getBaseMetadataValue(url: string, field: "title" | "description"): string | null {
+  if (url === "/") return CURRENT_META[field];
+  const page = seoPages.find((candidate) => candidate.path === url);
+  return page?.[field] ?? null;
+}
+
+function parseReportSuggestions(raw: string): SeoSuggestion[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is SeoSuggestion => {
+      if (!item || typeof item !== "object") return false;
+      const suggestion = item as Partial<SeoSuggestion>;
+      return (
+        typeof suggestion.id === "string" &&
+        typeof suggestion.type === "string" &&
+        typeof suggestion.current === "string" &&
+        typeof suggestion.suggested === "string" &&
+        Array.isArray(suggestion.urls) &&
+        suggestion.urls.every((url) => typeof url === "string")
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
+type SeoActionResult =
+  | { success: true; applicationId?: string }
+  | { success: false; status: number; message: string };
+
+export async function applySeoSuggestion(input: {
+  reportId: string;
+  suggestionId: string;
+  url: string;
+}): Promise<SeoActionResult> {
+  const report = await getLatestReport();
+  if (!report) return { success: false, status: 404, message: "Aucun rapport SEO disponible." };
+  if (report.id !== input.reportId) {
+    return { success: false, status: 409, message: "Ce rapport n’est plus à jour. Relancez l’analyse." };
+  }
+
+  const suggestion = parseReportSuggestions(report.suggestions).find(
+    (candidate) => candidate.id === input.suggestionId,
+  );
+  if (!suggestion) return { success: false, status: 404, message: "Suggestion introuvable." };
+  if (
+    (suggestion.field !== "title" && suggestion.field !== "description") ||
+    (suggestion.type !== "title" && suggestion.type !== "description") ||
+    !suggestion.urls?.includes(input.url)
+  ) {
+    return {
+      success: false,
+      status: 400,
+      message: "Seuls les titres et descriptions associés à cette page peuvent être appliqués.",
+    };
+  }
+
+  const value = suggestion.suggested?.trim();
+  if (!value || value.length > (suggestion.field === "title" ? 200 : 500)) {
+    return { success: false, status: 400, message: "La valeur proposée est invalide." };
+  }
+
+  const changes = parseAppliedSeoChanges(report.appliedSuggestions);
+  const overrides = getActiveSeoMetadataOverrides(changes);
+  const currentValue =
+    overrides[input.url]?.[suggestion.field] ??
+    getBaseMetadataValue(input.url, suggestion.field);
+  const expectedValue = suggestion.currentByUrl?.[input.url] ?? suggestion.current;
+  if (currentValue === null || currentValue !== expectedValue) {
+    return {
+      success: false,
+      status: 409,
+      message: "La métadonnée a changé depuis cette analyse. Relancez l’analyse avant de l’appliquer.",
+    };
+  }
+
+  if (value === currentValue) {
+    return { success: false, status: 409, message: "Cette suggestion est déjà appliquée." };
+  }
+
+  const applicationId = randomUUID();
+  changes.push({
+    applicationId,
+    suggestionId: suggestion.id,
+    url: input.url,
+    field: suggestion.field,
+    value,
+    previousValue: currentValue,
+    appliedAt: new Date().toISOString(),
+  });
+  await db
+    .update(seoReports)
+    .set({ appliedSuggestions: JSON.stringify(changes) })
+    .where(eq(seoReports.id, report.id));
+
+  return { success: true, applicationId };
+}
+
+export async function undoSeoSuggestion(input: {
+  reportId: string;
+  applicationId: string;
+}): Promise<SeoActionResult> {
+  const report = await getLatestReport();
+  if (!report) return { success: false, status: 404, message: "Aucun rapport SEO disponible." };
+  if (report.id !== input.reportId) {
+    return { success: false, status: 409, message: "Ce rapport n’est plus à jour. Actualisez la page." };
+  }
+
+  const changes = parseAppliedSeoChanges(report.appliedSuggestions);
+  const change = changes.find(
+    (candidate) => candidate.applicationId === input.applicationId && !candidate.undoneAt,
+  );
+  if (!change) return { success: false, status: 404, message: "Modification appliquée introuvable." };
+
+  change.undoneAt = new Date().toISOString();
+  await db
+    .update(seoReports)
+    .set({ appliedSuggestions: JSON.stringify(changes) })
+    .where(eq(seoReports.id, report.id));
+
+  return { success: true };
+}
 // Trending keywords for web development — updated monthly by the agent
 const TRENDING_KEYWORD_POOL: string[][] = [
   // Lot A — high-intent web projects
@@ -352,7 +539,7 @@ function calculateScore(suggestions: SeoSuggestion[]): number {
 
 export async function runSeoAnalysis(): Promise<SeoAnalysisResult> {
   // 1. Fetch data
-  const [refs, recentVisits] = await Promise.all([
+  const [refs, recentVisits, metadataOverrides] = await Promise.all([
     db.select().from(references).orderBy(desc(references.createdAt)),
     db
       .select({ path: pageVisits.path, count: sql<number>`count(*)` })
@@ -361,6 +548,7 @@ export async function runSeoAnalysis(): Promise<SeoAnalysisResult> {
       .groupBy(pageVisits.path)
       .orderBy(desc(sql`count(*)`))
       .limit(10),
+    getAppliedSeoMetadataOverrides(),
   ]);
 
   // 2. Pick trending keywords
@@ -368,11 +556,25 @@ export async function runSeoAnalysis(): Promise<SeoAnalysisResult> {
 
   // 3. Run rules
   const suggestions = deduplicateSuggestions([
-    ...attachUrl(analyzeTitle(CURRENT_META.title, trending), "/"),
-    ...attachUrl(analyzeDescription(CURRENT_META.description, trending), "/"),
+    ...attachUrl(
+      analyzeTitle(metadataOverrides["/"]?.title ?? CURRENT_META.title, trending),
+      "/",
+    ),
+    ...attachUrl(
+      analyzeDescription(
+        metadataOverrides["/"]?.description ?? CURRENT_META.description,
+        trending,
+      ),
+      "/",
+    ),
     ...attachUrl(analyzeKeywords(CURRENT_META.keywords, trending), "/"),
     ...attachUrl(analyzeStructure(refs), "/"),
-    ...analyzeServicePages(seoPages.map(getSeoPageAuditData), trending),
+    ...analyzeServicePages(
+      seoPages.map((page) =>
+        getSeoPageAuditData(withSeoMetadata(page, metadataOverrides[page.path])),
+      ),
+      trending,
+    ),
   ]);
 
   // 4. Score
@@ -390,12 +592,15 @@ export async function runSeoAnalysis(): Promise<SeoAnalysisResult> {
 // ─── Persist report ─────────────────────────────────────────────────────────
 
 export async function saveReport(result: SeoAnalysisResult, emailSent = false) {
+  const previousReport = await getLatestReport();
   const [report] = await db
     .insert(seoReports)
     .values({
       score: String(result.score),
       suggestions: JSON.stringify(result.suggestions),
-      appliedSuggestions: "[]",
+      appliedSuggestions: JSON.stringify(
+        parseAppliedSeoChanges(previousReport?.appliedSuggestions),
+      ),
       trendingKeywords: JSON.stringify(result.trendingKeywords),
       visitStats: JSON.stringify(result.visitStats),
       emailSent,

@@ -116,6 +116,27 @@ function AnalyticsLineChart({ data }: { data: { date: string; count: number }[] 
   );
 }
 
+type AppliedSeoChange = {
+  applicationId: string;
+  suggestionId: string;
+  url: string;
+  field: "title" | "description";
+  value: string;
+  previousValue: string;
+  appliedAt: string;
+  undoneAt?: string;
+};
+
+function parseAppliedSeoChanges(raw: unknown): AppliedSeoChange[] {
+  if (typeof raw !== "string") return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function SeoAgentSection() {
   const { toast } = useToast();
   const { data: seoLatest, isLoading: seoLoading, refetch: seoRefetch } = useQuery<any>({
@@ -131,9 +152,34 @@ function SeoAgentSection() {
     onSuccess: () => toast({ title: "Rapport envoyé !", description: "Le rapport SEO a été envoyé par email." }),
     onError: (e: any) => toast({ title: "Erreur", description: e.message, variant: "destructive" }),
   });
+  const applySuggestionMutation = useMutation({
+    mutationFn: (input: { reportId: string; suggestionId: string; url: string }) =>
+      apiRequest("POST", "/api/seo/apply-suggestion", input),
+    onSuccess: () => {
+      seoRefetch();
+      toast({ title: "Suggestion appliquée", description: "Les métadonnées publiques ont été mises à jour." });
+    },
+    onError: (e: any) => toast({ title: "Erreur", description: e.message, variant: "destructive" }),
+  });
+  const undoSuggestionMutation = useMutation({
+    mutationFn: (input: { reportId: string; applicationId: string }) =>
+      apiRequest("POST", "/api/seo/undo-suggestion", input),
+    onSuccess: () => {
+      seoRefetch();
+      toast({ title: "Modification annulée", description: "La métadonnée précédente est rétablie." });
+    },
+    onError: (e: any) => toast({ title: "Erreur", description: e.message, variant: "destructive" }),
+  });
 
   const report = seoLatest;
   const suggestions: any[] = report ? JSON.parse(report.suggestions || "[]") : [];
+  const appliedChanges = parseAppliedSeoChanges(report?.appliedSuggestions);
+  const activeAppliedChanges = Array.from(
+    appliedChanges.reduce((active, change) => {
+      if (!change.undoneAt) active.set(`${change.url}\u0000${change.field}`, change);
+      return active;
+    }, new Map<string, AppliedSeoChange>()),
+  ).map(([, change]) => change);
   const trending: string[] = report ? JSON.parse(report.trendingKeywords || "[]") : [];
   const visitStats: any = report ? JSON.parse(report.visitStats || "{}") : {};
   const score = report ? parseInt(report.score) : null;
@@ -238,7 +284,7 @@ function SeoAgentSection() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2"><ArrowUpCircle className="h-5 w-5 text-primary" /> Suggestions d'amélioration</CardTitle>
-              <CardDescription>Appliquez ces recommandations pour améliorer votre référencement Google.</CardDescription>
+              <CardDescription>Les titres et descriptions peuvent être appliqués puis annulés ici. Les recommandations de contenu restent manuelles.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {suggestions.length === 0 ? (
@@ -265,6 +311,51 @@ function SeoAgentSection() {
                               💡 {s.suggested}
                             </div>
                           )}
+                          {(s.field === "title" || s.field === "description") &&
+                            (s.type === "title" || s.type === "description") &&
+                            s.urls?.length > 0 && (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {s.urls.map((url: string) => {
+                                  const activeChange = [...activeAppliedChanges]
+                                    .reverse()
+                                    .find(
+                                      (change) =>
+                                        change.url === url &&
+                                        change.field === s.field,
+                                    );
+                                  const alreadyApplied = activeChange?.value === s.suggested;
+                                  const isApplying =
+                                    applySuggestionMutation.isPending &&
+                                    applySuggestionMutation.variables?.suggestionId === s.id &&
+                                    applySuggestionMutation.variables?.url === url;
+
+                                  return (
+                                    <div key={url} className="flex items-center gap-2">
+                                      {alreadyApplied ? (
+                                        <Badge variant="outline" className="text-green-600 border-green-300">
+                                          Appliquée · {url}
+                                        </Badge>
+                                      ) : (
+                                        <Button
+                                          size="sm"
+                                          variant="secondary"
+                                          disabled={isApplying || !report?.id}
+                                          onClick={() => {
+                                          applySuggestionMutation.mutate({
+                                            reportId: report.id,
+                                            suggestionId: s.id,
+                                            url,
+                                          });
+                                          }}
+                                        >
+                                          {isApplying ? "Application…" : `Appliquer à ${url}`}
+                                        </Button>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                         </div>
                       </div>
                     </div>
@@ -273,6 +364,48 @@ function SeoAgentSection() {
               )}
             </CardContent>
           </Card>
+
+          {activeAppliedChanges.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Modifications SEO appliquées</CardTitle>
+                <CardDescription>Ces valeurs sont publiées sur les pages indiquées. Vous pouvez les annuler à tout moment.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {activeAppliedChanges.map((change) => {
+                  const isUndoing =
+                    undoSuggestionMutation.isPending &&
+                    undoSuggestionMutation.variables?.applicationId === change.applicationId;
+                  return (
+                    <div
+                      key={change.applicationId}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">
+                          {change.field === "title" ? "Titre" : "Description"} · {change.url}
+                        </p>
+                        <p className="mt-1 break-words text-sm">{change.value}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isUndoing || !report?.id}
+                        onClick={() =>
+                          undoSuggestionMutation.mutate({
+                            reportId: report.id,
+                            applicationId: change.applicationId,
+                          })
+                        }
+                      >
+                        {isUndoing ? "Annulation…" : "Annuler"}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Mail className="h-3 w-3" />

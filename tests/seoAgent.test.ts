@@ -1,9 +1,84 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getSeoPageAuditData, renderSeoPage, seoPages, type SeoPageAuditData } from "../server/seoPages";
+import {
+  applyHomeSeoMetadata,
+  getSeoPageAuditData,
+  renderSeoPage,
+  seoPages,
+  withSeoMetadata,
+  type SeoPageAuditData,
+} from "../server/seoPages";
 
 process.env.DATABASE_URL ??= "postgres://test:test@localhost:5432/test";
-const { analyzeServicePages } = await import("../server/seoAgent");
+const {
+  analyzeServicePages,
+  getActiveSeoMetadataOverrides,
+  parseAppliedSeoChanges,
+} = await import("../server/seoAgent");
+
+test("applied SEO metadata updates server-rendered pages and the homepage head", () => {
+  const page = seoPages.find((candidate) => candidate.path === "/site-evolutif");
+  assert.ok(page);
+  const updatedPage = withSeoMetadata(page, {
+    title: "Titre ajusté pour le référencement | Innov Studio",
+    description: "Description ajustée pour présenter l’offre web évolutive.",
+  });
+  const pageHtml = renderSeoPage(updatedPage);
+
+  assert.match(pageHtml, /<title>Titre ajusté pour le référencement \| Innov Studio<\/title>/);
+  assert.match(pageHtml, /<meta name="description" content="Description ajustée pour présenter l’offre web évolutive\.">/);
+
+  const homeHtml = applyHomeSeoMetadata(
+    '<title>Ancien titre</title><meta name="description" content="Ancienne description" /><meta property="og:title" content="Ancien titre" /><meta property="og:description" content="Ancienne description" /><meta name="twitter:title" content="Ancien titre" /><meta name="twitter:description" content="Ancienne description" />',
+    {
+      title: 'Titre "mis à jour" & validé',
+      description: "Nouvelle description.",
+    },
+  );
+  assert.match(homeHtml, /<title>Titre &quot;mis à jour&quot; &amp; validé<\/title>/);
+  assert.match(homeHtml, /name="description" content="Nouvelle description\."/);
+  assert.match(homeHtml, /property="og:title" content="Titre &quot;mis à jour&quot; &amp; validé"/);
+  assert.match(homeHtml, /name="twitter:description" content="Nouvelle description\."/);
+});
+
+test("SEO metadata override history keeps the latest active value and supports undo", () => {
+  const parsed = parseAppliedSeoChanges(JSON.stringify([
+    {
+      applicationId: "first",
+      suggestionId: "title-a",
+      url: "/",
+      field: "title",
+      value: "Titre A",
+      previousValue: "Titre de base",
+      appliedAt: "2026-11-07T10:00:00.000Z",
+    },
+    {
+      applicationId: "second",
+      suggestionId: "title-b",
+      url: "/",
+      field: "title",
+      value: "Titre B",
+      previousValue: "Titre A",
+      appliedAt: "2026-11-07T11:00:00.000Z",
+      undoneAt: "2026-11-07T11:30:00.000Z",
+    },
+    {
+      applicationId: "description",
+      suggestionId: "desc-a",
+      url: "/references",
+      field: "description",
+      value: "Description projet",
+      previousValue: "Description initiale",
+      appliedAt: "2026-11-07T12:00:00.000Z",
+    },
+  ]));
+
+  assert.deepEqual({ ...getActiveSeoMetadataOverrides(parsed) }, {
+    "/": { title: "Titre A" },
+    "/references": { description: "Description projet" },
+  });
+  assert.deepEqual(parseAppliedSeoChanges("not-json"), []);
+});
 
 test("the rendered service pages expose their title, description, canonical and indexable content", () => {
   const pages = seoPages.map(getSeoPageAuditData);

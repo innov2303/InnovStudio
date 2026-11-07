@@ -63,7 +63,7 @@ export type PublicReference = {
   imageUrl?: string | null;
 };
 
-type SeoPage = {
+export type SeoPage = {
   path: string;
   title: string;
   description: string;
@@ -83,6 +83,74 @@ type SeoPage = {
     next: { label: string; title: string; description: string };
   };
 };
+
+export type SeoMetadataOverride = {
+  title?: string;
+  description?: string;
+};
+
+export function withSeoMetadata(
+  page: SeoPage,
+  overrides?: SeoMetadataOverride,
+): SeoPage {
+  if (!overrides) return page;
+  return {
+    ...page,
+    ...(overrides.title ? { title: overrides.title } : {}),
+    ...(overrides.description ? { description: overrides.description } : {}),
+  };
+}
+
+export function applyHomeSeoMetadata(
+  html: string,
+  overrides?: SeoMetadataOverride,
+): string {
+  if (!overrides) return html;
+
+  let result = html;
+  if (overrides.title) {
+    const title = escapeHtml(overrides.title);
+    result = result.replace(/<title>[\s\S]*?<\/title>/i, `<title>${title}</title>`);
+    result = replaceMetaContent(result, "property", "og:title", overrides.title);
+    result = replaceMetaContent(result, "name", "twitter:title", overrides.title);
+  }
+  if (overrides.description) {
+    result = replaceMetaContent(result, "name", "description", overrides.description);
+    result = replaceMetaContent(result, "property", "og:description", overrides.description);
+    result = replaceMetaContent(result, "name", "twitter:description", overrides.description);
+    const jsonLdPattern = /(<script type="application\/ld\+json">\s*)([\s\S]*?)(\s*<\/script>)/i;
+    result = result.replace(
+      jsonLdPattern,
+      (match, prefix: string, json: string, suffix: string) => {
+        try {
+          const structuredData = JSON.parse(json);
+          if (!structuredData || typeof structuredData !== "object") return match;
+          structuredData.description = overrides.description;
+          return `${prefix}${JSON.stringify(structuredData, null, 2)}${suffix}`;
+        } catch {
+          return match;
+        }
+      },
+    );
+  }
+  return result;
+}
+
+function replaceMetaContent(
+  html: string,
+  attribute: "name" | "property",
+  key: string,
+  value: string,
+): string {
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(
+    `(<meta\\s+${attribute}="${escapedKey}"\\s+content=")[^"]*(")`,
+    "i",
+  );
+  return html.replace(pattern, (_match, prefix: string, suffix: string) => {
+    return `${prefix}${escapeHtml(value)}${suffix}`;
+  });
+}
 
 export type SeoPageAuditData = {
   path: string;

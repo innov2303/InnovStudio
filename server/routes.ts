@@ -16,7 +16,7 @@ import PDFDocument from "pdfkit";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { renderSeoPage, renderSitemap, seoPages } from "./seoPages";
+import { renderSeoPage, renderSitemap, seoPages, withSeoMetadata } from "./seoPages";
 import { OAuth2Client } from "google-auth-library";
 
 // Helper pour obtenir l'IP réelle
@@ -2166,6 +2166,57 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/seo/apply-suggestion", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Admin only" });
+      }
+
+      const { reportId, suggestionId, url } = req.body ?? {};
+      if (
+        typeof reportId !== "string" ||
+        typeof suggestionId !== "string" ||
+        typeof url !== "string" ||
+        reportId.length > 80 ||
+        suggestionId.length > 180 ||
+        url.length > 200
+      ) {
+        return res.status(400).json({ message: "Paramètres de suggestion invalides." });
+      }
+
+      const { applySeoSuggestion } = await import("./seoAgent");
+      const result = await applySeoSuggestion({ reportId, suggestionId, url });
+      if (!result.success) return res.status(result.status).json({ message: result.message });
+      return res.json(result);
+    } catch (error: any) {
+      console.error("Apply SEO suggestion error:", error);
+      return res.status(500).json({ message: "Impossible d’appliquer cette suggestion." });
+    }
+  });
+
+  app.post("/api/seo/undo-suggestion", requireAuth, async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({ message: "Admin only" });
+      }
+
+      const { reportId, applicationId } = req.body ?? {};
+      if (typeof reportId !== "string" || typeof applicationId !== "string") {
+        return res.status(400).json({ message: "Paramètres de restauration invalides." });
+      }
+
+      const { undoSeoSuggestion } = await import("./seoAgent");
+      const result = await undoSeoSuggestion({ reportId, applicationId });
+      if (!result.success) return res.status(result.status).json({ message: result.message });
+      return res.json(result);
+    } catch (error: any) {
+      console.error("Undo SEO suggestion error:", error);
+      return res.status(500).json({ message: "Impossible d’annuler cette modification." });
+    }
+  });
+
   // Analytics - track page visit (public endpoint, no auth required)
   app.post("/api/analytics/track", async (req, res) => {
     try {
@@ -3039,14 +3090,26 @@ export async function registerRoutes(
     app.get(page.path, async (_req, res) => {
       if (page.path === "/references") {
         try {
-          const references = await storage.getAllReferences();
-          return res.status(200).type("html").send(renderSeoPage({ ...page, references }));
+          const [{ getAppliedSeoMetadataOverrides }, references] = await Promise.all([
+            import("./seoAgent"),
+            storage.getAllReferences(),
+          ]);
+          const overrides = await getAppliedSeoMetadataOverrides();
+          return res
+            .status(200)
+            .type("html")
+            .send(renderSeoPage({ ...withSeoMetadata(page, overrides[page.path]), references }));
         } catch (error) {
           console.error("Render references page error:", error);
           return res.status(500).type("text").send("Impossible de charger les références.");
         }
       }
-      return res.status(200).type("html").send(renderSeoPage(page));
+      const { getAppliedSeoMetadataOverrides } = await import("./seoAgent");
+      const overrides = await getAppliedSeoMetadataOverrides();
+      return res
+        .status(200)
+        .type("html")
+        .send(renderSeoPage(withSeoMetadata(page, overrides[page.path])));
     });
   }
 
