@@ -324,6 +324,30 @@ test("shortening a long description preserves an existing CTA", () => {
   assert.equal(followUpSuggestions.length, 0);
 });
 
+test("SEO suggestions do not inject generic trend keywords into service descriptions", () => {
+  const page: SeoPageAuditData = {
+    path: "/application-web-entreprise",
+    title: "Application web sur mesure pour entreprise | Innov Studio",
+    description:
+      "Applications web métier sur mesure : outils internes, espaces clients, tableaux de bord et automatisations adaptés aux processus de votre entreprise.",
+    canonical: "https://innov-studio.fr/application-web-entreprise",
+    indexable: true,
+    contentLength: 500,
+  };
+
+  const suggestions = analyzeServicePages(
+    [page],
+    ["site web pour artisan", "site web pour restaurant"],
+  );
+  assert.ok(
+    suggestions.every(
+      (suggestion) =>
+        suggestion.type !== "keywords" &&
+        !suggestion.suggested.includes("Spécialiste en"),
+    ),
+  );
+});
+
 test("identical recommendations across pages are grouped while retaining each URL", () => {
   const duplicatePages: SeoPageAuditData[] = [
     {

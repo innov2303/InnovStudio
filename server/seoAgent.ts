@@ -37,8 +37,6 @@ const CURRENT_META = {
   title: "Sites web et applications sur mesure | Innov Studio",
   description:
     "Créez un site web professionnel et faites-le évoluer vers des fonctionnalités métier ou une application web sur mesure, au rythme de votre entreprise.",
-  keywords:
-    "création site web professionnel, développeur web freelance, agence web sur mesure, site internet professionnel, application web métier, intégration IA, agent IA pour site web, automatisation web IA, React, Node.js, développement sur mesure, Progressive Web App, refonte site web, maintenance site web",
 };
 
 export type SeoAppliedChange = {
@@ -334,7 +332,7 @@ function analyzeTitle(title: string, trending: string[]): SeoSuggestion[] {
   return suggestions;
 }
 
-function analyzeDescription(desc: string, trending: string[]): SeoSuggestion[] {
+function analyzeDescription(desc: string): SeoSuggestion[] {
   const suggestions: SeoSuggestion[] = [];
   const len = desc.length;
   const hasCta = /devis|contactez/i.test(desc);
@@ -372,54 +370,6 @@ function analyzeDescription(desc: string, trending: string[]): SeoSuggestion[] {
       suggested: fitMetaDescriptionWithCta(desc),
       reason: `Ajouter un appel à l'action (CTA) dans la meta description augmente le CTR de 5-15%.`,
       field: "description",
-    });
-  }
-
-  const trendingInDesc = trending.some((kw) => desc.toLowerCase().includes(kw.toLowerCase().split(" ")[0]));
-  if (!trendingInDesc && trending.length > 0) {
-    suggestions.push({
-      id: "desc-trending-kw",
-      type: "description",
-      priority: "low",
-      current: desc,
-      suggested: desc + ` Spécialiste en ${trending[1] || trending[0]}.`,
-      reason: `Le mot-clé tendance "${trending[0]}" n'est pas dans la description. Le mentionner peut booster la visibilité.`,
-    });
-  }
-
-  return suggestions;
-}
-
-function analyzeKeywords(keywords: string, trending: string[]): SeoSuggestion[] {
-  const suggestions: SeoSuggestion[] = [];
-  const kwList = keywords.split(",").map((k) => k.trim().toLowerCase());
-
-  const missingTrending = trending.filter(
-    (t) => !kwList.some((kw) => kw.includes(t.toLowerCase().split(" ")[0]))
-  );
-
-  if (missingTrending.length > 0) {
-    suggestions.push({
-      id: "keywords-missing-trending",
-      type: "keywords",
-      priority: "medium",
-      current: keywords,
-      suggested: keywords + ", " + missingTrending.slice(0, 3).join(", "),
-      reason: `Les mots-clés tendance "${missingTrending.slice(0, 2).join('", "')}" ne sont pas dans vos meta keywords. Les ajouter améliore la cohérence SEO.`,
-      field: "keywords",
-    });
-  }
-
-  const currentYear = new Date().getFullYear().toString();
-  if (!keywords.includes(currentYear)) {
-    suggestions.push({
-      id: "keywords-add-year",
-      type: "keywords",
-      priority: "low",
-      current: keywords,
-      suggested: keywords + `, création site web professionnel ${currentYear}`,
-      reason: `Ajouter des mots-clés avec l'année en cours cible les recherches récentes.`,
-      field: "keywords",
     });
   }
 
@@ -470,7 +420,7 @@ export function analyzeServicePages(
   const suggestions = pages.flatMap((page) => {
     const suggestions = [
       ...analyzeTitle(page.title, trending),
-      ...analyzeDescription(page.description, trending),
+      ...analyzeDescription(page.description),
     ];
 
     const expectedCanonical = `https://innov-studio.fr${page.path}`;
@@ -588,13 +538,9 @@ export async function runSeoAnalysis(): Promise<SeoAnalysisResult> {
       "/",
     ),
     ...attachUrl(
-      analyzeDescription(
-        metadataOverrides["/"]?.description ?? CURRENT_META.description,
-        trending,
-      ),
+      analyzeDescription(metadataOverrides["/"]?.description ?? CURRENT_META.description),
       "/",
     ),
-    ...attachUrl(analyzeKeywords(CURRENT_META.keywords, trending), "/"),
     ...attachUrl(analyzeStructure(refs), "/"),
     ...analyzeServicePages(
       seoPages.map((page) =>
