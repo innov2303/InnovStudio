@@ -233,28 +233,25 @@ test("references show side-by-side categories with independent carousels", () =>
   assert.match(html, /<h1[^>]*>Mes[\s\S]*?projets réalisés[\s\S]*?<\/h1>/);
   assert.match(html, /Site vitrine professionnel/);
   assert.match(html, /Application web métier/);
-  assert.match(html, /data-reference-tabs hidden/);
-  assert.equal((html.match(/data-reference-tab="/g) ?? []).length, 3);
+  assert.doesNotMatch(html, /data-reference-tabs|data-reference-tab|Filtrer les références par catégorie/);
   assert.equal((html.match(/class="reference-section"/g) ?? []).length, 2);
   assert.equal((html.match(/class="reference-carousel-track"/g) ?? []).length, 2);
   assert.equal((html.match(/class="reference-slide"/g) ?? []).length, 4);
   assert.equal((html.match(/class="reference-carousel-button"/g) ?? []).length, 4);
   assert.equal((html.match(/class="reference-card"/g) ?? []).length, 4);
-  assert.match(html, /data-reference-category="vitrine"/);
-  assert.match(html, /data-reference-category="enterprise"/);
   assert.match(
     html,
     /\.reference-groups\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);align-items:start;gap:24px\}/,
   );
   assert.match(html, /@media\(max-width:900px\)\{\.reference-groups\{grid-template-columns:1fr;gap:18px\}\}/);
-  assert.match(html, /track\.scrollTo\(\{/);
-  assert.match(html, /section\.hidden = category !== "all"/);
+  assert.match(html, /data-reference-previous/);
+  assert.match(html, /data-reference-next/);
 
   const shortListHtml = renderSeoPage({
     ...page,
     references: references.slice(0, 2),
   });
-  assert.doesNotMatch(shortListHtml, /data-reference-tabs hidden/);
+  assert.doesNotMatch(shortListHtml, /data-reference-tabs|data-reference-tab/);
   assert.equal((shortListHtml.match(/class="reference-carousel-track"/g) ?? []).length, 1);
 });
 

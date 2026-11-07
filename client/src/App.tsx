@@ -149,29 +149,94 @@ function PublicSeoPage() {
   }, [location]);
 
   useEffect(() => {
-    const browser = document.querySelector("[data-reference-browser]");
-    const tabList = browser?.querySelector("[data-reference-tabs]");
-    const tabs = Array.from(browser?.querySelectorAll<HTMLElement>("[data-reference-tab]") ?? []);
-    const sections = Array.from(browser?.querySelectorAll<HTMLElement>("[data-reference-category]") ?? []);
-    if (!browser || !tabList || tabs.length === 0 || sections.length === 0) return;
+    const browser = document.querySelector<HTMLElement>("[data-reference-browser]");
+    if (!browser) return;
 
-    const setCategory = (category: string) => {
-      tabs.forEach((tab) => {
-        tab.setAttribute("aria-pressed", String(tab.dataset.referenceTab === category));
+    const cleanups: Array<() => void> = [];
+    const tracks = Array.from(browser.querySelectorAll<HTMLElement>("[data-reference-track]"));
+
+    tracks.forEach((track) => {
+      const slides = Array.from(track.querySelectorAll<HTMLElement>(".reference-slide"));
+      if (slides.length === 0) return;
+
+      const carousel = track.closest(".reference-section");
+      const previous = carousel?.querySelector<HTMLButtonElement>("[data-reference-previous]") ?? null;
+      const next = carousel?.querySelector<HTMLButtonElement>("[data-reference-next]") ?? null;
+      const status = carousel?.querySelector<HTMLElement>(".reference-carousel-status") ?? null;
+      let activeIndex = 0;
+      let animationFrame: number | null = null;
+
+      const syncControls = () => {
+        if (previous) previous.disabled = activeIndex === 0;
+        if (next) next.disabled = activeIndex === slides.length - 1;
+        if (status) status.textContent = `${activeIndex + 1} sur ${slides.length}`;
+      };
+
+      const update = () => {
+        if (track.clientWidth === 0) return;
+
+        let closestIndex = 0;
+        let closestDistance = Infinity;
+        slides.forEach((slide, index) => {
+          const distance = Math.abs(slide.offsetLeft - track.scrollLeft);
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = index;
+          }
+        });
+
+        activeIndex = closestIndex;
+        syncControls();
+      };
+
+      const move = (direction: number) => {
+        const destination = Math.max(0, Math.min(slides.length - 1, activeIndex + direction));
+        if (destination === activeIndex) return;
+
+        activeIndex = destination;
+        syncControls();
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        track.scrollTo({
+          left: slides[destination].offsetLeft,
+          behavior: reduceMotion ? "auto" : "smooth",
+        });
+      };
+
+      const handleScroll = () => {
+        if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+        animationFrame = requestAnimationFrame(update);
+      };
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          move(-1);
+        } else if (event.key === "ArrowRight") {
+          event.preventDefault();
+          move(1);
+        }
+      };
+      const handleResize = () => requestAnimationFrame(update);
+      const handlePrevious = () => move(-1);
+      const handleNext = () => move(1);
+
+      previous?.addEventListener("click", handlePrevious);
+      next?.addEventListener("click", handleNext);
+      track.addEventListener("scroll", handleScroll, { passive: true });
+      track.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("resize", handleResize);
+      update();
+
+      cleanups.push(() => {
+        if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+        previous?.removeEventListener("click", handlePrevious);
+        next?.removeEventListener("click", handleNext);
+        track.removeEventListener("scroll", handleScroll);
+        track.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("resize", handleResize);
       });
-      sections.forEach((section) => {
-        section.hidden = category !== "all" && section.dataset.referenceCategory !== category;
-      });
-    };
-    const listeners = tabs.map((tab) => {
-      const listener = () => setCategory(tab.dataset.referenceTab || "all");
-      tab.addEventListener("click", listener);
-      return { tab, listener };
     });
-    setCategory("all");
-    tabList.removeAttribute("hidden");
 
-    return () => listeners.forEach(({ tab, listener }) => tab.removeEventListener("click", listener));
+    return () => cleanups.forEach((cleanup) => cleanup());
   }, [pageHtml]);
 
   return pageHtml

@@ -507,10 +507,6 @@ function renderReferenceGroups(references: PublicReference[]): string {
       (reference) => reference.category === group.category,
     ),
   }));
-  const referenceCount = categories.reduce(
-    (total, group) => total + group.items.length,
-    0,
-  );
   const sections = categories
     .map(({ category, title, items }) => {
       const slides = items
@@ -556,7 +552,7 @@ function renderReferenceGroups(references: PublicReference[]): string {
         : "";
 
       return `
-        <section class="reference-section" data-reference-category="${escapeHtml(category)}">
+        <section class="reference-section">
           <div class="reference-heading">
             <h2>${escapeHtml(title)}</h2>
             ${controls}
@@ -568,23 +564,9 @@ function renderReferenceGroups(references: PublicReference[]): string {
       `;
     })
     .join("");
-  const tabs = referenceCount > 2
-    ? `
-      <div class="reference-tabs" role="group" aria-label="Filtrer les références par catégorie" data-reference-tabs hidden>
-        <button class="reference-tab is-active" type="button" aria-pressed="true" data-reference-tab="all">Tous</button>
-        ${categories
-          .filter((group) => group.items.length > 0)
-          .map(({ category, title }) => `
-            <button class="reference-tab" type="button" aria-pressed="false" data-reference-tab="${escapeHtml(category)}">${escapeHtml(title)}</button>
-          `)
-          .join("")}
-      </div>
-    `
-    : "";
 
   return `
     <div class="reference-browser" data-reference-browser>
-      ${tabs}
       <div class="reference-groups">
         ${sections}
       </div>
@@ -765,82 +747,6 @@ export function renderSeoPage(page: SeoPage): string {
         ${faq}
       </section>`
     : "";
-  const referencePageScript =
-    page.path === "/references"
-      ? `<script>
-          (() => {
-            const browser = document.querySelector("[data-reference-browser]");
-            if (!browser) return;
-
-            const updates = [];
-            const tracks = Array.from(browser.querySelectorAll("[data-reference-track]"));
-            tracks.forEach((track) => {
-              const slides = Array.from(track.querySelectorAll(".reference-slide"));
-              const carousel = track.closest(".reference-section");
-              const previous = carousel?.querySelector("[data-reference-previous]");
-              const next = carousel?.querySelector("[data-reference-next]");
-              const status = carousel?.querySelector(".reference-carousel-status");
-              let activeIndex = 0;
-
-              const update = () => {
-                if (track.clientWidth === 0 || slides.length === 0) return;
-                let closestIndex = 0;
-                let closestDistance = Infinity;
-                slides.forEach((slide, index) => {
-                  const distance = Math.abs(slide.offsetLeft - track.scrollLeft);
-                  if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestIndex = index;
-                  }
-                });
-                activeIndex = closestIndex;
-                if (previous) previous.disabled = activeIndex === 0;
-                if (next) next.disabled = activeIndex === slides.length - 1;
-                if (status) status.textContent = (activeIndex + 1) + " sur " + slides.length;
-              };
-
-              const move = (direction) => {
-                const destination = Math.max(0, Math.min(slides.length - 1, activeIndex + direction));
-                const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-                track.scrollTo({
-                  left: slides[destination]?.offsetLeft ?? 0,
-                  behavior: reduceMotion ? "auto" : "smooth",
-                });
-              };
-
-              previous?.addEventListener("click", () => move(-1));
-              next?.addEventListener("click", () => move(1));
-              track.addEventListener("scroll", () => requestAnimationFrame(update), { passive: true });
-              updates.push(update);
-              update();
-            });
-
-            const tabList = browser?.querySelector("[data-reference-tabs]");
-            const tabs = Array.from(browser?.querySelectorAll("[data-reference-tab]") ?? []);
-            const sections = Array.from(browser?.querySelectorAll("[data-reference-category]") ?? []);
-            if (tabList && tabs.length > 0 && sections.length > 0) {
-              const setCategory = (category) => {
-                tabs.forEach((tab) => {
-                  tab.setAttribute("aria-pressed", String(tab.dataset.referenceTab === category));
-                });
-                sections.forEach((section) => {
-                  section.hidden = category !== "all" && section.dataset.referenceCategory !== category;
-                });
-              };
-
-              tabs.forEach((tab) => {
-                tab.addEventListener("click", () => {
-                  setCategory(tab.dataset.referenceTab || "all");
-                  requestAnimationFrame(() => updates.forEach((update) => update()));
-                });
-              });
-              setCategory("all");
-              tabList.hidden = false;
-            }
-          })();
-        </script>`
-      : "";
-
   return `<!doctype html>
 <html lang="fr">
   <head>
@@ -912,8 +818,6 @@ export function renderSeoPage(page: SeoPage): string {
       .service-card .button{align-self:flex-start;margin-top:auto}
       .reference-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:24px}
       .reference-section{min-width:0;margin:0;padding:20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 10px 28px rgba(15,23,42,.045)}
-      .reference-section[hidden]{display:none}
-      .reference-groups:has(.reference-section[hidden]) .reference-section:not([hidden]){grid-column:1/-1}
       .reference-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px}
       .reference-heading h2{min-width:0;margin:0;font-size:21px;line-height:1.3}
       .reference-carousel-controls{display:flex;flex:0 0 auto;align-items:center;gap:7px}
@@ -926,12 +830,6 @@ export function renderSeoPage(page: SeoPage): string {
       .reference-carousel-track{position:relative;display:flex;gap:14px;overflow-x:auto;padding:1px 1px 9px;overscroll-behavior-x:contain;scroll-behavior:smooth;scroll-snap-type:x mandatory;scrollbar-color:#cbd5e1 transparent;scrollbar-width:thin}
       .reference-carousel-track:focus-visible{outline:3px solid rgba(37,99,235,.24);outline-offset:2px;border-radius:12px}
       .reference-slide{flex:0 0 100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
-      .reference-tabs{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 28px}
-      .reference-tabs[hidden]{display:none}
-      .reference-tab{appearance:none;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);padding:10px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease}
-      .reference-tab:hover{border-color:rgba(14,116,144,.35);color:var(--cyan)}
-      .reference-tab[aria-pressed="true"]{border-color:transparent;background:linear-gradient(90deg,#06b6d4,#2563eb);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.16)}
-      .reference-tab:focus-visible{outline:3px solid rgba(37,99,235,.3);outline-offset:3px}
       .reference-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 8px 24px rgba(15,23,42,.04);transition:border-color .2s ease,transform .2s ease}
       a.reference-card{display:block}
       a.reference-card:hover{border-color:rgba(34,211,238,.55);transform:translateY(-2px)}
@@ -994,8 +892,6 @@ export function renderSeoPage(page: SeoPage): string {
         .reference-heading h2{font-size:18px}
         .reference-carousel-button{width:32px;height:32px}
         .reference-carousel-track{gap:10px}
-        .reference-tabs{gap:7px;margin-bottom:22px}
-        .reference-tab{padding:9px 12px;font-size:13px}
         .content-section,.service-card{padding:24px}
         .cta{padding:30px 20px}
       }
@@ -1109,7 +1005,6 @@ export function renderSeoPage(page: SeoPage): string {
       </div>
     </footer>
     </div>
-    ${referencePageScript}
   </body>
 </html>`;
 }
