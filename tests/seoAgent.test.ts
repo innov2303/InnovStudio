@@ -272,6 +272,58 @@ test("service-page recommendations identify their URL and detect canonical/index
   assert.ok(suggestions.every((suggestion) => suggestion.urls.includes(page.path)));
 });
 
+test("overlong descriptions combine the CTA and length fix into one non-recurring suggestion", () => {
+  const page: SeoPageAuditData = {
+    path: "/description-test",
+    title: "Titre suffisamment long pour éviter les recommandations de longueur",
+    description:
+      "Des solutions web adaptées à votre entreprise et à vos clients, conçues pour présenter clairement vos services et accompagner le développement de votre activité. ".repeat(2),
+    canonical: "https://innov-studio.fr/description-test",
+    indexable: true,
+    contentLength: 500,
+  };
+
+  const initialSuggestions = analyzeServicePages([page], []).filter(
+    (suggestion) => suggestion.field === "description",
+  );
+  assert.equal(initialSuggestions.length, 1);
+  const proposedDescription = initialSuggestions[0].suggested;
+  assert.ok(proposedDescription.length <= 160);
+  assert.match(proposedDescription, /devis/i);
+
+  const followUpSuggestions = analyzeServicePages(
+    [{ ...page, description: proposedDescription }],
+    [],
+  ).filter((suggestion) => suggestion.field === "description");
+  assert.equal(followUpSuggestions.length, 0);
+});
+
+test("shortening a long description preserves an existing CTA", () => {
+  const page: SeoPageAuditData = {
+    path: "/description-cta-test",
+    title: "Titre suffisamment long pour éviter les recommandations de longueur",
+    description:
+      "Des solutions web adaptées à votre entreprise et à vos clients, conçues pour présenter clairement vos services et accompagner le développement de votre activité. ".repeat(2) +
+      "Devis gratuit sous 24h.",
+    canonical: "https://innov-studio.fr/description-cta-test",
+    indexable: true,
+    contentLength: 500,
+  };
+
+  const suggestion = analyzeServicePages([page], []).find(
+    (candidate) => candidate.field === "description",
+  );
+  assert.ok(suggestion);
+  assert.ok(suggestion.suggested.length <= 160);
+  assert.match(suggestion.suggested, /devis gratuit sous 24h/i);
+
+  const followUpSuggestions = analyzeServicePages(
+    [{ ...page, description: suggestion.suggested }],
+    [],
+  ).filter((candidate) => candidate.field === "description");
+  assert.equal(followUpSuggestions.length, 0);
+});
+
 test("identical recommendations across pages are grouped while retaining each URL", () => {
   const duplicatePages: SeoPageAuditData[] = [
     {

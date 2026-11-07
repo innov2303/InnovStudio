@@ -267,6 +267,30 @@ function pickTrendingKeywords(): string[] {
 
 // ─── SEO rules engine ───────────────────────────────────────────────────────
 
+const MAX_META_DESCRIPTION_LENGTH = 160;
+const DEFAULT_DESCRIPTION_CTA = "Devis gratuit sous 24h.";
+
+function truncateAtWordBoundary(value: string, maxLength: number): string {
+  if (value.length <= maxLength) return value;
+  const clipped = value.slice(0, maxLength);
+  const lastSpace = clipped.lastIndexOf(" ");
+  return (lastSpace > 0 ? clipped.slice(0, lastSpace) : clipped)
+    .replace(/[.,;:!?…\s]+$/g, "");
+}
+
+function fitMetaDescriptionWithCta(description: string): string {
+  const normalized = description.trim();
+  const trailingCta = normalized.match(/\b(?:devis|contactez)\b[^.!?]*[.!?]?\s*$/i)?.[0].trim();
+  const cta = trailingCta || DEFAULT_DESCRIPTION_CTA;
+  const rawBody = trailingCta
+    ? normalized.slice(0, normalized.length - trailingCta.length).trim()
+    : normalized;
+  const body = rawBody.replace(/[.!?…]+$/g, "");
+  const maxBodyLength = MAX_META_DESCRIPTION_LENGTH - cta.length - (body ? 2 : 0);
+  const fittedBody = truncateAtWordBoundary(body, maxBodyLength);
+  return `${fittedBody}${fittedBody ? ". " : ""}${cta}`;
+}
+
 function analyzeTitle(title: string, trending: string[]): SeoSuggestion[] {
   const suggestions: SeoSuggestion[] = [];
   const len = title.length;
@@ -313,36 +337,39 @@ function analyzeTitle(title: string, trending: string[]): SeoSuggestion[] {
 function analyzeDescription(desc: string, trending: string[]): SeoSuggestion[] {
   const suggestions: SeoSuggestion[] = [];
   const len = desc.length;
+  const hasCta = /devis|contactez/i.test(desc);
 
-  if (len < 120) {
+  if (len < 120 && !hasCta) {
     suggestions.push({
       id: "desc-too-short",
       type: "description",
       priority: "high",
       current: desc,
-      suggested: `${desc} Contactez-moi pour un devis gratuit.`,
+      suggested: fitMetaDescriptionWithCta(desc),
       reason: `La description fait ${len} car. Idéal : 150-160 caractères. Elle est trop courte.`,
       field: "description",
     });
-  } else if (len > 165) {
+  } else if (len > MAX_META_DESCRIPTION_LENGTH) {
     suggestions.push({
       id: "desc-too-long",
       type: "description",
       priority: "medium",
       current: desc,
-      suggested: desc.substring(0, 155) + "...",
-      reason: `La description fait ${len} car — tronquée par Google à ~160. La raccourcir.`,
+      suggested: fitMetaDescriptionWithCta(desc),
+      reason: hasCta
+        ? `La description fait ${len} caractères. La raccourcir à ${MAX_META_DESCRIPTION_LENGTH} caractères maximum en conservant le CTA.`
+        : `La description fait ${len} caractères. La raccourcir à ${MAX_META_DESCRIPTION_LENGTH} caractères maximum et ajouter un CTA.`,
       field: "description",
     });
   }
 
-  if (!desc.toLowerCase().includes("devis") && !desc.toLowerCase().includes("contactez")) {
+  if (!hasCta && len >= 120 && len <= MAX_META_DESCRIPTION_LENGTH) {
     suggestions.push({
       id: "desc-no-cta",
       type: "description",
       priority: "medium",
       current: desc,
-      suggested: desc.replace(/\.$/, "") + ". Devis gratuit sous 24h.",
+      suggested: fitMetaDescriptionWithCta(desc),
       reason: `Ajouter un appel à l'action (CTA) dans la meta description augmente le CTR de 5-15%.`,
       field: "description",
     });
