@@ -4,6 +4,7 @@ import { useForceLight } from "@/hooks/use-force-light";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
 import { useEffect, useState } from "react";
+import { getSectionAtPosition } from "../lib/home-section-navigation";
 import { 
   Code2, 
   Sparkles, 
@@ -72,24 +73,35 @@ export default function Home() {
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
-    const sections = homeSections
-      .map(({ id }) => document.getElementById(id))
-      .filter((section): section is HTMLElement => section !== null);
+    const sections = homeSections.map(({ id }) => id);
+    let scrollFrame: number | null = null;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const mostVisible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    const updateActiveSection = () => {
+      scrollFrame = null;
+      const markerPosition = window.innerHeight * 0.45;
+      const sectionBounds = sections.flatMap((id) => {
+        const section = document.getElementById(id);
+        if (!section) return [];
+        const bounds = section.getBoundingClientRect();
+        return [{ id, top: bounds.top, bottom: bounds.bottom }];
+      });
+      const nextActiveSection = getSectionAtPosition(sectionBounds, markerPosition);
 
-        if (mostVisible) {
-          setActiveSection(mostVisible.target.id);
-        }
-      },
-      { rootMargin: "-25% 0px -35% 0px", threshold: [0, 0.2, 0.5, 0.75] },
-    );
+      if (nextActiveSection) {
+        setActiveSection((current) => current === nextActiveSection ? current : nextActiveSection);
+      }
+    };
 
-    sections.forEach((section) => observer.observe(section));
+    const scheduleActiveSectionUpdate = () => {
+      if (scrollFrame === null) {
+        scrollFrame = window.requestAnimationFrame(updateActiveSection);
+      }
+    };
+
+    window.addEventListener("scroll", scheduleActiveSectionUpdate, { passive: true });
+    window.addEventListener("resize", scheduleActiveSectionUpdate);
+    updateActiveSection();
+
     const requestedSectionId = window.location.hash.slice(1);
     const hashScrollFrame = requestedSectionId
       ? window.requestAnimationFrame(() => {
@@ -106,22 +118,32 @@ export default function Home() {
       : undefined;
 
     return () => {
-      observer.disconnect();
+      window.removeEventListener("scroll", scheduleActiveSectionUpdate);
+      window.removeEventListener("resize", scheduleActiveSectionUpdate);
+      if (scrollFrame !== null) {
+        window.cancelAnimationFrame(scrollFrame);
+      }
       if (hashScrollFrame !== undefined) {
         window.cancelAnimationFrame(hashScrollFrame);
       }
     };
   }, []);
 
+  const scrollToHomeSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    const headerOffset = 70;
+    const targetPosition = section.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({
+      top: Math.max(0, targetPosition - headerOffset),
+      behavior: "smooth",
+    });
+  };
+
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
-    const el = document.getElementById(sectionId);
-    if (el) {
-      const headerOffset = 70;
-      const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerOffset;
-      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
-    }
+    scrollToHomeSection(sectionId);
   };
 
   const handleLogout = async () => {
@@ -358,9 +380,7 @@ export default function Home() {
               aria-label={`Aller à la section ${label}`}
               aria-current={isActive ? "location" : undefined}
               data-testid={`section-nav-${id}`}
-              onClick={() => {
-                document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
+              onClick={() => scrollToHomeSection(id)}
               className={`group relative flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border shadow-md backdrop-blur transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-2 ${
                 isActive
                   ? "border-cyan-600 bg-cyan-600 text-white"
