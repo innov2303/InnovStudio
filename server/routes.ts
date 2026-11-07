@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import session from "express-session";
 import crypto from "crypto";
 import { storage } from "./storage";
-import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema, createFeatureSchema, forgotPasswordSchema, resetPasswordSchema, googleProfileSchema } from "@shared/schema";
+import { loginSchema, registerSchema, changePasswordSchema, createProjectSchema, createFeatureSchema, forgotPasswordSchema, resetPasswordSchema, googleProfileSchema, contactMessageSchema, emailAddressSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import { pool, db } from "./db";
 import { sql } from "drizzle-orm";
@@ -355,7 +355,7 @@ export async function registerRoutes(
 
       const result = googleProfileSchema.safeParse(req.body);
       if (!result.success) {
-        return res.status(400).json({ message: result.error.errors[0]?.message || "Informations invalides" });
+        return res.status(400).json({ message: result.error.issues[0]?.message || "Informations invalides" });
       }
 
       const existingUser = await storage.getUserByNormalizedEmail(pending.email);
@@ -470,7 +470,7 @@ export async function registerRoutes(
     try {
       const result = registerSchema.safeParse(req.body);
       if (!result.success) {
-        return res.status(400).json({ message: result.error.errors[0].message });
+        return res.status(400).json({ message: result.error.issues[0].message });
       }
 
       const existingUser = await storage.getUserByEmail(result.data.email);
@@ -492,10 +492,10 @@ export async function registerRoutes(
       });
 
       // Send verification email
-      const emailSent = await sendVerificationEmail(result.data.email, result.data.firstName, verificationToken);
+      const emailSent = await sendVerificationEmail(result.data.email, verificationToken);
       
       if (!emailSent) {
-        console.error("Failed to send verification email to:", result.data.email);
+        console.error("Failed to send verification email.");
       }
 
       await logSecurityEvent('register', req, result.data.email, user.id);
@@ -561,7 +561,7 @@ export async function registerRoutes(
       await storage.updateUserVerificationToken(user.id, verificationToken);
 
       // Send new verification email (sendVerificationEmail builds the URL internally)
-      await sendVerificationEmail(email, user.firstName, verificationToken);
+      await sendVerificationEmail(email, verificationToken);
 
       res.json({ message: "Un nouveau lien de vérification a été envoyé à votre adresse email" });
     } catch (error) {
@@ -593,10 +593,10 @@ export async function registerRoutes(
       await storage.setPasswordResetToken(user.id, resetToken, expires);
 
       // Send reset email
-      const emailSent = await sendPasswordResetEmail(email, user.firstName, resetToken);
+      const emailSent = await sendPasswordResetEmail(email, resetToken);
 
       if (!emailSent) {
-        console.error("Failed to send password reset email to:", email);
+        console.error("Failed to send password reset email.");
       }
 
       await logSecurityEvent('password_reset_request', req, email, user.id);
@@ -613,7 +613,7 @@ export async function registerRoutes(
     try {
       const result = resetPasswordSchema.safeParse(req.body);
       if (!result.success) {
-        return res.status(400).json({ message: result.error.errors[0].message });
+        return res.status(400).json({ message: result.error.issues[0].message });
       }
 
       const { token, newPassword } = result.data;
@@ -671,7 +671,7 @@ export async function registerRoutes(
     try {
       const result = changePasswordSchema.safeParse(req.body);
       if (!result.success) {
-        return res.status(400).json({ message: result.error.errors[0].message });
+        return res.status(400).json({ message: result.error.issues[0].message });
       }
 
       const user = await storage.getUser(req.session.userId!);
@@ -756,7 +756,7 @@ export async function registerRoutes(
       await storage.setPasswordResetToken(user.id, resetToken, expires);
       
       const { sendPasswordChangeEmail } = await import("./email");
-      const sent = await sendPasswordChangeEmail(user.email, user.firstName, resetToken);
+      const sent = await sendPasswordChangeEmail(user.email, resetToken);
       
       if (!sent) {
         return res.status(500).json({ message: "Erreur lors de l'envoi de l'email" });
@@ -772,16 +772,11 @@ export async function registerRoutes(
   // Request email change (sends confirmation to current email)
   app.post("/api/auth/request-email-change", requireAuth, async (req, res) => {
     try {
-      const { newEmail } = req.body;
-      if (!newEmail || typeof newEmail !== "string") {
+      const parsedEmail = emailAddressSchema.safeParse(req.body?.newEmail);
+      if (!parsedEmail.success) {
         return res.status(400).json({ message: "Nouvel email requis" });
       }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(newEmail)) {
-        return res.status(400).json({ message: "Format d'email invalide" });
-      }
+      const newEmail = parsedEmail.data;
 
       const user = await storage.getUser(req.session.userId!);
       if (!user || !user.email) {
@@ -800,7 +795,7 @@ export async function registerRoutes(
       await storage.setEmailChangeRequest(user.id, newEmail, token, expires);
       
       const { sendEmailChangeConfirmation } = await import("./email");
-      const sent = await sendEmailChangeConfirmation(user.email, user.firstName, newEmail, token);
+      const sent = await sendEmailChangeConfirmation(user.email, newEmail, token);
       
       if (!sent) {
         return res.status(500).json({ message: "Erreur lors de l'envoi de l'email" });
@@ -903,20 +898,17 @@ export async function registerRoutes(
   // Contact form endpoint (public, rate limited)
   app.post("/api/contact", async (req, res) => {
     try {
-      const { name, email, phone, subject, message } = req.body;
-      
-      if (!name || !email || !message) {
-        return res.status(400).json({ message: "Nom, email et message sont requis" });
+      const parsedContact = contactMessageSchema.safeParse(req.body);
+      if (!parsedContact.success) {
+        return res.status(400).json({
+          message: "Les informations du formulaire sont invalides.",
+          errors: parsedContact.error.flatten().fieldErrors,
+        });
       }
-      
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: "Format d'email invalide" });
-      }
+      const { name, email, phone, subject, message } = parsedContact.data;
       
       const { sendContactEmail } = await import("./email");
-      const sent = await sendContactEmail(name, email, phone || "", subject || "Sans sujet", message);
+      const sent = await sendContactEmail(name, email, phone, subject, message);
       
       if (!sent) {
         return res.status(500).json({ message: "Erreur lors de l'envoi du message" });
@@ -934,7 +926,7 @@ export async function registerRoutes(
     try {
       const result = createProjectSchema.safeParse(req.body);
       if (!result.success) {
-        return res.status(400).json({ message: result.error.errors[0].message });
+        return res.status(400).json({ message: result.error.issues[0].message });
       }
 
       const project = await storage.createProject(req.session.userId!, result.data);
@@ -1082,7 +1074,7 @@ export async function registerRoutes(
 
       const result = createFeatureSchema.safeParse(req.body);
       if (!result.success) {
-        return res.status(400).json({ message: result.error.errors[0].message });
+        return res.status(400).json({ message: result.error.issues[0].message });
       }
 
       const feature = await storage.createFeature(projectId, result.data);

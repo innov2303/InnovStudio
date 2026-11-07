@@ -55,6 +55,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Mot de passe requis"),
 });
 
+export const emailAddressSchema = z.string().trim().email("Email invalide").max(254, "Email trop long");
+
+export const contactMessageSchema = z.object({
+  name: z.string().trim().min(1, "Nom requis").max(120, "Nom trop long"),
+  email: emailAddressSchema,
+  phone: z.string().trim().max(40, "Téléphone trop long")
+    .regex(/^[0-9+().\-\s]*$/, "Format de téléphone invalide")
+    .optional()
+    .default(""),
+  subject: z.string().trim().max(200, "Sujet trop long").optional().default(""),
+  message: z.string().trim().min(1, "Message requis").max(10_000, "Message trop long"),
+}).transform((data) => ({
+  ...data,
+  subject: data.subject || "Sans sujet",
+}));
+
 export const registerSchema = insertUserSchema.extend({
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Minimum 6 caractères"),
@@ -166,7 +182,7 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
 export const createProjectSchema = insertProjectSchema.extend({
   title: z.string().min(3, "Minimum 3 caractères"),
   description: z.string().min(10, "Minimum 10 caractères"),
-  projectType: z.enum(projectTypeEnum, { errorMap: () => ({ message: "Type de projet requis" }) }),
+  projectType: z.enum(projectTypeEnum, { message: "Type de projet requis" }),
   businessSector: z.string().min(1, "Secteur d'activité requis"),
   features: z.string().min(10, "Minimum 10 caractères"),
   designStyle: z.string().min(1, "Style de design requis"),
@@ -303,7 +319,7 @@ export const insertSubscriptionSchema = createInsertSchema(subscriptions).pick({
 
 export const createSubscriptionSchema = insertSubscriptionSchema.extend({
   projectId: z.string().min(1, "Projet requis"),
-  offerType: z.enum(subscriptionOfferEnum, { errorMap: () => ({ message: "Type d'offre invalide" }) }),
+  offerType: z.enum(subscriptionOfferEnum, { message: "Type d'offre invalide" }),
 });
 
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;

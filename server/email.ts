@@ -2,6 +2,16 @@ import { Resend } from 'resend';
 
 let connectionSettings: any;
 
+export function escapeEmailHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;",
+  })[character]!);
+}
+
 // Détection du mode auto-hébergé
 function isSelfHosted(): boolean {
   return !process.env.REPLIT_CONNECTORS_HOSTNAME;
@@ -64,7 +74,7 @@ function getBaseUrl(): string {
   return process.env.REPLIT_DEV_DOMAIN ? 'https://' + process.env.REPLIT_DEV_DOMAIN : 'http://localhost:5000';
 }
 
-export async function sendVerificationEmail(to: string, firstName: string, verificationToken: string): Promise<boolean> {
+export async function sendVerificationEmail(to: string, verificationToken: string): Promise<boolean> {
   try {
     const { client, fromEmail } = await getResendClient();
     
@@ -87,7 +97,7 @@ export async function sendVerificationEmail(to: string, firstName: string, verif
               <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 2px;">Innov Studio</h1>
             </div>
             <div style="padding: 40px;">
-              <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 24px;">Bienvenue, ${firstName} !</h2>
+              <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 24px;">Bienvenue sur Innov Studio !</h2>
               <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
                 Merci de vous être inscrit sur Innov Studio. Pour accéder à votre espace client, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous.
               </p>
@@ -125,7 +135,7 @@ export async function sendVerificationEmail(to: string, firstName: string, verif
   }
 }
 
-export async function sendPasswordResetEmail(to: string, firstName: string, resetToken: string): Promise<boolean> {
+export async function sendPasswordResetEmail(to: string, resetToken: string): Promise<boolean> {
   try {
     const { client, fromEmail } = await getResendClient();
     
@@ -150,7 +160,7 @@ export async function sendPasswordResetEmail(to: string, firstName: string, rese
             <div style="padding: 40px;">
               <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 24px;">Réinitialisation du mot de passe</h2>
               <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-                Bonjour ${firstName}, vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
+            Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
               </p>
               <div style="text-align: center; margin: 32px 0;">
                 <a href="${resetUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 500;">
@@ -186,7 +196,7 @@ export async function sendPasswordResetEmail(to: string, firstName: string, rese
   }
 }
 
-export async function sendPasswordChangeEmail(to: string, firstName: string, resetToken: string): Promise<boolean> {
+export async function sendPasswordChangeEmail(to: string, resetToken: string): Promise<boolean> {
   try {
     const { client, fromEmail } = await getResendClient();
     
@@ -211,7 +221,7 @@ export async function sendPasswordChangeEmail(to: string, firstName: string, res
             <div style="padding: 40px;">
               <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 24px;">Modification du mot de passe</h2>
               <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-                Bonjour ${firstName}, vous avez demandé à modifier votre mot de passe. Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe.
+                Vous avez demandé à modifier votre mot de passe. Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe.
               </p>
               <div style="text-align: center; margin: 32px 0;">
                 <a href="${resetUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 500;">
@@ -244,7 +254,7 @@ export async function sendPasswordChangeEmail(to: string, firstName: string, res
   }
 }
 
-export async function sendEmailChangeConfirmation(to: string, firstName: string, newEmail: string, confirmToken: string): Promise<boolean> {
+export async function sendEmailChangeConfirmation(to: string, newEmail: string, confirmToken: string): Promise<boolean> {
   try {
     const { client, fromEmail } = await getResendClient();
     
@@ -269,10 +279,10 @@ export async function sendEmailChangeConfirmation(to: string, firstName: string,
             <div style="padding: 40px;">
               <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 24px;">Changement d'adresse email</h2>
               <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-                Bonjour ${firstName}, vous avez demandé à changer votre adresse email vers :
+                Vous avez demandé à changer votre adresse email vers :
               </p>
               <p style="color: #6366f1; font-size: 18px; font-weight: 600; text-align: center; margin: 0 0 24px 0;">
-                ${newEmail}
+                ${escapeEmailHtml(newEmail)}
               </p>
               <div style="text-align: center; margin: 32px 0;">
                 <a href="${confirmUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 500;">
@@ -409,12 +419,18 @@ export async function sendContactEmail(senderName: string, senderEmail: string, 
     
     // Email to admin with the contact form message
     const adminEmail = "contact@innov-studio.fr";
+    const safeSenderName = escapeEmailHtml(senderName);
+    const safeSenderEmail = escapeEmailHtml(senderEmail);
+    const safeSenderPhone = escapeEmailHtml(senderPhone);
+    const safeSubject = escapeEmailHtml(subject);
+    const safeMessage = escapeEmailHtml(message);
+    const safeHeaderSubject = subject.replace(/[\r\n]+/g, " ").slice(0, 200);
     
     const { error } = await client.emails.send({
       from: fromEmail,
       to: adminEmail,
       replyTo: senderEmail,
-      subject: `[Contact] ${subject}`,
+      subject: `[Contact] ${safeHeaderSubject}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -433,18 +449,18 @@ export async function sendContactEmail(senderName: string, senderEmail: string, 
               </h2>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
               <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="margin: 0 0 8px 0;"><strong>De:</strong> ${senderName}</p>
-                <p style="margin: 0 0 8px 0;"><strong>Email:</strong> <a href="mailto:${senderEmail}" style="color: #0ea5e9;">${senderEmail}</a></p>
-                ${senderPhone ? `<p style="margin: 0 0 8px 0;"><strong>Téléphone:</strong> <a href="tel:${senderPhone}" style="color: #0ea5e9;">${senderPhone}</a></p>` : ''}
-                <p style="margin: 0;"><strong>Sujet:</strong> ${subject}</p>
+            <p style="margin: 0 0 8px 0;"><strong>De:</strong> ${safeSenderName}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Email:</strong> <a href="mailto:${safeSenderEmail}" style="color: #0ea5e9;">${safeSenderEmail}</a></p>
+            ${senderPhone ? `<p style="margin: 0 0 8px 0;"><strong>Téléphone:</strong> <a href="tel:${safeSenderPhone}" style="color: #0ea5e9;">${safeSenderPhone}</a></p>` : ''}
+            <p style="margin: 0;"><strong>Sujet:</strong> ${safeSubject}</p>
               </div>
               <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px;">
                 <p style="margin: 0 0 8px 0;"><strong>Message:</strong></p>
-                <p style="margin: 0; white-space: pre-wrap;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+            <p style="margin: 0; white-space: pre-wrap;">${safeMessage}</p>
               </div>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
               <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
-                Vous pouvez répondre directement à cet email pour contacter ${senderName}.
+            Vous pouvez répondre directement à cet email pour contacter ${safeSenderName}.
               </p>
             </div>
           </div>
