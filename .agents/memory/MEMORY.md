@@ -4,3 +4,4 @@
 - [Inscription Google](google-account-onboarding.md) — collecter le profil avant le tableau de bord; ne jamais lier automatiquement un compte administrateur.
 - [Déploiement VPS](vps-deployment.md) — la production passe par un VPS externe; vérifier le commit réellement déployé, car le script peut continuer après un échec Git.
 - [Suggestions de descriptions SEO](seo-description-suggestions.md) — combiner CTA et longueur pour éviter que deux recommandations s’annulent.
+- [Périmètre des recommandations SEO](seo-agent-recommendation-scope.md) — éviter les mots-clés meta sans effet et les tendances hors sujet ou inapplicables.
