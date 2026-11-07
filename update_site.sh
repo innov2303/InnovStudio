@@ -32,7 +32,44 @@ fi
 
 git fetch origin "$BRANCH"
 git pull --ff-only origin "$BRANCH"
-npm ci
+
+# Some lockfiles contain Replit-only tarball URLs. Normalize them temporarily
+# because this script runs on an external VPS, then restore Git's copy on exit.
+trap 'git restore --source=HEAD --worktree -- package-lock.json' EXIT
+node <<'NODE'
+const fs = require("node:fs");
+const lockPath = "package-lock.json";
+let lock = fs.readFileSync(lockPath, "utf8");
+const replacements = [
+  [
+    "http://package-firewall.replit.internal/npm/",
+    "https://registry.npmjs.org/",
+  ],
+  [
+    "https://package-firewall.replit.internal/npm/",
+    "https://registry.npmjs.org/",
+  ],
+];
+let replacementCount = 0;
+for (const [internalPrefix, publicPrefix] of replacements) {
+  const parts = lock.split(internalPrefix);
+  replacementCount += parts.length - 1;
+  lock = parts.join(publicPrefix);
+}
+if (lock.includes("package-firewall.replit.internal")) {
+  throw new Error("Le package-lock contient encore une adresse de registre interne.");
+}
+if (replacementCount > 0) {
+  fs.writeFileSync(lockPath, lock);
+}
+console.log(
+  replacementCount > 0
+    ? `${replacementCount} adresse(s) npm interne(s) remplacée(s) temporairement.`
+    : "Le package-lock utilise déjà des adresses npm accessibles au VPS.",
+);
+NODE
+
+npm ci --registry=https://registry.npmjs.org/
 npm run build
 pm2 restart "$PM2_APP"
 
