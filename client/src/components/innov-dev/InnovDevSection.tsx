@@ -209,8 +209,8 @@ export default function InnovDevSection() {
     <section className="innov-dev">
       <header className="id-topline">
         <div>
-          <div className="id-eyebrow"><span className="id-mark">I</span> INNOV DEV <span className="id-eyebrow-rule" /> ESPACE PRIVÉ</div>
-          <h1>Sites clients</h1>
+          <div className="id-eyebrow"><span className="id-mark">I</span> INNOV STUDIO DEV <span className="id-eyebrow-rule" /> ESPACE PRIVÉ</div>
+          <h1>Création de sites</h1>
           <p className="id-intro">Préparez les sites vitrines de vos clients, reliez leur projet Replit et suivez leur publication.</p>
         </div>
         <Button onClick={openCreate} disabled={projectsQuery.isLoading || projects.length === 0}>

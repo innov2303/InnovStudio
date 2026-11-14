@@ -81,8 +81,13 @@ type SubscriptionOffer = {
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw, Search, RefreshCw, ArrowUpCircle, AlertTriangle, Info, Star, Cpu } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
 import InnovDevSection from "@/components/innov-dev/InnovDevSection";
+import AdminWorkspaceNavigation from "@/components/admin-workspaces/AdminWorkspaceNavigation";
+import InnovDevModulesSection from "@/components/admin-workspaces/InnovDevModulesSection";
+import InnovProdSection from "@/components/admin-workspaces/InnovProdSection";
+import { getAdminWorkspace, resolveDashboardSection } from "@shared/adminWorkspaces";
+import type { DashboardSection } from "@shared/adminWorkspaces";
 
-type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "references" | "logs" | "analytics" | "seo" | "innov_dev";
+type MenuSection = DashboardSection;
 
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, PieChart, Pie } from "recharts";
 
@@ -427,7 +432,8 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<MenuSection>("dashboard");
   const [logFilter, setLogFilter] = useState<string>("all");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
@@ -435,19 +441,37 @@ export default function Dashboard() {
   const [editingFeature, setEditingFeature] = useState<{ id: string; name: string; description: string } | null>(null);
 
   useEffect(() => {
+    if (!user?.role) return;
+    const syncSection = () => {
+      const params = new URLSearchParams(window.location.search);
+      setActiveSection(resolveDashboardSection(params.get("section"), user.role === "admin"));
+      const connectionResult = params.get("innovDev");
+      if (connectionResult && user.role === "admin") {
+        setActiveSection("innov_dev");
+        toast(connectionResult === "replit-connected"
+          ? { title: "Replit connecté", description: "Innov Studio Dev peut maintenant créer et publier vos sites." }
+          : { title: "Connexion Replit interrompue", description: "Vérifiez la configuration OAuth puis réessayez.", variant: "destructive" });
+        params.delete("innovDev");
+        params.set("section", "innov_dev");
+        window.history.replaceState({}, "", `${window.location.pathname}?${params}${window.location.hash}`);
+      }
+    };
+    syncSection();
+    window.addEventListener("popstate", syncSection);
+    return () => window.removeEventListener("popstate", syncSection);
+  }, [user?.role, toast]);
+
+  const navigateSection = (section: MenuSection) => {
+    const next = resolveDashboardSection(section, user?.role === "admin");
+    setActiveSection(next);
     const params = new URLSearchParams(window.location.search);
-    if (params.get("section") === "innov_dev" && user?.role === "admin") {
-      setActiveSection("innov_dev");
+    params.set("section", next);
+    params.delete("innovDev");
+    const destination = `${window.location.pathname}?${params}${window.location.hash}`;
+    if (destination !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+      window.history.pushState({}, "", destination);
     }
-    const connectionResult = params.get("innovDev");
-    if (connectionResult && user?.role === "admin") {
-      setActiveSection("innov_dev");
-      toast(connectionResult === "replit-connected"
-        ? { title: "Replit connecté", description: "Innov Dev peut maintenant créer et publier vos sites." }
-        : { title: "Connexion Replit interrompue", description: "Vérifiez la configuration OAuth puis réessayez.", variant: "destructive" });
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-  }, [user, toast]);
+  };
 
   const toggleProjectCollapse = (projectId: string) => {
     setCollapsedProjects(prev => {
@@ -1069,7 +1093,7 @@ export default function Dashboard() {
           description: "Veuillez enregistrer votre signature dans Mon Profil avant d'envoyer un devis.",
           variant: "destructive",
         });
-        setActiveSection("profile");
+        navigateSection("profile");
       } else {
         toast({
           title: "Erreur",
@@ -1406,6 +1430,7 @@ export default function Dashboard() {
   }
 
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+  const activeWorkspace = user.role === "admin" ? getAdminWorkspace(activeSection) : undefined;
 
   const menuItems = [
     { id: "dashboard" as MenuSection, label: "Tableau de bord", icon: LayoutDashboard },
@@ -1418,7 +1443,11 @@ export default function Dashboard() {
     ...(user.role === "admin" ? [{ id: "subscription_settings" as MenuSection, label: "Gérer les abonnements", icon: Settings }] : []),
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
     ...(user.role === "admin" ? [{ id: "references" as MenuSection, label: "Références", icon: Globe }] : []),
-    ...(user.role === "admin" ? [{ id: "innov_dev" as MenuSection, label: "Innov Dev", icon: Workflow }] : []),
+    ...(user.role === "admin" ? [
+      { id: "innov_dev" as MenuSection, label: "Création de sites", icon: Workflow },
+      { id: "innov_dev_modules" as MenuSection, label: "Modules et addons", icon: Package },
+      { id: "innov_prod" as MenuSection, label: "Sites clients", icon: Server },
+    ] : []),
     ...(user.role === "admin" ? [{ id: "seo" as MenuSection, label: "Agent SEO", icon: Search }] : []),
     ...(user.role === "admin" ? [{ id: "logs" as MenuSection, label: "Logs", icon: Shield }] : []),
     ...(user.role === "admin" ? [{ id: "analytics" as MenuSection, label: "Analytics", icon: BarChart3 }] : []),
@@ -1427,7 +1456,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
-      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r bg-muted/30 flex flex-col transition-all duration-300`}>
+      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} sticky top-0 h-dvh shrink-0 border-r bg-muted/30 flex flex-col transition-all duration-300`}>
         {/* Sidebar Header */}
         <div className="p-4 border-b flex items-center justify-between">
           {!sidebarCollapsed && (
@@ -1443,31 +1472,43 @@ export default function Dashboard() {
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             className="ml-auto"
             data-testid="button-toggle-sidebar"
+            aria-label={sidebarCollapsed ? "Développer le menu" : "Réduire le menu"}
+            aria-expanded={!sidebarCollapsed}
           >
             {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-2 space-y-1">
-          {menuItems.map((item) => (
+        <div className="min-h-0 flex-1 overflow-y-auto p-2">
+          {user.role === "admin" ? (
+            <AdminWorkspaceNavigation
+              activeSection={activeSection}
+              collapsed={sidebarCollapsed}
+              onNavigate={navigateSection}
+            />
+          ) : <nav aria-label="Espace client" className="space-y-1">{menuItems.map((item) => (
             <Button
               key={item.id}
               variant={activeSection === item.id ? "secondary" : "ghost"}
               className={`w-full justify-start gap-3 ${sidebarCollapsed ? 'px-2' : ''}`}
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => navigateSection(item.id)}
               data-testid={`menu-${item.id}`}
+              title={sidebarCollapsed ? item.label : undefined}
+              aria-label={item.label}
+              aria-current={activeSection === item.id ? "page" : undefined}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />
               {!sidebarCollapsed && <span>{item.label}</span>}
             </Button>
-          ))}
-        </nav>
+          ))}</nav>}
+        </div>
 
         {/* Sidebar Footer */}
         <div className="p-2 border-t space-y-1">
           <Link href="/">
-            <Button variant="ghost" className={`w-full justify-start gap-3 ${sidebarCollapsed ? 'px-2' : ''}`}>
+            <Button variant="ghost" aria-label="Retour au site" title={sidebarCollapsed ? "Retour au site" : undefined}
+              className={`w-full justify-start gap-3 ${sidebarCollapsed ? 'px-2' : ''}`}>
               <Home className="h-5 w-5 flex-shrink-0" />
               {!sidebarCollapsed && <span>Retour au site</span>}
             </Button>
@@ -1478,6 +1519,8 @@ export default function Dashboard() {
             onClick={() => logoutMutation.mutate()}
             disabled={logoutMutation.isPending}
             data-testid="button-logout"
+            aria-label="Déconnexion"
+            title={sidebarCollapsed ? "Déconnexion" : undefined}
           >
             {logoutMutation.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin flex-shrink-0" />
@@ -1490,13 +1533,16 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="min-w-0 flex-1 flex flex-col">
         {/* Header */}
-        <header className="border-b px-6 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">
-            {menuItems.find(m => m.id === activeSection)?.label || "Tableau de bord"}
-          </h1>
-          <div className="flex items-center gap-4">
+        <header className="border-b px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            {activeWorkspace && <p className="truncate text-xs font-medium text-primary">{activeWorkspace.label}</p>}
+            <h1 className="truncate text-lg sm:text-xl font-semibold">
+              {menuItems.find(m => m.id === activeSection)?.label || "Tableau de bord"}
+            </h1>
+          </div>
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             <ThemeToggle />
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9">
@@ -1513,7 +1559,7 @@ export default function Dashboard() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="min-w-0 flex-1 p-4 sm:p-6">
           {/* Dashboard Section */}
           {activeSection === "dashboard" && (
             <div className="space-y-6">
@@ -3969,7 +4015,7 @@ export default function Dashboard() {
                     <Button 
                       onClick={() => {
                         setShowSubscriptionDialog(false);
-                        setActiveSection("projects");
+                        navigateSection("projects");
                         setShowProjectForm(true);
                       }}
                     >
@@ -4766,6 +4812,10 @@ export default function Dashboard() {
 
           {activeSection === "seo" && user.role === "admin" && <SeoAgentSection />}
           {activeSection === "innov_dev" && user.role === "admin" && <InnovDevSection />}
+          {activeSection === "innov_dev_modules" && user.role === "admin" &&
+            <InnovDevModulesSection onOpenBuilder={() => navigateSection("innov_dev")} />}
+          {activeSection === "innov_prod" && user.role === "admin" &&
+            <InnovProdSection onOpenBuilder={() => navigateSection("innov_dev")} />}
 
           {activeSection === "logs" && user.role === "admin" && (() => {
             const logCategories = [

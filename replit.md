@@ -4,6 +4,8 @@
 Site vitrine pour un studio de production web spécialisé dans les applications entreprise et les sites vitrines avec intégration IA. Le site comprend un système d'authentification locale avec gestion des utilisateurs.
 
 ## Innov Dev
+- L’administration reste une seule application avec une seule connexion, organisée en trois espaces : **Innov Studio** pour tous les menus de gestion initiaux, **Innov Studio Dev** pour la création de sites et les modèles/modules, et **Innov Studio Prod** pour préparer le suivi des sites clients. Ce ne sont pas trois déploiements ou bases distincts; le site public et les accès clients restent séparés de ces espaces administrateur.
+- Innov Studio Prod affiche les informations de déploiement enregistrées. Ne pas les présenter comme des mesures de disponibilité : le monitoring réel reste à ajouter ultérieurement.
 - L’espace Innov Dev se trouve dans le tableau de bord administrateur. Chaque dossier de site est relié à un projet client existant et peut créer son propre Repl Replit.
 - Le premier modèle est un site vitrine français avec les pages Accueil, Services, À propos et Contact. Le contenu et les éléments visuels sont prévisualisables avant la création du Repl.
 - Configurer `INNOV_DEV_REPLIT_REDIRECT_URI=https://innov-studio.fr/api/innov-dev/replit/callback` dans l’environnement du serveur; cette adresse doit correspondre exactement à la redirection OAuth.
