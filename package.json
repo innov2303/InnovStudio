@@ -9,7 +9,8 @@
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "test": "tsx --test tests/*.test.ts",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:innov-dev": "drizzle-kit push --config=drizzle.innov-dev.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
