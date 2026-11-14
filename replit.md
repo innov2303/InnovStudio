@@ -9,6 +9,7 @@ Site vitrine pour un studio de production web spécialisé dans les applications
 - Configurer `INNOV_DEV_REPLIT_REDIRECT_URI=https://innov-studio.fr/api/innov-dev/replit/callback` dans l’environnement du serveur; cette adresse doit correspondre exactement à la redirection OAuth.
 - Les jetons OAuth sont chiffrés en base avec la clé de session existante. `SESSION_SECRET` doit être une valeur forte d’au moins 32 caractères.
 - Après le déploiement du code, appliquer le schéma avec `npm run db:push` sur la base cible de chaque environnement. Vérifier la connexion de base avant de lancer la commande sur le VPS.
+- La table `session` appartient à `connect-pg-simple` et est exclue de `db:push` via `tablesFilter` dans `drizzle.config.ts`. Ne jamais confirmer sa suppression ou son renommage pour installer Innov Dev; ne pas utiliser `--force` pour contourner cet avertissement.
 - « Publier les changements Replit » publie le code déjà présent dans le Repl. « Synchroniser et publier » remplace le site par le contenu Innov Dev avant publication; l’interface demande confirmation car les modifications manuelles peuvent être écrasées.
 
 ## Features
