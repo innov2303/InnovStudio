@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -191,6 +191,103 @@ export const createProjectSchema = insertProjectSchema.extend({
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type CreateProjectData = z.infer<typeof createProjectSchema>;
+
+export const innovDevSiteStatusEnum = [
+  "draft",
+  "creating_repl",
+  "ready",
+  "publishing",
+  "published",
+  "error",
+] as const;
+
+export const innovDevServiceSchema = z.object({
+  title: z.string().trim().min(1).max(100),
+  description: z.string().trim().max(500),
+});
+
+export const innovDevSiteContentSchema = z.object({
+  brandName: z.string().trim().min(1).max(120),
+  tagline: z.string().trim().max(160),
+  heroTitle: z.string().trim().min(1).max(180),
+  heroDescription: z.string().trim().max(1200),
+  heroImageUrl: z.string().trim().url().startsWith("https://").or(z.literal("")),
+  primaryColor: z.string().regex(/^#[\da-fA-F]{6}$/),
+  servicesTitle: z.string().trim().min(1).max(120),
+  services: z.array(innovDevServiceSchema).max(8),
+  aboutTitle: z.string().trim().min(1).max(120),
+  aboutText: z.string().trim().max(1600),
+  contactTitle: z.string().trim().min(1).max(120),
+  contactEmail: z.string().trim().email().max(254).or(z.literal("")),
+  contactPhone: z.string().trim().max(40).regex(/^[0-9+().\-\s]*$/),
+  footerText: z.string().trim().max(250),
+});
+
+export type InnovDevSiteContent = z.infer<typeof innovDevSiteContentSchema>;
+
+export function createDefaultInnovDevSiteContent(brandName = "Votre entreprise"): InnovDevSiteContent {
+  const brand = brandName.trim().slice(0, 120) || "Votre entreprise";
+  return {
+    brandName: brand,
+    tagline: "Des solutions adaptées à vos besoins",
+    heroTitle: `Bienvenue chez ${brand}`,
+    heroDescription: "Présentez votre activité, vos services et la valeur que vous apportez à vos clients.",
+    heroImageUrl: "",
+    primaryColor: "#2563eb",
+    servicesTitle: "Nos services",
+    services: [
+      { title: "Conseil", description: "Un accompagnement adapté à votre projet." },
+      { title: "Réalisation", description: "Des solutions pensées pour votre activité." },
+      { title: "Accompagnement", description: "Un suivi disponible après la mise en ligne." },
+    ],
+    aboutTitle: "À propos",
+    aboutText: "Présentez votre entreprise, votre expérience et votre façon de travailler.",
+    contactTitle: "Parlons de votre projet",
+    contactEmail: "",
+    contactPhone: "",
+    footerText: `${brand} — Tous droits réservés.`,
+  };
+}
+
+export const innovDevSites = pgTable("innov_dev_sites", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id", { length: 36 }).notNull(),
+  siteName: text("site_name").notNull(),
+  templateId: text("template_id").notNull().default("showcase-v1"),
+  content: jsonb("content").$type<InnovDevSiteContent>().notNull(),
+  status: text("status").notNull().default("draft"),
+  replitAppName: text("replit_app_name"),
+  replitAppId: text("replit_app_id"),
+  replitEditorUrl: text("replit_editor_url"),
+  publicUrl: text("public_url"),
+  lastError: text("last_error"),
+  lastPublishedAt: timestamp("last_published_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const createInnovDevSiteSchema = z.object({
+  projectId: z.string().trim().min(1).max(36),
+  siteName: z.string().trim().min(2).max(120),
+  templateId: z.literal("showcase-v1").default("showcase-v1"),
+  content: innovDevSiteContentSchema,
+});
+
+export const updateInnovDevSiteSchema = z.object({
+  siteName: z.string().trim().min(2).max(120).optional(),
+  content: innovDevSiteContentSchema.optional(),
+});
+
+export type CreateInnovDevSiteData = z.infer<typeof createInnovDevSiteSchema>;
+export type InnovDevSite = typeof innovDevSites.$inferSelect;
+
+export const innovDevReplitConnections = pgTable("innov_dev_replit_connections", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  adminUserId: varchar("admin_user_id", { length: 36 }).notNull().unique(),
+  encryptedPayload: text("encrypted_payload").notNull(),
+  connectedAt: timestamp("connected_at"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 // Project Features table
 export const projectFeatures = pgTable("project_features", {

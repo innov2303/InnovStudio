@@ -18,6 +18,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { renderSeoPage, renderSitemap, seoPages, withSeoMetadata } from "./seoPages";
 import { OAuth2Client } from "google-auth-library";
+import { registerInnovDevRoutes } from "./innovDevRoutes";
 
 // Helper pour obtenir l'IP réelle
 function getClientIp(req: Request): string {
@@ -3121,6 +3122,8 @@ export async function registerRoutes(
   app.get("/sitemap.xml", (_req, res) => {
     res.status(200).type("application/xml").send(renderSitemap());
   });
+
+  registerInnovDevRoutes(app);
 
   return httpServer;
 }

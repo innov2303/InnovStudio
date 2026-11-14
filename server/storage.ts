@@ -1,4 +1,4 @@
-import { type User, type InsertUser, users, type Project, type InsertProject, projects, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers, securityLogs, type SecurityLog, pageVisits, type PageVisit, type Reference, type InsertReference, references } from "@shared/schema";
+import { type User, type InsertUser, users, type Project, type InsertProject, projects, type InnovDevSite, type CreateInnovDevSiteData, innovDevSites, type ProjectFeature, type InsertFeature, projectFeatures, type ProjectDocument, type InsertDocument, projectDocuments, type Subscription, type InsertSubscription, subscriptions, type SubscriptionOffer, subscriptionOffers, securityLogs, type SecurityLog, pageVisits, type PageVisit, type Reference, type InsertReference, references, innovDevReplitConnections } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, gte, count } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -31,6 +31,14 @@ export interface IStorage {
   getProject(id: string): Promise<Project | undefined>;
   updateProjectStatus(id: string, status: string): Promise<Project | undefined>;
   deleteProject(id: string): Promise<boolean>;
+  // Innov Dev
+  createInnovDevSite(site: CreateInnovDevSiteData): Promise<InnovDevSite>;
+  getInnovDevSite(id: string): Promise<InnovDevSite | undefined>;
+  getAllInnovDevSites(): Promise<InnovDevSite[]>;
+  updateInnovDevSite(id: string, updates: Partial<Pick<InnovDevSite, "siteName" | "content" | "status" | "replitAppName" | "replitAppId" | "replitEditorUrl" | "publicUrl" | "lastError" | "lastPublishedAt">>): Promise<InnovDevSite | undefined>;
+  getInnovDevReplitConnection(adminUserId: string): Promise<typeof innovDevReplitConnections.$inferSelect | undefined>;
+  saveInnovDevReplitConnection(adminUserId: string, encryptedPayload: string, connectedAt?: Date | null): Promise<void>;
+  deleteInnovDevReplitConnection(adminUserId: string): Promise<void>;
   // Features
   createFeature(projectId: string, feature: InsertFeature): Promise<ProjectFeature>;
   getFeature(id: string): Promise<ProjectFeature | undefined>;
@@ -318,6 +326,68 @@ export class DatabaseStorage implements IStorage {
     // Delete the project
     await db.delete(projects).where(eq(projects.id, id));
     return true;
+  }
+
+  async createInnovDevSite(site: CreateInnovDevSiteData): Promise<InnovDevSite> {
+    const [created] = await db.insert(innovDevSites).values(site).returning();
+    return created;
+  }
+
+  async getInnovDevSite(id: string): Promise<InnovDevSite | undefined> {
+    const [site] = await db.select().from(innovDevSites).where(eq(innovDevSites.id, id));
+    return site;
+  }
+
+  async getAllInnovDevSites(): Promise<InnovDevSite[]> {
+    return db.select().from(innovDevSites).orderBy(desc(innovDevSites.createdAt));
+  }
+
+  async updateInnovDevSite(
+    id: string,
+    updates: Partial<Pick<InnovDevSite, "siteName" | "content" | "status" | "replitAppName" | "replitAppId" | "replitEditorUrl" | "publicUrl" | "lastError" | "lastPublishedAt">>,
+  ): Promise<InnovDevSite | undefined> {
+    const [updated] = await db
+      .update(innovDevSites)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(innovDevSites.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getInnovDevReplitConnection(adminUserId: string) {
+    const [connection] = await db
+      .select()
+      .from(innovDevReplitConnections)
+      .where(eq(innovDevReplitConnections.adminUserId, adminUserId));
+    return connection;
+  }
+
+  async saveInnovDevReplitConnection(
+    adminUserId: string,
+    encryptedPayload: string,
+    connectedAt?: Date | null,
+  ): Promise<void> {
+    await db
+      .insert(innovDevReplitConnections)
+      .values({
+        adminUserId,
+        encryptedPayload,
+        connectedAt: connectedAt ?? null,
+      })
+      .onConflictDoUpdate({
+        target: innovDevReplitConnections.adminUserId,
+        set: {
+          encryptedPayload,
+          ...(connectedAt === undefined ? {} : { connectedAt }),
+          updatedAt: new Date(),
+        },
+      });
+  }
+
+  async deleteInnovDevReplitConnection(adminUserId: string): Promise<void> {
+    await db
+      .delete(innovDevReplitConnections)
+      .where(eq(innovDevReplitConnections.adminUserId, adminUserId));
   }
 
   async createFeature(projectId: string, feature: InsertFeature): Promise<ProjectFeature> {

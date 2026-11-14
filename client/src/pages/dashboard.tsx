@@ -67,7 +67,8 @@ import {
   Package,
   BarChart3,
   TrendingUp,
-  Mail
+  Mail,
+  Workflow
 } from "lucide-react";
 import type { User as UserType, Project, CreateProjectData, ProjectFeature, CreateFeatureData, ProjectDocument, Subscription } from "@shared/schema";
 import { createProjectSchema, createFeatureSchema } from "@shared/schema";
@@ -79,8 +80,9 @@ type SubscriptionOffer = {
 };
 import { FileUp, Download, Upload, FilePenLine, FileCheck, FileClock, Save, Eye, X as XIcon, Send, PenLine, CreditCard, Settings, RotateCcw, Search, RefreshCw, ArrowUpCircle, AlertTriangle, Info, Star, Cpu } from "lucide-react";
 import { SignaturePad } from "@/components/signature-pad";
+import InnovDevSection from "@/components/innov-dev/InnovDevSection";
 
-type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "references" | "logs" | "analytics" | "seo";
+type MenuSection = "dashboard" | "profile" | "projects" | "documents" | "services" | "subscription_settings" | "users" | "references" | "logs" | "analytics" | "seo" | "innov_dev";
 
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, PieChart, Pie } from "recharts";
 
@@ -431,6 +433,21 @@ export default function Dashboard() {
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
   const [showFeatureForm, setShowFeatureForm] = useState<string | null>(null);
   const [editingFeature, setEditingFeature] = useState<{ id: string; name: string; description: string } | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("section") === "innov_dev" && user?.role === "admin") {
+      setActiveSection("innov_dev");
+    }
+    const connectionResult = params.get("innovDev");
+    if (connectionResult && user?.role === "admin") {
+      setActiveSection("innov_dev");
+      toast(connectionResult === "replit-connected"
+        ? { title: "Replit connecté", description: "Innov Dev peut maintenant créer et publier vos sites." }
+        : { title: "Connexion Replit interrompue", description: "Vérifiez la configuration OAuth puis réessayez.", variant: "destructive" });
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [user, toast]);
 
   const toggleProjectCollapse = (projectId: string) => {
     setCollapsedProjects(prev => {
@@ -1401,6 +1418,7 @@ export default function Dashboard() {
     ...(user.role === "admin" ? [{ id: "subscription_settings" as MenuSection, label: "Gérer les abonnements", icon: Settings }] : []),
     ...(user.role === "admin" ? [{ id: "users" as MenuSection, label: "Utilisateurs", icon: Users }] : []),
     ...(user.role === "admin" ? [{ id: "references" as MenuSection, label: "Références", icon: Globe }] : []),
+    ...(user.role === "admin" ? [{ id: "innov_dev" as MenuSection, label: "Innov Dev", icon: Workflow }] : []),
     ...(user.role === "admin" ? [{ id: "seo" as MenuSection, label: "Agent SEO", icon: Search }] : []),
     ...(user.role === "admin" ? [{ id: "logs" as MenuSection, label: "Logs", icon: Shield }] : []),
     ...(user.role === "admin" ? [{ id: "analytics" as MenuSection, label: "Analytics", icon: BarChart3 }] : []),
@@ -4747,6 +4765,7 @@ export default function Dashboard() {
           )}
 
           {activeSection === "seo" && user.role === "admin" && <SeoAgentSection />}
+          {activeSection === "innov_dev" && user.role === "admin" && <InnovDevSection />}
 
           {activeSection === "logs" && user.role === "admin" && (() => {
             const logCategories = [

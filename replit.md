@@ -3,6 +3,14 @@
 ## Overview
 Site vitrine pour un studio de production web spécialisé dans les applications entreprise et les sites vitrines avec intégration IA. Le site comprend un système d'authentification locale avec gestion des utilisateurs.
 
+## Innov Dev
+- L’espace Innov Dev se trouve dans le tableau de bord administrateur. Chaque dossier de site est relié à un projet client existant et peut créer son propre Repl Replit.
+- Le premier modèle est un site vitrine français avec les pages Accueil, Services, À propos et Contact. Le contenu et les éléments visuels sont prévisualisables avant la création du Repl.
+- Configurer `INNOV_DEV_REPLIT_REDIRECT_URI=https://innov-studio.fr/api/innov-dev/replit/callback` dans l’environnement du serveur; cette adresse doit correspondre exactement à la redirection OAuth.
+- Les jetons OAuth sont chiffrés en base avec la clé de session existante. `SESSION_SECRET` doit être une valeur forte d’au moins 32 caractères.
+- Après le déploiement du code, appliquer le schéma avec `npm run db:push` sur la base cible de chaque environnement. Vérifier la connexion de base avant de lancer la commande sur le VPS.
+- « Publier les changements Replit » publie le code déjà présent dans le Repl. « Synchroniser et publier » remplace le site par le contenu Innov Dev avant publication; l’interface demande confirmation car les modifications manuelles peuvent être écrasées.
+
 ## Features
 - **Page d'accueil moderne** : Hero section, services (Sites Vitrines, Applications Web, Intégration IA, Design UI/UX), avantages, Technologies Modernes, Références
 - **Références (Portfolio)** : Section sur la page d'accueil avec preview des sites produits, deux catégories (Sites Vitrines / Produits Web Entreprise), gestion admin depuis le dashboard, thumbnails via image.thum.io
