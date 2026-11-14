@@ -308,6 +308,10 @@ export function registerInnovDevRoutes(app: Express) {
     try {
       res.json(await getReplitConnectionStatus(req.session.userId!));
     } catch (error) {
+      console.error(
+        "Innov Dev Replit status failed:",
+        error instanceof Error ? error.message : "unknown error",
+      );
       res.status(500).json({ message: "Impossible de lire l’état de la connexion Replit." });
     }
   });

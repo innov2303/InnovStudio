@@ -238,7 +238,10 @@ export default function InnovDevSection() {
         </div>
       </div>
       {!connectionQuery.data?.configured && !connectionQuery.isLoading && <p className="id-setup-note">Configurez l’adresse de retour OAuth Replit sur le serveur avant de connecter un compte.</p>}
-      {connectionQuery.isError && <InlineError text="Impossible de vérifier la connexion Replit." onRetry={() => void connectionQuery.refetch()} />}
+      {connectionQuery.isError && <InlineError
+        text={connectionQuery.error instanceof Error ? connectionQuery.error.message : "Impossible de vérifier la connexion Replit."}
+        onRetry={() => void connectionQuery.refetch()}
+      />}
 
       <div className="id-overview">
         <div className="id-overview-main">
