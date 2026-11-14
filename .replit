@@ -53,3 +53,4 @@ timeoutMs = 180000
 
 [userenv.development]
 GOOGLE_REDIRECT_URI = "https://38cb8800-c678-48d2-a794-cc96134e4f06-00-1wbbz5l38jscz.spock.replit.dev/api/auth/google/callback"
+INNOV_DEV_REPLIT_REDIRECT_URI = "https://38cb8800-c678-48d2-a794-cc96134e4f06-00-1wbbz5l38jscz.spock.replit.dev/api/innov-dev/replit/callback"
